@@ -1,0 +1,14 @@
+services:
+  code-compass-db:
+    image: postgres:16.9-bullseye
+    container_name: code-compass-db
+    ports:
+      - "9999:5432"
+    environment:
+      POSTGRES_PASSWORD: benz
+      POSTGRES_USER: benz
+      POSTGRES_DB: code_compass_db
+    volumes:
+      - code-compass-vol:/var/lib/postgresql/data
+volumes:
+  code-compass-vol:
