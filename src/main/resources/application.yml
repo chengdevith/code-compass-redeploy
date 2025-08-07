@@ -2,10 +2,10 @@ spring:
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://localhost:9999/code_compass_db
+    url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
-    username: benz
-    password: benz
+    username: postgres
+    password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: create-drop
@@ -16,9 +16,12 @@ spring:
     oauth2:
       resource server:
         jwt:
-          issuer-uri: http://localhost:8888/realms/aft-mb-api
+          issuer-uri: http://localhost:8080/realms/aft-mb-api
 
 # Config Server Path and BaseUri for media
 media:
-  server-path: /home/benz/ISTAD/SPRING/medias/
-  base-uri: http://localhost:8080/media/
+  server-path: /home/panha/Pictures/media/
+  base-uri: http://localhost:8081/media/
+
+server:
+  port: 8081
