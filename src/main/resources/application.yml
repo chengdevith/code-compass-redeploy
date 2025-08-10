@@ -6,17 +6,20 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: qwer
-  jpa: #Config JPA Hibernate DDL
+  jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate.hibernate.format_sql: true
-  security: #Config Resource Server Keycloak
+  security:
     oauth2:
       resource server:
         jwt:
-          issuer-uri: http://localhost:8080/realms/aft-mb-api
+          issuer-uri: http://localhost:8080/realms/code-compass-api
+  threads:
+    virtual:
+      enabled: true
 
 # Config Server Path and BaseUri for media
 media:
