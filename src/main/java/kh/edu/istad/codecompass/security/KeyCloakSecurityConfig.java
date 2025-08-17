@@ -25,8 +25,7 @@ public class KeyCloakSecurityConfig {
 
         // Set all request must be authenticated
         http.authorizeHttpRequests( request ->
-                request
-                        .anyRequest().authenticated()
+                request.anyRequest().permitAll()
         );
 
         // Disable default form login

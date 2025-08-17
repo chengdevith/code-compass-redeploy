@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: servlet
   application:
     name: CodeCompass
   datasource:
@@ -8,7 +10,7 @@ spring:
     password: qwer
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate.hibernate.format_sql: true
@@ -28,3 +30,17 @@ media:
 
 server:
   port: 8081
+  forward-headers-strategy: none
+
+judge0:
+  protocol: http
+  domain: localhost
+  port: 8888
+  auth-token: ""
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.netty.http.client: DEBUG
+    io.netty: DEBUG
