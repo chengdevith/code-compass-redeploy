@@ -43,6 +43,7 @@ public class Judge0Controller {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<SubmissionTokenResponse>> createSubmission(
             @Valid @RequestBody CreateSubmissionRequest request) {
 
