@@ -1,7 +1,9 @@
 package kh.edu.istad.codecompass.dto.jugde0;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
+@Builder
 public record SubmissionResult(
         String token,
         @JsonProperty("std_out") String stdout,

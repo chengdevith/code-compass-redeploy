@@ -1,7 +1,6 @@
 package kh.edu.istad.codecompass.mapper;
 
 import kh.edu.istad.codecompass.domain.Submission;
-import kh.edu.istad.codecompass.dto.jugde0.CreateSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.Judge0SubmissionResponse;
 import kh.edu.istad.codecompass.dto.jugde0.SubmissionResult;
 import org.mapstruct.Mapper;
@@ -19,6 +18,7 @@ public interface Judge0Mapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Submission fromJudge0ResponseToEntity(Judge0SubmissionResponse response);
+
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "languageId", source = "languageId") // Map from parameter

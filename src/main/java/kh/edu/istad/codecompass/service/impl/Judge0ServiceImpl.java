@@ -1,326 +1,289 @@
 package kh.edu.istad.codecompass.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kh.edu.istad.codecompass.domain.Submission;
 import kh.edu.istad.codecompass.dto.jugde0.*;
 import kh.edu.istad.codecompass.mapper.Judge0Mapper;
 import kh.edu.istad.codecompass.repository.SubmissionRepository;
 import kh.edu.istad.codecompass.service.Judge0Service;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class Judge0ServiceImpl implements Judge0Service {
 
-    private final RestTemplate judge0RestTemplate;
-    private final SubmissionRepository submissionRepository;
-    private final Judge0Mapper mapper;
+    private final WebClient judge0WebClient;
+    private final Judge0Mapper judge0Mapper;
+//    private final SubmissionRepository submissionRepository;
 
     @Override
-    public SubmissionTokenResponse createSubmission(CreateSubmissionRequest request) {
-        log.info("Creating submission for language: {}", request.languageId());
+    public SubmissionResult createSubmission(CreateSubmissionRequest request) {
+        log.info("Creating submission: {}", request);
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<CreateSubmissionRequest> httpEntity = new HttpEntity<>(request, headers);
+        Judge0SubmissionResponse judge0SubmissionResponse = judge0WebClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/submissions")
+                        .queryParam("base64_encoded", false)
+                        .queryParam("wait", true)
+                        .build())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Judge0SubmissionResponse.class)
+                .block();
 
-            ResponseEntity<SubmissionTokenResponse> response = judge0RestTemplate.exchange(
-                    "/submissions",
-                    HttpMethod.POST,
-                    httpEntity,
-                    SubmissionTokenResponse.class
-            );
+        Submission submission = judge0Mapper.fromJudge0ResponseToEntity(judge0SubmissionResponse);
+        submission.setLanguageId(request.languageId());
+        return judge0Mapper.fromEntityToResult(submission);
+    }
 
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new ResponseStatusException(
-                        HttpStatus.valueOf(response.getStatusCode().value()),
-                        "Judge0 API error"
-                );
-            }
-
-            SubmissionTokenResponse tokenResponse = response.getBody();
-            if (tokenResponse == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from Judge0");
-            }
-
-            // Save initial submission
-            saveInitialSubmission(request, tokenResponse.token());
-
-            log.info("Submission created with token: {}", tokenResponse.token());
-            return tokenResponse;
-
-        } catch (HttpClientErrorException e) {
-            log.error("Judge0 client error: {}", e.getResponseBodyAsString());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
-        } catch (HttpServerErrorException e) {
-            log.error("Judge0 server error: {}", e.getResponseBodyAsString());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
-        } catch (Exception e) {
-            log.error("Error creating submission", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Submission creation failed");
-        }
+    @Override
+    public SubmissionResult getSubmissionByToken(String token) {
+        return judge0WebClient.get()
+                .uri("/submissions/{token}", token)
+                .retrieve()
+                .bodyToMono(SubmissionResult.class)
+                .block();
     }
 
     @Override
     public Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest) {
         log.info("Creating batch submissions for language: {}", batchRequest.languageId());
 
-        try {
-            List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
-            Judge0BatchRequest judge0BatchRequest = new Judge0BatchRequest(submissions);
+        List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
+        log.info("Creating {} submissions", submissions.size());
 
-            Judge0BatchResponse response = sendBatchRequestToJudge0(judge0BatchRequest);
-            return saveSubmissionsToDatabase(response, batchRequest.languageId());
+        Judge0BatchRequest request = new Judge0BatchRequest(submissions);
 
-        } catch (Exception e) {
-            log.error("Error creating batch submissions", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Batch submission creation failed");
-        }
+        return sendBatchRequestToJudge0(request, batchRequest.languageId());
     }
 
     private List<CreateSubmissionRequest> prepareSubmissionRequests(BatchSubmissionRequest batchRequest) {
         List<CreateSubmissionRequest> requests = new ArrayList<>();
-
-        if (batchRequest.inputs() == null || batchRequest.inputs().isEmpty()) {
-            log.warn("Batch request has no inputs. Adding a default empty submission to avoid Judge0 error.");
-            requests.add(CreateSubmissionRequest.builder()
-                    .sourceCode(batchRequest.sourceCode())
-                    .languageId(batchRequest.languageId())
-                    .stdin("")
-                    .expectedOutput("")
-                    .build());
-            return requests;
-        }
-
         for (int i = 0; i < batchRequest.inputs().size(); i++) {
-            String expected = (batchRequest.expectedOutputs() != null && i < batchRequest.expectedOutputs().size())
-                    ? batchRequest.expectedOutputs().get(i)
-                    : "";
             requests.add(CreateSubmissionRequest.builder()
                     .sourceCode(batchRequest.sourceCode())
                     .languageId(batchRequest.languageId())
                     .stdin(batchRequest.inputs().get(i))
-                    .expectedOutput(expected)
+                    .expectedOutput(i < batchRequest.expectedOutputs().size()
+                            ? batchRequest.expectedOutputs().get(i)
+                            : null)
+                    .cpuTimeLimit(2.0)
+                    .wallTimeLimit(5.0)
+                    .memoryLimit(128000)
                     .build());
         }
-
         return requests;
     }
 
-
-    private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request) {
+    private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Judge0BatchRequest> httpEntity = new HttpEntity<>(request, headers);
+            log.info("Sending batch request to Judge0 with {} submissions", request.submissions().size());
 
-            String url = "/submissions/batch?base64_encoded=" + request.base64Encoded();
+            // Log the raw JSON payload
+            ObjectMapper objectMapper = new ObjectMapper();
+            String requestJson = objectMapper.writeValueAsString(request);
+            log.info("Judge0 batch request payload: {}", requestJson);
 
-            ResponseEntity<Judge0SubmissionResponse[]> response = judge0RestTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    httpEntity,
-                    Judge0SubmissionResponse[].class
-            );
+            Judge0SubmissionResponse[] responses = judge0WebClient.post()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/submissions/batch")
+                            .queryParam("base64_encoded", false)
+                            .queryParam("wait", true)
+                            .build())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, clientResponse -> {
+                        log.error("Judge0 API error: {}", clientResponse.statusCode());
+                        return clientResponse.bodyToMono(String.class)
+                                .map(body -> new RuntimeException("Judge0 API error: " + body));
+                    })
+                    .bodyToMono(Judge0SubmissionResponse[].class)
+                    .timeout(Duration.ofSeconds(30))
+                    .block();
 
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new ResponseStatusException(
-                        HttpStatus.valueOf(response.getStatusCode().value()),
-                        "Judge0 batch API error"
-                );
+            if (responses == null || responses.length == 0) {
+                throw new RuntimeException("No response received from Judge0");
             }
 
-            Judge0SubmissionResponse[] responseArray = response.getBody();
-            if (responseArray == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty batch response from Judge0");
+            log.info("Received {} responses from Judge0", responses.length);
+
+            // Log first response for debugging
+            Judge0SubmissionResponse firstResponse = responses[0];
+            log.info("First response - Token: {}, Status: {}, Stdout: {}, Language: {}",
+                    firstResponse.token(),
+                    firstResponse.status(),
+                    firstResponse.stdout(),
+                    firstResponse.languageId());
+
+//            for (int i = 0; i < responses.length; i++) {
+//                responses[i].languageId()
+//            }
+
+            // Check if we got actual results or just tokens
+            boolean hasResults = Arrays.stream(responses)
+                    .anyMatch(r -> r.status() != null || r.stdout() != null || r.stderr() != null);
+
+            if (!hasResults) {
+                log.info("Got tokens only, polling for results...");
+                return pollForResults(responses, languageId);
             }
 
-            return new Judge0BatchResponse(Arrays.asList(responseArray));
+            return mapResponses(request, responses, languageId);
 
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            log.error("Judge0 API error: {}", e.getResponseBodyAsString());
-            throw new ResponseStatusException(
-                    HttpStatus.valueOf(e.getStatusCode().value()),
-                    "Judge0 API error: " + e.getResponseBodyAsString()
-            );
-        }
-    }
-
-    private Judge0BatchResponse saveSubmissionsToDatabase(Judge0BatchResponse response, String languageId) {
-        List<Submission> submissions = response.submissions().stream()
-                .map(judgeResponse -> mapper.fromJudge0ResponseToEntity(judgeResponse, languageId))
-                .collect(Collectors.toList());
-
-        submissionRepository.saveAll(submissions);
-        return response;
-    }
-
-    @Override
-    public SubmissionResult getSubmissionByToken(String token) {
-        log.debug("Getting submission status for token: {}", token);
-
-        try {
-            ResponseEntity<Judge0SubmissionResponse> response = judge0RestTemplate.getForEntity(
-                    "/submissions/" + token,
-                    Judge0SubmissionResponse.class
-            );
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new ResponseStatusException(
-                        HttpStatus.valueOf(response.getStatusCode().value()),
-                        "Judge0 API error"
-                );
-            }
-
-            Judge0SubmissionResponse judge0Response = response.getBody();
-            if (judge0Response == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from Judge0");
-            }
-
-            SubmissionResult result = updateSubmissionFromResponse(judge0Response);
-            log.debug("Retrieved submission: {} - {}", token, result.status().description());
-            return result;
-
-        } catch (HttpClientErrorException e) {
-            log.error("Judge0 client error getting submission: {}", token, e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
-        } catch (HttpServerErrorException e) {
-            log.error("Judge0 server error getting submission: {}", token, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
         } catch (Exception e) {
-            log.error("Error getting submission: {}", token, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get submission");
+            log.error("Error in batch submission: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to execute batch submissions: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    public Judge0BatchResponse getBatchSubmissions(String tokens, boolean base64Encoded, String fields) {
-        log.info("Getting batch submissions for tokens: {}", tokens);
+    private Judge0BatchResponse pollForResults(Judge0SubmissionResponse[] tokenResponses, String languageId) {
+        List<Judge0SubmissionResponse> results = new ArrayList<>();
 
-        try {
-            String url = "/submissions/batch?tokens=" + tokens +
-                    "&base64_encoded=" + base64Encoded +
-                    "&fields=" + fields;
-
-            ResponseEntity<Judge0BatchResponse> response = judge0RestTemplate.getForEntity(
-                    url,
-                    Judge0BatchResponse.class
-            );
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new ResponseStatusException(
-                        HttpStatus.valueOf(response.getStatusCode().value()),
-                        "Judge0 batch API error"
-                );
+        for (Judge0SubmissionResponse tokenResponse : tokenResponses) {
+            if (tokenResponse.token() == null) {
+                log.error("No token received for submission");
+                results.add(createErrorResponse("No token received"));
+                continue;
             }
 
-            Judge0BatchResponse batchResponse = response.getBody();
-            if (batchResponse == null) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty batch response from Judge0");
-            }
-
-            log.info("Retrieved {} submissions", batchResponse.submissions().size());
-            return batchResponse;
-
-        } catch (HttpClientErrorException e) {
-            log.error("Judge0 client error getting batch submissions: {}", tokens, e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
-        } catch (HttpServerErrorException e) {
-            log.error("Judge0 server error getting batch submissions: {}", tokens, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
-        } catch (Exception e) {
-            log.error("Error getting batch submissions for tokens: {}", tokens, e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get batch submissions");
+            Judge0SubmissionResponse result = pollSingleSubmission(tokenResponse.token());
+            results.add(new Judge0SubmissionResponse(
+                    languageId,
+                    result.stdout(),
+                    result.time(),
+                    result.memory(),
+                    result.stderr(),
+                    result.token(),
+                    result.compileOutput(),
+                    result.message(),
+                    result.status()
+            ));
         }
+
+        return new Judge0BatchResponse(results);
     }
 
-    @Override
-    public SubmissionResult pollSubmissionUntilComplete(String token) {
-        return pollSubmissionUntilComplete(token, 30, 1000); // 30 attempts, 1 second interval
-    }
+    private Judge0SubmissionResponse pollSingleSubmission(String token) {
+        int maxAttempts = 15;
+        int attempt = 0;
 
-    @Override
-    public SubmissionResult pollSubmissionUntilComplete(String token, int maxAttempts, long intervalMs) {
-        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+        log.info("Polling submission with token: {}", token);
+
+        while (attempt < maxAttempts) {
             try {
-                SubmissionResult result = getSubmissionByToken(token);
-                Integer statusId = result.status().id();
+                Judge0SubmissionResponse response = judge0WebClient.get()
+                        .uri("/submissions/{token}", token)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::isError, clientResponse -> {
+                            log.error("Error polling token {}: {}", token, clientResponse.statusCode());
+                            return Mono.error(new RuntimeException("Failed to poll submission"));
+                        })
+                        .bodyToMono(Judge0SubmissionResponse.class)
+                        .timeout(Duration.ofSeconds(10))
+                        .block();
 
-                if (statusId != null && statusId != 1 && statusId != 2) {
-                    return result; // Completed (not in queue or processing)
+                if (response != null) {
+                    log.debug("Attempt {}: Token {}, Status: {}", attempt + 1, token, response.status());
+
+                    if (response.status() != null && response.status().id() != null) {
+                        // Status ID 1 = In Queue, 2 = Processing
+                        if (response.status().id() > 2) {
+                            log.info("Submission {} completed with status: {} ({})",
+                                    token, response.status().id(), response.status().description());
+                            return response;
+                        }
+                    }
                 }
 
-                if (attempt < maxAttempts - 1) {
-                    Thread.sleep(intervalMs);
-                }
+                attempt++;
+                Thread.sleep(2000); // Wait for 2 seconds before next poll
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Polling interrupted", e);
+                log.error("Polling interrupted for token: {}", token);
+                return createTimeoutResponse(token);
             } catch (Exception e) {
-                if (attempt == maxAttempts - 1) {
-                    // Last attempt failed, try fallback to DB
-                    return findSubmissionByToken(token);
+                log.error("Error polling submission {}: {}", token, e.getMessage());
+                attempt++;
+
+                if (attempt < maxAttempts) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
-                log.warn("Attempt {} failed for token {}, retrying...", attempt + 1, token);
             }
         }
 
-        // All attempts exhausted, try fallback to DB
-        return findSubmissionByToken(token);
+        log.warn("Timeout polling submission: {}", token);
+        return createTimeoutResponse(token);
     }
 
-    @Override
-    public SubmissionResult findSubmissionByToken(String token) {
-        Submission submission = submissionRepository.findByToken(token)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Submission not found: " + token));
-        return mapper.fromEntityToResult(submission);
+    private Judge0SubmissionResponse createTimeoutResponse(String token) {
+        return new Judge0SubmissionResponse(
+                null, // languageId
+                null, // stdout
+                null, // time
+                null, // memory
+                "Execution timeout during polling", // stderr
+                token,
+                null, // compileOutput
+                "Polling timeout exceeded", // message
+                new Judge0SubmissionResponse.Status(13, "Internal Error") // status
+        );
     }
 
-    private Submission saveInitialSubmission(CreateSubmissionRequest request, String token) {
-        Submission submission = Submission.builder()
-                .token(token)
-                .languageId(request.languageId())
-                .status("In Queue")
-                .statusId(1)
-                .build();
-        return submissionRepository.save(submission);
+    private Judge0SubmissionResponse createErrorResponse(String errorMessage) {
+        return new Judge0SubmissionResponse(
+                null, // languageId
+                null, // stdout
+                null, // time
+                null, // memory
+                errorMessage, // stderr
+                null, // token
+                null, // compileOutput
+                errorMessage, // message
+                new Judge0SubmissionResponse.Status(13, "Internal Error") // status
+        );
     }
 
-    private SubmissionResult updateSubmissionFromResponse(Judge0SubmissionResponse response) {
-        Optional<Submission> existingOpt = submissionRepository.findByToken(response.token());
+    private Judge0BatchResponse mapResponses(Judge0BatchRequest request, Judge0SubmissionResponse[] responses, String languageId) {
+        List<Judge0SubmissionResponse> mappedResponses = new ArrayList<>();
 
-        Submission submission;
-        if (existingOpt.isPresent()) {
-            submission = existingOpt.get();
-            submission.setStdout(response.stdout());
-            submission.setStderr(response.stderr());
-            submission.setCompileOutput(response.compileOutput());
-            submission.setMessage(response.message());
-            submission.setTime(response.time());
-            submission.setLanguageId(response.languageId());
-            submission.setMemory(response.memory());
-            submission.setStatus(response.status().description());
-            submission.setStatusId(response.status().id());
-        } else {
-            submission = mapper.fromJudge0ResponseToEntity(response);
+        for (int i = 0; i < responses.length; i++) {
+            Judge0SubmissionResponse resp = responses[i];
+//            String languageId = resp.languageId() == null ?  original.languageId() : resp.languageId();
+
+            mappedResponses.add(new Judge0SubmissionResponse(
+                    languageId,
+                    resp.stdout(),
+                    resp.time(),
+                    resp.memory(),
+                    resp.stderr(),
+                    resp.token(),
+                    resp.compileOutput(),
+                    resp.message(),
+                    resp.status()
+            ));
         }
 
-        submission = submissionRepository.save(submission);
-        return mapper.fromEntityToResult(submission);
+        return new Judge0BatchResponse(mappedResponses);
     }
 }
+
