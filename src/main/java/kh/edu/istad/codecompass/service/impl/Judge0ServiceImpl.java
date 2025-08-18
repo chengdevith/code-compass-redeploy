@@ -7,17 +7,13 @@ import kh.edu.istad.codecompass.repository.SubmissionRepository;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,201 +25,302 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Judge0ServiceImpl implements Judge0Service {
 
-    private final WebClient judge0WebClient;
+    private final RestTemplate judge0RestTemplate;
     private final SubmissionRepository submissionRepository;
     private final Judge0Mapper mapper;
 
     @Override
-    public Mono<SubmissionTokenResponse> createSubmission(CreateSubmissionRequest request) {
+    public SubmissionTokenResponse createSubmission(CreateSubmissionRequest request) {
         log.info("Creating submission for language: {}", request.languageId());
 
-        return judge0WebClient.post()
-                .uri("/submissions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, this::handleClientError)
-                .onStatus(HttpStatusCode::is5xxServerError, this::handleServerError)
-                .bodyToMono(SubmissionTokenResponse.class)
-                .flatMap(tokenResponse -> saveInitialSubmission(request, tokenResponse.token())
-                        .map(saved -> tokenResponse))
-                .doOnSuccess(response -> log.info("Submission created with token: {}", response.token()))
-                .doOnError(e -> log.error("Error creating submission", e));
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<CreateSubmissionRequest> httpEntity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<SubmissionTokenResponse> response = judge0RestTemplate.exchange(
+                    "/submissions",
+                    HttpMethod.POST,
+                    httpEntity,
+                    SubmissionTokenResponse.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new ResponseStatusException(
+                        HttpStatus.valueOf(response.getStatusCode().value()),
+                        "Judge0 API error"
+                );
+            }
+
+            SubmissionTokenResponse tokenResponse = response.getBody();
+            if (tokenResponse == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from Judge0");
+            }
+
+            // Save initial submission
+            saveInitialSubmission(request, tokenResponse.token());
+
+            log.info("Submission created with token: {}", tokenResponse.token());
+            return tokenResponse;
+
+        } catch (HttpClientErrorException e) {
+            log.error("Judge0 client error: {}", e.getResponseBodyAsString());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            log.error("Judge0 server error: {}", e.getResponseBodyAsString());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
+        } catch (Exception e) {
+            log.error("Error creating submission", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Submission creation failed");
+        }
     }
 
     @Override
-    public Mono<Judge0BatchResponse> createSubmissionBatch(BatchSubmissionRequest batchRequest) {
+    public Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest) {
         log.info("Creating batch submissions for language: {}", batchRequest.languageId());
 
-        List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
-        Judge0BatchRequest judge0BatchRequest = new Judge0BatchRequest(submissions);
+        try {
+            List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
+            Judge0BatchRequest judge0BatchRequest = new Judge0BatchRequest(submissions);
 
-        return sendBatchRequestToJudge0(judge0BatchRequest)
-                .flatMap(response -> saveSubmissionsToDatabase(response, batchRequest.languageId()));
+            Judge0BatchResponse response = sendBatchRequestToJudge0(judge0BatchRequest);
+            return saveSubmissionsToDatabase(response, batchRequest.languageId());
+
+        } catch (Exception e) {
+            log.error("Error creating batch submissions", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Batch submission creation failed");
+        }
     }
 
     private List<CreateSubmissionRequest> prepareSubmissionRequests(BatchSubmissionRequest batchRequest) {
         List<CreateSubmissionRequest> requests = new ArrayList<>();
 
+        if (batchRequest.inputs() == null || batchRequest.inputs().isEmpty()) {
+            log.warn("Batch request has no inputs. Adding a default empty submission to avoid Judge0 error.");
+            requests.add(CreateSubmissionRequest.builder()
+                    .sourceCode(batchRequest.sourceCode())
+                    .languageId(batchRequest.languageId())
+                    .stdin("")
+                    .expectedOutput("")
+                    .build());
+            return requests;
+        }
+
         for (int i = 0; i < batchRequest.inputs().size(); i++) {
+            String expected = (batchRequest.expectedOutputs() != null && i < batchRequest.expectedOutputs().size())
+                    ? batchRequest.expectedOutputs().get(i)
+                    : "";
             requests.add(CreateSubmissionRequest.builder()
                     .sourceCode(batchRequest.sourceCode())
                     .languageId(batchRequest.languageId())
                     .stdin(batchRequest.inputs().get(i))
-                    .expectedOutput(i < batchRequest.expectedOutputs().size()
-                            ? batchRequest.expectedOutputs().get(i)
-                            : null)
+                    .expectedOutput(expected)
                     .build());
         }
+
         return requests;
     }
 
-    private Mono<Judge0BatchResponse> sendBatchRequestToJudge0(Judge0BatchRequest request) {
-        return judge0WebClient.post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/submissions/batch")
-                        .queryParam("base64_encoded", request.base64Encoded())
-                        .build())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, clientResponse ->
-                        clientResponse.bodyToMono(String.class)
-                                .flatMap(error -> Mono.error(new RuntimeException(
-                                        "Judge0 API error: " + error))))
-                .bodyToMono(Judge0SubmissionResponse[].class)
-                .map(Arrays::asList)
-                .map(Judge0BatchResponse::new);
+
+    private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Judge0BatchRequest> httpEntity = new HttpEntity<>(request, headers);
+
+            String url = "/submissions/batch?base64_encoded=" + request.base64Encoded();
+
+            ResponseEntity<Judge0SubmissionResponse[]> response = judge0RestTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    httpEntity,
+                    Judge0SubmissionResponse[].class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new ResponseStatusException(
+                        HttpStatus.valueOf(response.getStatusCode().value()),
+                        "Judge0 batch API error"
+                );
+            }
+
+            Judge0SubmissionResponse[] responseArray = response.getBody();
+            if (responseArray == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty batch response from Judge0");
+            }
+
+            return new Judge0BatchResponse(Arrays.asList(responseArray));
+
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("Judge0 API error: {}", e.getResponseBodyAsString());
+            throw new ResponseStatusException(
+                    HttpStatus.valueOf(e.getStatusCode().value()),
+                    "Judge0 API error: " + e.getResponseBodyAsString()
+            );
+        }
     }
 
-    private Mono<Judge0BatchResponse> saveSubmissionsToDatabase(Judge0BatchResponse response, String languageId) {
-        return Mono.fromCallable(() -> {
-                    List<Submission> submissions = response.submissions().stream()
-                            .map(judgeResponse -> mapper.fromJudge0ResponseToEntity(judgeResponse, languageId))
-                            .collect(Collectors.toList());
-                    return submissionRepository.saveAll(submissions);
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .thenReturn(response);
+    private Judge0BatchResponse saveSubmissionsToDatabase(Judge0BatchResponse response, String languageId) {
+        List<Submission> submissions = response.submissions().stream()
+                .map(judgeResponse -> mapper.fromJudge0ResponseToEntity(judgeResponse, languageId))
+                .collect(Collectors.toList());
+
+        submissionRepository.saveAll(submissions);
+        return response;
     }
 
     @Override
-    public Mono<SubmissionResult> getSubmissionByToken(String token) {
+    public SubmissionResult getSubmissionByToken(String token) {
         log.debug("Getting submission status for token: {}", token);
 
-        return judge0WebClient.get()
-                .uri("/submissions/{token}", token)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, this::handleClientError)
-                .onStatus(HttpStatusCode::is5xxServerError, this::handleServerError)
-                .bodyToMono(Judge0SubmissionResponse.class)
-                .flatMap(this::updateSubmissionFromResponse)
-                .doOnSuccess(result -> log.debug("Retrieved submission: {} - {}",
-                        token, result.status().description()))
-                .doOnError(e -> log.error("Error getting submission: {}", token, e));
+        try {
+            ResponseEntity<Judge0SubmissionResponse> response = judge0RestTemplate.getForEntity(
+                    "/submissions/" + token,
+                    Judge0SubmissionResponse.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new ResponseStatusException(
+                        HttpStatus.valueOf(response.getStatusCode().value()),
+                        "Judge0 API error"
+                );
+            }
+
+            Judge0SubmissionResponse judge0Response = response.getBody();
+            if (judge0Response == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty response from Judge0");
+            }
+
+            SubmissionResult result = updateSubmissionFromResponse(judge0Response);
+            log.debug("Retrieved submission: {} - {}", token, result.status().description());
+            return result;
+
+        } catch (HttpClientErrorException e) {
+            log.error("Judge0 client error getting submission: {}", token, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            log.error("Judge0 server error getting submission: {}", token, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
+        } catch (Exception e) {
+            log.error("Error getting submission: {}", token, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get submission");
+        }
     }
 
     @Override
-    public Mono<Judge0BatchResponse> getBatchSubmissions(String tokens, boolean base64Encoded, String fields) {
+    public Judge0BatchResponse getBatchSubmissions(String tokens, boolean base64Encoded, String fields) {
         log.info("Getting batch submissions for tokens: {}", tokens);
 
-        return judge0WebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/submissions/batch")
-                        .queryParam("tokens", tokens)
-                        .queryParam("base64_encoded", base64Encoded)
-                        .queryParam("fields", fields)
-                        .build())
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, this::handleClientError)
-                .onStatus(HttpStatusCode::is5xxServerError, this::handleServerError)
-                .bodyToMono(Judge0BatchResponse.class)
-                .doOnSuccess(response -> log.info("Retrieved {} submissions", response.submissions().size()))
-                .doOnError(e -> log.error("Error getting batch submissions for tokens: {}", tokens, e));
+        try {
+            String url = "/submissions/batch?tokens=" + tokens +
+                    "&base64_encoded=" + base64Encoded +
+                    "&fields=" + fields;
+
+            ResponseEntity<Judge0BatchResponse> response = judge0RestTemplate.getForEntity(
+                    url,
+                    Judge0BatchResponse.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new ResponseStatusException(
+                        HttpStatus.valueOf(response.getStatusCode().value()),
+                        "Judge0 batch API error"
+                );
+            }
+
+            Judge0BatchResponse batchResponse = response.getBody();
+            if (batchResponse == null) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Empty batch response from Judge0");
+            }
+
+            log.info("Retrieved {} submissions", batchResponse.submissions().size());
+            return batchResponse;
+
+        } catch (HttpClientErrorException e) {
+            log.error("Judge0 client error getting batch submissions: {}", tokens, e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judge0 error: " + e.getResponseBodyAsString());
+        } catch (HttpServerErrorException e) {
+            log.error("Judge0 server error getting batch submissions: {}", tokens, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error");
+        } catch (Exception e) {
+            log.error("Error getting batch submissions for tokens: {}", tokens, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to get batch submissions");
+        }
     }
 
     @Override
-    public Mono<SubmissionResult> pollSubmissionUntilComplete(String token) {
+    public SubmissionResult pollSubmissionUntilComplete(String token) {
         return pollSubmissionUntilComplete(token, 30, 1000); // 30 attempts, 1 second interval
     }
 
     @Override
-    public Mono<SubmissionResult> pollSubmissionUntilComplete(String token, int maxAttempts, long intervalMs) {
-        return Mono.defer(() -> getSubmissionByToken(token))
-                .flatMap(result -> {
-                    Integer statusId = result.status().id();
-                    if (statusId != null && statusId != 1 && statusId != 2) {
-                        return Mono.just(result); // Completed
-                    }
-                    if (maxAttempts <= 1) {
-                        return findSubmissionByToken(token); // Fallback to DB
-                    }
-                    return Mono.delay(Duration.ofMillis(intervalMs))
-                            .flatMap(i -> pollSubmissionUntilComplete(token, maxAttempts - 1, intervalMs));
-                });
+    public SubmissionResult pollSubmissionUntilComplete(String token, int maxAttempts, long intervalMs) {
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                SubmissionResult result = getSubmissionByToken(token);
+                Integer statusId = result.status().id();
+
+                if (statusId != null && statusId != 1 && statusId != 2) {
+                    return result; // Completed (not in queue or processing)
+                }
+
+                if (attempt < maxAttempts - 1) {
+                    Thread.sleep(intervalMs);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Polling interrupted", e);
+            } catch (Exception e) {
+                if (attempt == maxAttempts - 1) {
+                    // Last attempt failed, try fallback to DB
+                    return findSubmissionByToken(token);
+                }
+                log.warn("Attempt {} failed for token {}, retrying...", attempt + 1, token);
+            }
+        }
+
+        // All attempts exhausted, try fallback to DB
+        return findSubmissionByToken(token);
     }
 
     @Override
-    public Mono<SubmissionResult> findSubmissionByToken(String token) {
-        return Mono.fromCallable(() -> {
-            Submission submission = submissionRepository.findByToken(token)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Submission not found: " + token));
-            return mapper.fromEntityToResult(submission);
-        }).subscribeOn(Schedulers.boundedElastic());
+    public SubmissionResult findSubmissionByToken(String token) {
+        Submission submission = submissionRepository.findByToken(token)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Submission not found: " + token));
+        return mapper.fromEntityToResult(submission);
     }
 
-    private Mono<Submission> saveInitialSubmission(CreateSubmissionRequest request, String token) {
-        return Mono.fromCallable(() -> {
-            Submission submission = Submission.builder()
-                    .token(token)
-                    .languageId(request.languageId())
-                    .status("In Queue")
-                    .statusId(1)
-                    .build();
-            return submissionRepository.save(submission);
-        }).subscribeOn(Schedulers.boundedElastic());
+    private Submission saveInitialSubmission(CreateSubmissionRequest request, String token) {
+        Submission submission = Submission.builder()
+                .token(token)
+                .languageId(request.languageId())
+                .status("In Queue")
+                .statusId(1)
+                .build();
+        return submissionRepository.save(submission);
     }
 
-    private Mono<SubmissionResult> updateSubmissionFromResponse(Judge0SubmissionResponse response) {
-        return Mono.fromCallable(() -> {
-            Optional<Submission> existingOpt = submissionRepository.findByToken(response.token());
+    private SubmissionResult updateSubmissionFromResponse(Judge0SubmissionResponse response) {
+        Optional<Submission> existingOpt = submissionRepository.findByToken(response.token());
 
-            Submission submission;
-            if (existingOpt.isPresent()) {
-                submission = existingOpt.get();
-                submission.setStdout(response.stdout());
-                submission.setStderr(response.stderr());
-                submission.setCompileOutput(response.compileOutput());
-                submission.setMessage(response.message());
-                submission.setTime(response.time());
-                submission.setLanguageId(response.languageId());
-                submission.setMemory(response.memory());
-                submission.setStatus(response.status().description());
-                submission.setStatusId(response.status().id());
-            } else
-                submission = mapper.fromJudge0ResponseToEntity(response);
+        Submission submission;
+        if (existingOpt.isPresent()) {
+            submission = existingOpt.get();
+            submission.setStdout(response.stdout());
+            submission.setStderr(response.stderr());
+            submission.setCompileOutput(response.compileOutput());
+            submission.setMessage(response.message());
+            submission.setTime(response.time());
+            submission.setLanguageId(response.languageId());
+            submission.setMemory(response.memory());
+            submission.setStatus(response.status().description());
+            submission.setStatusId(response.status().id());
+        } else {
+            submission = mapper.fromJudge0ResponseToEntity(response);
+        }
 
-            submission = submissionRepository.save(submission);
-            return mapper.fromEntityToResult(submission);
-        }).subscribeOn(Schedulers.boundedElastic());
-    }
-
-    private Mono<Throwable> handleClientError(ClientResponse response) {
-        return response.bodyToMono(String.class)
-                .flatMap(body -> {
-                    log.error("Judge0 client error {}: {}", response.statusCode(), body);
-                    return Mono.error(new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, "Judge0 error: " + body));
-                });
-    }
-
-    private Mono<Throwable> handleServerError(ClientResponse response) {
-        return response.bodyToMono(String.class)
-                .flatMap(body -> {
-                    log.error("Judge0 server error {}: {}", response.statusCode(), body);
-                    return Mono.error(new ResponseStatusException(
-                            HttpStatus.INTERNAL_SERVER_ERROR, "Judge0 server error"));
-                });
+        submission = submissionRepository.save(submission);
+        return mapper.fromEntityToResult(submission);
     }
 }

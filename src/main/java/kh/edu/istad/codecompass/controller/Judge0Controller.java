@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -24,17 +23,19 @@ public class Judge0Controller {
 
     @PostMapping("/batch")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BatchSubmissionTokenResponse> createBatchSubmissions(
+    public BatchSubmissionTokenResponse createBatchSubmissions(
             @Valid @RequestBody BatchSubmissionRequest request) {
-            return judge0Service.createSubmissionBatch(request).map(res ->
-            {
-                List<String> tokens = res.submissions().stream().map(Judge0SubmissionResponse::token).toList();
-                return new BatchSubmissionTokenResponse(tokens);
-            });
+
+        Judge0BatchResponse response = judge0Service.createSubmissionBatch(request);
+        List<String> tokens = response.submissions().stream()
+                .map(Judge0SubmissionResponse::token)
+                .toList();
+
+        return new BatchSubmissionTokenResponse(tokens);
     }
 
     @GetMapping("/batch")
-    public Mono<Judge0BatchResponse> getBatchSubmissions(
+    public Judge0BatchResponse getBatchSubmissions(
             @RequestParam String tokens,
             @RequestParam(defaultValue = "false") boolean base64_encoded,
             @RequestParam(defaultValue = "language_id,stdout,time,memory,stderr,token,compile_output,message,status") String fields) {
@@ -44,38 +45,37 @@ public class Judge0Controller {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ResponseEntity<SubmissionTokenResponse>> createSubmission(
+    public ResponseEntity<SubmissionTokenResponse> createSubmission(
             @Valid @RequestBody CreateSubmissionRequest request) {
 
         log.info("Received submission request for language: {}", request.languageId());
 
-        return judge0Service.createSubmission(request)
-                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                .doOnSuccess(response -> {
-                    assert response.getBody() != null;
-                    log.info("Submission created: {}", response.getBody().token());
-                });
+        SubmissionTokenResponse response = judge0Service.createSubmission(request);
+
+        log.info("Submission created: {}", response.token());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{token}")
-    public Mono<ResponseEntity<SubmissionResult>> getSubmission(@PathVariable String token) {
-        return judge0Service.getSubmissionByToken(token)
-                .map(ResponseEntity::ok);
+    public ResponseEntity<SubmissionResult> getSubmission(@PathVariable String token) {
+        SubmissionResult result = judge0Service.getSubmissionByToken(token);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{token}/poll")
-    public Mono<ResponseEntity<SubmissionResult>> pollSubmission(
+    public ResponseEntity<SubmissionResult> pollSubmission(
             @PathVariable String token,
             @RequestParam(defaultValue = "30") int maxAttempts,
             @RequestParam(defaultValue = "1000") long intervalMs) {
 
-        return judge0Service.pollSubmissionUntilComplete(token, maxAttempts, intervalMs)
-                .map(ResponseEntity::ok);
+        SubmissionResult result = judge0Service.pollSubmissionUntilComplete(token, maxAttempts, intervalMs);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{token}/local")
-    public Mono<ResponseEntity<SubmissionResult>> getLocalSubmission(@PathVariable String token) {
-        return judge0Service.findSubmissionByToken(token)
-                .map(ResponseEntity::ok);
+    public ResponseEntity<SubmissionResult> getLocalSubmission(@PathVariable String token) {
+        SubmissionResult result = judge0Service.findSubmissionByToken(token);
+        return ResponseEntity.ok(result);
     }
 }
