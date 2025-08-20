@@ -1,7 +1,7 @@
 spring:
   application:
     name: CodeCompass
-  datasource:
+  datasource: #Config Datasource (PostgreSql)
     url: jdbc:postgresql://localhost:9999/code_compass_db
     driver-class-name: org.postgresql.Driver
     username: benz
@@ -12,9 +12,13 @@ spring:
 #    show-sql: true
 #    properties:
 #      hibernate.hibernate.format_sql: true
+  elasticsearch: #Config Elasticsearch
+    uris: http://localhost:9200
+    username: elastic
+#    password: yourpassword
 #  security: #Config Resource Server Keycloak
 #    oauth2:
-#      resource server:
+#      resourceserver:
 #        jwt:
 #          issuer-uri: http://localhost:8888/realms/aft-mb-api
 
