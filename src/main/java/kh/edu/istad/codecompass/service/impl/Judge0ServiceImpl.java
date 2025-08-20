@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kh.edu.istad.codecompass.domain.Submission;
 import kh.edu.istad.codecompass.dto.jugde0.*;
 import kh.edu.istad.codecompass.mapper.Judge0Mapper;
-import kh.edu.istad.codecompass.repository.SubmissionRepository;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .onStatus(HttpStatusCode::isError, clientResponse -> {
                         log.error("Judge0 API error: {}", clientResponse.statusCode());
                         return clientResponse.bodyToMono(String.class)
-                                .map(body -> new RuntimeException("Judge0 API error: " + body));
+                                .map(body -> new RuntimeException(MessageFormat.format("Judge0 API error: {0}", body)));
                     })
                     .bodyToMono(Judge0SubmissionResponse[].class)
                     .timeout(Duration.ofSeconds(30))
@@ -142,11 +142,11 @@ public class Judge0ServiceImpl implements Judge0Service {
                 return pollForResults(responses, languageId);
             }
 
-            return mapResponses(request, responses, languageId);
+            return mapResponses(responses, languageId);
 
         } catch (Exception e) {
             log.error("Error in batch submission: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to execute batch submissions: " + e.getMessage(), e);
+            throw new RuntimeException(MessageFormat.format("Failed to execute batch submissions: {0}", e.getMessage()), e);
         }
     }
 
@@ -156,7 +156,7 @@ public class Judge0ServiceImpl implements Judge0Service {
         for (Judge0SubmissionResponse tokenResponse : tokenResponses) {
             if (tokenResponse.token() == null) {
                 log.error("No token received for submission");
-                results.add(createErrorResponse("No token received"));
+                results.add(createErrorResponse());
                 continue;
             }
 
@@ -249,26 +249,25 @@ public class Judge0ServiceImpl implements Judge0Service {
         );
     }
 
-    private Judge0SubmissionResponse createErrorResponse(String errorMessage) {
+    private Judge0SubmissionResponse createErrorResponse() {
         return new Judge0SubmissionResponse(
                 null, // languageId
                 null, // stdout
                 null, // time
                 null, // memory
-                errorMessage, // stderr
+                "No token received", // stderr
                 null, // token
                 null, // compileOutput
-                errorMessage, // message
+                "No token received", // message
                 new Judge0SubmissionResponse.Status(13, "Internal Error") // status
         );
     }
 
-    private Judge0BatchResponse mapResponses(Judge0BatchRequest request, Judge0SubmissionResponse[] responses, String languageId) {
+    private Judge0BatchResponse mapResponses(Judge0SubmissionResponse[] responses, String languageId) {
         List<Judge0SubmissionResponse> mappedResponses = new ArrayList<>();
 
-        for (int i = 0; i < responses.length; i++) {
-            Judge0SubmissionResponse resp = responses[i];
-//            String languageId = resp.languageId() == null ?  original.languageId() : resp.languageId();
+        for (Judge0SubmissionResponse resp : responses) {
+            //            String languageId = resp.languageId() == null ?  original.languageId() : resp.languageId();
 
             mappedResponses.add(new Judge0SubmissionResponse(
                     languageId,
