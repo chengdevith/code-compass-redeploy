@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 @Getter
@@ -41,8 +42,8 @@ public class User {
     private String image_url;
 
     private Level level;
-    private Integer coins;
-    private Integer stars;
+    private Integer coin;
+    private Integer star;
     private Integer rank;
     private Integer total_problems_solved;
 
@@ -56,5 +57,17 @@ public class User {
     private List<Badge> badges;
 
     @OneToMany(mappedBy = "user")
-    private Set<UserProblem> userProblems;
+    private List<UserProblem> userProblems;
+
+    @OneToMany(mappedBy = "user")
+    private Queue<SubmissionHistories> submissionHistories;
+
+    @OneToMany(mappedBy = "user")
+    private List<Solution> solutions;
+
+    @OneToMany(mappedBy = "user")
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "user")
+    private List<Report> report;
 }

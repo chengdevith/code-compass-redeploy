@@ -1,40 +1,42 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
+import kh.edu.istad.codecompass.enums.Star;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "badges")
-public class Badge {
+@Table(name = "submissions_histories")
+public class SubmissionHistories {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String name;
-
-    private String description;
+    @Column(nullable = false)
+    private String code;
 
     @Column(nullable = false)
-    private String icon_url;
+    private String languageId;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private String status;
+
+    private Star star;
+    private Integer coin;
 
     @Column(nullable = false)
-    private Boolean isDeleted;
+    private LocalDateTime submittedAt;
 
-    @ManyToMany(mappedBy = "badges")
-    private List<User> user;
+    @ManyToOne
+    private Problem problem;
 
-    @OneToOne
-    private Package problem_package;
+    @ManyToOne
+    private User user;
+
 }

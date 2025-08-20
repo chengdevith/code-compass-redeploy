@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 @Getter
@@ -56,5 +58,20 @@ public class Problem {
     private Set<Package> packages;
 
     @OneToMany(mappedBy = "problem")
-    private Set<UserProblem> userProblems;
+    private List<UserProblem> userProblems;
+
+    @OneToMany(mappedBy = "problem")
+    private Queue<SubmissionHistories> submissionHistories;
+
+    @OneToMany(mappedBy = "problem")
+    private List<Solution>  solutions;
+
+    @OneToMany(mappedBy = "problem")
+    private List<TestCase> testCases;
+
+    @ManyToMany
+    private List<Tag> tags;
+
+    @OneToMany(mappedBy = "problem")
+    private List<Report> reports;
 }

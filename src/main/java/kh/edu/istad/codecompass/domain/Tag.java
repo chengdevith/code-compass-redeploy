@@ -5,24 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "submissions")
-public class Submission {
+@Table(name = "tags")
+public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String code;
+    @Column(nullable = false, unique = true)
+    private String tagName;
 
-    @Column(nullable = false)
-    private String languageId;
-
-    @Column(nullable = false)
-    private String status;
-
-
+    @ManyToMany
+    private List<Problem> problems;
 }

@@ -12,29 +12,27 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "badges")
-public class Badge {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String name;
-
-    private String description;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String comment;
 
     @Column(nullable = false)
-    private String icon_url;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime commentAt;
 
     @Column(nullable = false)
     private Boolean isDeleted;
 
-    @ManyToMany(mappedBy = "badges")
-    private List<User> user;
+    @ManyToOne
+    private User user;
 
-    @OneToOne
-    private Package problem_package;
+    @ManyToOne
+    private Discussion discussion;
+
+    @OneToMany(mappedBy = "comment")
+    private List<Report> report;
 }

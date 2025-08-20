@@ -11,20 +11,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "packages")
-public class Package {
+@Table(name = "discussions")
+public class Discussion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String name;
+    @OneToMany(mappedBy = "discussion")
+    private List<Comment> comments;
 
-    private String description;
-
-    @Column(nullable = false)
-    private Boolean isDeleted;
-
-    @ManyToMany
-    private List<Problem> problems;
+    @OneToOne
+    private Problem problem;
 }
