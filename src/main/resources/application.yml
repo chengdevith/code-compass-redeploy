@@ -4,10 +4,10 @@ spring:
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://localhost:9999/code_compass_db
+    url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
-    username: benz
-    password: benz
+    username: postgres
+    password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: update
@@ -34,7 +34,7 @@ server:
 
 judge0:
   protocol: http
-  domain: localhost
+  domain: judge0-code-compass.devith.it.com
   port: 8888
   auth-token: ""
 

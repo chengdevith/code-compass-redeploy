@@ -13,11 +13,11 @@ public class WebClientConfig {
             WebClient.Builder builder,
             @Value("${judge0.protocol}") String protocol,
             @Value("${judge0.domain}") String domain,
-            @Value("${judge0.port}") int port,
+//            @Value("${judge0.port}") int port,
             @Value("${judge0.auth-token:}") String authToken
     ) {
 
-        String baseUrl = String.format("%s://%s:%d", protocol, domain, port);
+        String baseUrl = String.format("%s://%s", protocol, domain);
 
         WebClient.Builder clientBuilder = builder.baseUrl(baseUrl);
 

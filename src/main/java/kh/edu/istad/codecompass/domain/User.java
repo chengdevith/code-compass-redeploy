@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -23,9 +22,6 @@ public class User {
 
     @Column(nullable = false, unique = true, length = 150)
     private String username;
-
-    @Column(nullable = false, length = 10)
-    private String password;
 
     @Column(nullable = false, unique = true, length = 150)
     private String email;
