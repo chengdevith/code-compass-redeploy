@@ -22,10 +22,10 @@ public class UserProblem {
     private Boolean isSolved;
 
     @ManyToOne
-    @JoinColumn(name = "problem_id",nullable = false)
+    @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

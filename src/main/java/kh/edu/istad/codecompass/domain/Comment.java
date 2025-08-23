@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -33,6 +34,6 @@ public class Comment {
     @ManyToOne
     private Discussion discussion;
 
-    @OneToMany(mappedBy = "comment")
-    private List<Report> report;
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Report> report = new ArrayList<>();
 }

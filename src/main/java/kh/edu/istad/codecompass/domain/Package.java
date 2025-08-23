@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,5 +28,5 @@ public class Package {
     private Boolean isDeleted;
 
     @ManyToMany
-    private List<Problem> problems;
+    private Set<Problem> problems = new HashSet<>();
 }

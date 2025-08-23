@@ -22,11 +22,11 @@ public class Solution {
     private Boolean isDeleted;
 
     @ManyToOne
-    @JoinColumn(name = "problem_id",nullable = false)
+    @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
 

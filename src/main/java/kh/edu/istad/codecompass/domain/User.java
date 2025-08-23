@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
@@ -50,20 +51,20 @@ public class User {
     private LeaderBoard leaderBoard;
 
     @ManyToMany
-    private List<Badge> badges;
+    private List<Badge> badges = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<UserProblem> userProblems;
+    private List<UserProblem> userProblems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private Queue<SubmissionHistories> submissionHistories;
+    private List<SubmissionHistories> submissionHistories = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Solution> solutions;
+    private List<Solution> solutions = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Report> report;
+    private List<Report> report = new ArrayList<>();
 }

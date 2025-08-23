@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -33,7 +34,7 @@ public class Badge {
     private Boolean isDeleted;
 
     @ManyToMany(mappedBy = "badges")
-    private List<User> user;
+    private List<User> user = new ArrayList<>();
 
     @OneToOne
     private Package problem_package;

@@ -38,6 +38,12 @@ judge0:
 #  port: 8888
   auth-token: ""
 
+keycloak-admin:
+  server-url: http://localhost:8080
+  realm: code-compass-api
+  client-id: admin-cli
+  client-secret: Fw12zDEkORHYLrKgUpufo7cgrjepWLQa
+
 logging:
   level:
     root: INFO
