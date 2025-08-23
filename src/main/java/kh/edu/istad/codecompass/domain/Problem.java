@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -22,6 +23,8 @@ public class Problem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Lob
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false, length = 100, unique = true)
@@ -70,7 +73,12 @@ public class Problem {
     private List<TestCase> testCases;
 
     @ManyToMany
-    private List<Tag> tags;
+    @JoinTable(
+            name = "problem_tags",
+            joinColumns = @JoinColumn(name = "problem_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
 
     @OneToMany(mappedBy = "problem")
     private List<Report> reports;

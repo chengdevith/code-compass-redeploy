@@ -1,7 +1,11 @@
 package kh.edu.istad.codecompass.controller;
 
 import jakarta.validation.Valid;
-import kh.edu.istad.codecompass.dto.jugde0.*;
+import kh.edu.istad.codecompass.dto.jugde0.request.BatchSubmissionRequest;
+import kh.edu.istad.codecompass.dto.jugde0.request.CreateSubmissionRequest;
+import kh.edu.istad.codecompass.dto.jugde0.response.Judge0BatchResponse;
+import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
+import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

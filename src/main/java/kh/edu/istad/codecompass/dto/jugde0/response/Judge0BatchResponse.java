@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.jugde0;
+package kh.edu.istad.codecompass.dto.jugde0.response;
 
 import java.util.List;
 

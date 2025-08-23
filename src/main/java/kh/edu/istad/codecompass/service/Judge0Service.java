@@ -1,6 +1,10 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.dto.jugde0.*;
+import kh.edu.istad.codecompass.dto.jugde0.request.BatchSubmissionRequest;
+import kh.edu.istad.codecompass.dto.jugde0.request.CreateSubmissionRequest;
+import kh.edu.istad.codecompass.dto.jugde0.response.Judge0BatchResponse;
+import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
+import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 
 public interface Judge0Service {
 

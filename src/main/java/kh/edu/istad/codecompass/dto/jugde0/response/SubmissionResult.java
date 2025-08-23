@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.jugde0;
+package kh.edu.istad.codecompass.dto.jugde0.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

@@ -1,8 +1,8 @@
 package kh.edu.istad.codecompass.mapper;
 
 import kh.edu.istad.codecompass.domain.Submission;
-import kh.edu.istad.codecompass.dto.jugde0.Judge0SubmissionResponse;
-import kh.edu.istad.codecompass.dto.jugde0.SubmissionResult;
+import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
+import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

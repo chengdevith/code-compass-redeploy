@@ -19,7 +19,7 @@ public class TestCase {
     private String input;
 
     @Column(nullable = false)
-    private String exceptedOutput;
+    private String expectedOutput;
 
     @ManyToOne
     private Problem problem;
