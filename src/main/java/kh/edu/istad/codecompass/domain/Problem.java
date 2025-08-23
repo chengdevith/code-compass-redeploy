@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -24,7 +21,7 @@ public class Problem {
     private Long id;
 
     @Lob
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(nullable = false, length = 100, unique = true)
@@ -58,19 +55,19 @@ public class Problem {
     private Boolean isDeleted;
 
     @ManyToMany(mappedBy = "problems")
-    private Set<Package> packages;
+    private Set<Package> packages = new HashSet<>();
 
-    @OneToMany(mappedBy = "problem")
-    private List<UserProblem> userProblems;
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<UserProblem> userProblems = new ArrayList<>();
 
-    @OneToMany(mappedBy = "problem")
-    private Queue<SubmissionHistories> submissionHistories;
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<SubmissionHistories> submissionHistories =  new ArrayList<>();
 
-    @OneToMany(mappedBy = "problem")
-    private List<Solution>  solutions;
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Solution>  solutions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "problem")
-    private List<TestCase> testCases;
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<TestCase> testCases =  new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -80,6 +77,6 @@ public class Problem {
     )
     private Set<Tag> tags = new HashSet<>();
 
-    @OneToMany(mappedBy = "problem")
-    private List<Report> reports;
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Report> reports = new ArrayList<>();
 }

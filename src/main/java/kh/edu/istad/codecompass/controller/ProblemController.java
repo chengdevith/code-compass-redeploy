@@ -18,4 +18,9 @@ public class ProblemController {
     public ProblemResponse createProblem(@RequestBody CreateProblemRequest problemRequest) {
         return problemService.createProblem(problemRequest);
     }
+
+    @GetMapping("/{problemId}")
+    public ProblemResponse findProblemById(@PathVariable Long problemId) {
+        return problemService.getProblem(problemId);
+    }
 }

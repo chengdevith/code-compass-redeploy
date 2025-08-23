@@ -1,6 +1,8 @@
 package kh.edu.istad.codecompass.service.impl;
 
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.domain.TestCase;
@@ -42,7 +44,11 @@ public class ProblemServiceImpl implements ProblemService {
                 .stream()
                 .map(tc -> problemMapper.toTestCase(tc, finalProblem))
                 .toList();
+
+        log.info("Test cases {}", testCases.toString());
+
         problem.setTestCases(testCases);
+
 
         // Map tags
         Set<Tag> tags = problemRequest.tagNames().stream()
@@ -62,8 +68,14 @@ public class ProblemServiceImpl implements ProblemService {
         return problemMapper.fromEntityToResponse(problem);
     }
 
+    @Transactional
     @Override
     public ProblemResponse getProblem(long problemId) {
-        return null;
+
+        Problem problem = problemRepository.findProblemById(problemId).orElseThrow(
+                () -> new NotFoundException("Problem not found")
+        );
+
+        return problemMapper.fromEntityToResponse(problem);
     }
 }
