@@ -44,5 +44,8 @@ public record CreateProblemRequest (
 
         @JsonProperty("tag_names")
         @NotEmpty(message = "At least one tag is required")
-        List<String> tagNames
+        List<String> tagNames,
+
+        @NotBlank(message ="Author's name is required")
+        String author
 ) { }

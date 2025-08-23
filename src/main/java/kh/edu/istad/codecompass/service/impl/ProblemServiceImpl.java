@@ -45,8 +45,6 @@ public class ProblemServiceImpl implements ProblemService {
                 .map(tc -> problemMapper.toTestCase(tc, finalProblem))
                 .toList();
 
-        log.info("Test cases {}", testCases.toString());
-
         problem.setTestCases(testCases);
 
 
@@ -60,7 +58,7 @@ public class ProblemServiceImpl implements ProblemService {
 
         problem.setBestMemoryUsage(problemRequest.bestMemoryUsage());
         problem.setBestTimeExecution(problemRequest.bestTimeExecution());
-        problem.setIsLocked(false);
+        problem.setIsVerified(false);
         problem.setIsDeleted(false);
 
         problem = problemRepository.save(problem);
@@ -72,7 +70,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemResponse getProblem(long problemId) {
 
-        Problem problem = problemRepository.findProblemById(problemId).orElseThrow(
+        Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
                 () -> new NotFoundException("Problem not found")
         );
 

@@ -32,6 +32,8 @@ public record ProblemResponse(
         List<TestCaseResponse> testCases,  // ✅ use DTO, not entity
 
         @JsonProperty("tag_names")
-        List<String> tags                  // ✅ list of tag names
+        List<String> tags,                  // ✅ list of tag names
+
+        String author
 ) { }
 

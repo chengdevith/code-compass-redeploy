@@ -27,6 +27,9 @@ public class Package {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(nullable = false)
+    private Boolean isVerified;
+
     @ManyToMany
     private Set<Problem> problems = new HashSet<>();
 }

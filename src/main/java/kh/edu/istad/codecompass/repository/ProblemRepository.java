@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
     boolean existsProblemByTitle(String title);
 
-    Optional<Problem> findProblemById(Long id);
+    Optional<Problem> findProblemByIdAndIsVerifiedTrue(Long id);
 }

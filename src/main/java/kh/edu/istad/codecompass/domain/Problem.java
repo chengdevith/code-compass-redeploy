@@ -49,10 +49,13 @@ public class Problem {
     private LocalDateTime updateAt;
 
     @Column(nullable = false)
-    private Boolean isLocked;
+    private Boolean isVerified;
 
     @Column(nullable = false)
     private Boolean isDeleted;
+
+    @Column(nullable = false, length = 100)
+    private String author;
 
     @ManyToMany(mappedBy = "problems")
     private Set<Package> packages = new HashSet<>();

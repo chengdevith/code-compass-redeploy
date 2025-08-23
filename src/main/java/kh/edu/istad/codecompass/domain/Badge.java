@@ -33,6 +33,9 @@ public class Badge {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(nullable = false)
+    private Boolean isVerified;
+
     @ManyToMany(mappedBy = "badges")
     private List<User> user = new ArrayList<>();
 

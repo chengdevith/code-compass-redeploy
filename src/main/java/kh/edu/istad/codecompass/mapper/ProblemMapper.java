@@ -20,7 +20,7 @@ public interface ProblemMapper {
     @Mapping(target = "tags", ignore = true) // handled manually in service
     @Mapping(target = "createAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updateAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "isLocked", constant = "false")
+    @Mapping(target = "isVerified", constant = "false")
     @Mapping(target = "isDeleted", constant = "false")
     @Mapping(target = "packages", ignore = true)
     @Mapping(target = "userProblems", ignore = true)
