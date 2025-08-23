@@ -50,11 +50,11 @@ public class Judge0ServiceImpl implements Judge0Service {
     }
 
     @Override
-    public SubmissionResult getSubmissionByToken(String token) {
+    public Judge0SubmissionResponse getSubmissionByToken(String token) {
         return judge0WebClient.get()
                 .uri("/submissions/{token}", token)
                 .retrieve()
-                .bodyToMono(SubmissionResult.class)
+                .bodyToMono(Judge0SubmissionResponse.class)
                 .block();
     }
 
@@ -88,7 +88,7 @@ public class Judge0ServiceImpl implements Judge0Service {
         return requests;
     }
 
-    private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
+        private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
         try {
             log.info("Sending batch request to Judge0 with {} submissions", request.submissions().size());
 

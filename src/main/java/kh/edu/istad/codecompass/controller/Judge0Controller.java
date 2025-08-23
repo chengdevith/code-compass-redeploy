@@ -1,10 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
 import jakarta.validation.Valid;
-import kh.edu.istad.codecompass.dto.jugde0.BatchSubmissionRequest;
-import kh.edu.istad.codecompass.dto.jugde0.CreateSubmissionRequest;
-import kh.edu.istad.codecompass.dto.jugde0.Judge0BatchResponse;
-import kh.edu.istad.codecompass.dto.jugde0.SubmissionResult;
+import kh.edu.istad.codecompass.dto.jugde0.*;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +24,7 @@ public class Judge0Controller {
     }
 
     @GetMapping("/{token}")
-    public SubmissionResult getSubmission(@PathVariable String token) {
+    public Judge0SubmissionResponse getSubmission(@PathVariable String token) {
         return judge0Service.getSubmissionByToken(token);
     }
 

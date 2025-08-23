@@ -18,7 +18,7 @@ public interface Judge0Service {
      * @return A {@link SubmissionResult} object with the execution status, output, and performance metrics (e.g., time, memory).
      * @author Panharoth
      */
-    SubmissionResult getSubmissionByToken(String token);
+    Judge0SubmissionResponse getSubmissionByToken(String token);
 
     //    batch submission
 

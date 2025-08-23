@@ -19,20 +19,9 @@ public interface Judge0Mapper {
     @Mapping(target = "updatedAt", ignore = true)
     Submission fromJudge0ResponseToEntity(Judge0SubmissionResponse response);
 
-
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "languageId", source = "languageId") // Map from parameter
-    @Mapping(target = "status", source = "response.status.description")
-    @Mapping(target = "statusId", source = "response.status.id")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Submission fromJudge0ResponseToEntity(Judge0SubmissionResponse response, String languageId);
-
     @Mapping(target = "memory", source = "memory", qualifiedByName = "mapMemory")
     @Mapping(target = "status", expression = "java(new SubmissionResult.Status(submission.getStatusId(), submission.getStatus()))")
     SubmissionResult fromEntityToResult(Submission submission);
-
-//    CreateSubmissionRequest fromCreateSubmissionRequestToJudgeResponse(Judge0SubmissionResponse judge0SubmissionResponse);
 
     @Named("mapMemory")
     default String mapMemory(Integer memory) {
