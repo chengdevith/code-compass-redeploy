@@ -1,8 +1,6 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.domain.TestCase;
@@ -15,7 +13,9 @@ import kh.edu.istad.codecompass.repository.TagRepository;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
@@ -34,7 +34,7 @@ public class ProblemServiceImpl implements ProblemService {
     public ProblemResponse createProblem(CreateProblemRequest problemRequest) {
 
         if (problemRepository.existsProblemByTitle(problemRequest.title()))
-            throw new BadRequestException("Problem already exists");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem already exists");
 
         Problem problem = problemMapper.fromRequestToEntity(problemRequest);
 
@@ -71,7 +71,7 @@ public class ProblemServiceImpl implements ProblemService {
     public ProblemResponse getProblem(long problemId) {
 
         Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
-                () -> new NotFoundException("Problem not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
         );
 
         return problemMapper.fromEntityToResponse(problem);

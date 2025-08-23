@@ -33,8 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Validate password
         if (!registerRequest.password().equals(registerRequest.confirmPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Passwords don't match");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match");
         }
 
         log.info("Register request: {}", registerRequest);

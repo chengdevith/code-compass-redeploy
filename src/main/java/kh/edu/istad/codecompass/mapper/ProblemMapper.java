@@ -39,7 +39,6 @@ public interface ProblemMapper {
     ProblemResponse fromEntityToResponse(Problem entity);
 
     // custom helpers
-
     default TestCase toTestCase(TestCaseRequest request, Problem problem) {
         TestCase tc = new TestCase();
         tc.setInput(request.input());
