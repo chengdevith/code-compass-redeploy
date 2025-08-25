@@ -11,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/code-compass/problems")
@@ -37,6 +39,21 @@ public class ProblemController {
     ) {
         problemService.verifyProblem(problemId, verified);
         return ResponseEntity.ok("The problem has been verified successfully");
+    }
+
+    @GetMapping("/unverified")
+    public List<ProblemResponse> getUnverifiedProblems() {
+        return problemService.getUnverifiedProblems();
+    }
+
+    @GetMapping("/all")
+    public List<ProblemResponse> getAllProblems() {
+        return problemService.getProblems();
+    }
+
+    @GetMapping("/verified")
+    public List<ProblemResponse> getVerifiedProblems() {
+        return problemService.getVerifiedProblems();
     }
 
 }

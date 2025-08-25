@@ -103,8 +103,34 @@ public class ProblemServiceImpl implements ProblemService {
         return problemMapper.fromEntityToResponse(problem);
     }
 
-    @Override
     @Transactional
+    @Override
+    public List<ProblemResponse> getProblems() {
+        return problemRepository
+                .findAll()
+                .stream().map(problemMapper::fromEntityToResponse).toList();
+    }
+
+    @Transactional
+    @Override
+    public List<ProblemResponse> getUnverifiedProblems() {
+        return problemRepository.findProblemsByIsVerifiedFalse()
+                .stream()
+                .map(problemMapper::fromEntityToResponse)
+                .toList();
+    }
+
+    @Transactional
+    @Override
+    public List<ProblemResponse> getVerifiedProblems() {
+        return problemRepository.findProblemsByIsVerifiedTrue()
+                .stream()
+                .map(problemMapper::fromEntityToResponse)
+                .toList();
+    }
+
+    @Transactional
+    @Override
     public void verifyProblem(long problemId, boolean isVerified) {
 
         Problem problem  = problemRepository.findProblemByIdAndIsVerifiedFalse(problemId).orElseThrow(
