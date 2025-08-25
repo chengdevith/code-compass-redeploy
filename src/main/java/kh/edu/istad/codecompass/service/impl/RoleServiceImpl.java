@@ -26,7 +26,7 @@ public class RoleServiceImpl implements RoleService {
                 .users().get(assignRoleRequest.userId());
 
         RoleRepresentation role = keycloak.realm(realmName)
-                .roles().get(assignRoleRequest.roleName()).toRepresentation();
+                .roles().get(assignRoleRequest.roleName().name()).toRepresentation();
 
         userResource.roles().realmLevel().add(List.of(role));
     }

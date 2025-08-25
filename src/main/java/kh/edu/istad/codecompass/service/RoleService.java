@@ -1,5 +1,7 @@
 package kh.edu.istad.codecompass.service;
 
+import kh.edu.istad.codecompass.dto.AssignRoleRequest;
+
 public interface RoleService {
 
     /**
@@ -8,11 +10,8 @@ public interface RoleService {
      * This method is used to grant a user administrative privileges or
      * other permissions by assigning them a named role.
      *
-     * @param userId The unique identifier of the user to whom the role will be assigned.
-     * This ID can be an email, username, or a system-generated ID.
-     * @param roleName The name of the role to be assigned.
-     * The name is case-sensitive and must match a predefined role.
+     * @param assignRoleRequest An {@link AssignRoleRequest} object containing the user's identifier and the name of the role to be assigned.
      * @author Panharoth
      */
-    void assignRole(String userId, String roleName);
+    void assignRole(AssignRoleRequest assignRoleRequest);
 }

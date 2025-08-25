@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,6 +29,7 @@ public class KeyCloakSecurityConfig {
                 request
                         .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
                         .requestMatchers("/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"api/v1/code-compass/problems").permitAll()
                         .anyRequest().authenticated()
         );
 

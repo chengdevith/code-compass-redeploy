@@ -1,7 +1,6 @@
 package kh.edu.istad.codecompass.dto.problem;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import kh.edu.istad.codecompass.dto.HintRequest;
 import kh.edu.istad.codecompass.dto.HintResponse;
 import kh.edu.istad.codecompass.dto.TestCaseResponse;
 import kh.edu.istad.codecompass.enums.Difficulty;

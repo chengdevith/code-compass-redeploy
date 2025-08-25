@@ -43,6 +43,7 @@ public class ProblemServiceImpl implements ProblemService {
         Problem problem = problemMapper.fromRequestToEntity(problemRequest);
         problem.setAuthor(author);
 
+        Problem finalProblem1 = problem;
         List<Hint> hints = problemRequest.hints() == null ?
                 List.of()
                 :
@@ -52,6 +53,7 @@ public class ProblemServiceImpl implements ProblemService {
                     Hint hint = new Hint();
                     hint.setDescription(hintRequest.hint());
                     hint.setIsLocked(hintRequest.isLocked());
+                    hint.setProblem(finalProblem1);
                     return hint;
                 }).toList();
 

@@ -2,8 +2,10 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.ws.rs.core.Response;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
 import kh.edu.istad.codecompass.service.RoleService;
@@ -87,7 +89,13 @@ public class AuthServiceImpl implements AuthService {
 
                 assert ur != null;
 
-                roleService.assignRole(ur.getId(), "SUBSCRIBER");
+                AssignRoleRequest assignRoleRequest = AssignRoleRequest
+                        .builder()
+                        .userId(ur.getId())
+                        .roleName(Role.SUBSCRIBER)
+                        .build();
+
+                roleService.assignRole(assignRoleRequest);
 
                 this.verifyEmail(ur.getId());
 

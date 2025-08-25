@@ -1,7 +1,14 @@
 package kh.edu.istad.codecompass.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import kh.edu.istad.codecompass.enums.Role;
 import lombok.Builder;
 
 @Builder
-public record AssignRoleRequest(String userId, String roleName) {
-}
+public record AssignRoleRequest(
+    @NotBlank(message = "User ID is required")
+    String userId,
+
+    @NotBlank(message = "User role is required")
+    Role roleName
+) {}
