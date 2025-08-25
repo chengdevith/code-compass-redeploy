@@ -24,10 +24,14 @@ repositories {
 }
 
 dependencies {
+
+    // --- Keycloak Admin client ---
+    implementation 'org.keycloak:keycloak-admin-client:26.0.6'
+
     // --- Spring Boot Starters ---
     implementation 'org.springframework.boot:spring-boot-starter-web'               // For building REST APIs
-//    implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security base
-//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // For OAuth2 JWT auth
+    implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security base
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // For OAuth2 JWT auth
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA & Hibernate for PostgreSQL
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
 
@@ -43,7 +47,7 @@ dependencies {
 
     // --- Testing ---
     testImplementation 'org.springframework.boot:spring-boot-starter-test'  // JUnit, Mockito, etc.
-//    testImplementation 'org.springframework.security:spring-security-test'  // Security test helpers
+    testImplementation 'org.springframework.security:spring-security-test'  // Security test helpers
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'            // JUnit platform launcher
 }
 
