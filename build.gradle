@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'          // Spring Security base
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // For OAuth2 JWT auth
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // JPA & Hibernate for PostgreSQL
-    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
+//    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
 
     // --- Database Drivers ---
     runtimeOnly 'org.postgresql:postgresql'  // PostgreSQL JDBC driver
