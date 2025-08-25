@@ -5,6 +5,8 @@ import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,8 +17,9 @@ public class ProblemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProblemResponse createProblem(@RequestBody CreateProblemRequest problemRequest) {
-        return problemService.createProblem(problemRequest);
+    public ProblemResponse createProblem(@RequestBody CreateProblemRequest problemRequest, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("username");
+        return problemService.createProblem(problemRequest, username);
     }
 
     @GetMapping("/{problemId}")

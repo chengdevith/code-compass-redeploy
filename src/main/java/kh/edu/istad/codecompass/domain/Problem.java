@@ -54,8 +54,9 @@ public class Problem {
     @Column(nullable = false)
     private Boolean isDeleted;
 
-    @Column(nullable = false, length = 100)
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
     @ManyToMany(mappedBy = "problems")
     private Set<Package> packages = new HashSet<>();
@@ -82,4 +83,7 @@ public class Problem {
 
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Report> reports = new ArrayList<>();
+
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Hint> hints = new ArrayList<>();
 }

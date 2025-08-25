@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.dto.problem;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import kh.edu.istad.codecompass.dto.HintRequest;
 import kh.edu.istad.codecompass.dto.TestCaseRequest;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
@@ -46,6 +47,5 @@ public record CreateProblemRequest (
         @NotEmpty(message = "At least one tag is required")
         List<String> tagNames,
 
-        @NotBlank(message ="Author's name is required")
-        String author
+        List<HintRequest> hints
 ) { }

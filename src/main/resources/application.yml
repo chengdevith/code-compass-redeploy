@@ -10,7 +10,7 @@ spring:
     password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate.hibernate.format_sql: true
@@ -18,7 +18,7 @@ spring:
     oauth2:
       resource server:
         jwt:
-          issuer-uri: http://localhost:8080/realms/code-compass-api
+          issuer-uri: https://keyy.devith.it.com/realms/code-compass
   threads:
     virtual:
       enabled: true
@@ -39,10 +39,10 @@ judge0:
   auth-token: ""
 
 keycloak-admin:
-  server-url: http://localhost:8080
-  realm: code-compass-api
-  client-id: admin-cli
-  client-secret: Fw12zDEkORHYLrKgUpufo7cgrjepWLQa
+  server-url: https://keyy.devith.it.com
+  realm: code-compass
+  client-id: nextjs
+  client-secret: rHTSRHjbS7WwfOvfze1aO6hrgjsa7r2i
 
 logging:
   level:

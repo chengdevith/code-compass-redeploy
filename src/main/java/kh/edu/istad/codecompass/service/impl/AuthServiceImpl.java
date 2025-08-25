@@ -1,8 +1,11 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.ws.rs.core.Response;
+import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.enums.Gender;
+import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
 import kh.edu.istad.codecompass.service.RoleService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +19,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +30,10 @@ import java.util.List;
 public class AuthServiceImpl implements AuthService {
     private final Keycloak keycloak;
     private final RoleService roleService;
+    private final UserRepository userRepository;
 
     @Value("${keycloak-admin.realm}")
-    private String realName;
+    private String realmName;
 
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
@@ -46,6 +53,11 @@ public class AuthServiceImpl implements AuthService {
         userRepresentation.setEnabled(true);
         userRepresentation.setEmailVerified(false);
 
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("gender", List.of(registerRequest.gender().name()));
+
+        userRepresentation.setAttributes(attributes);
+
         log.info("userRepresentation: {}", userRepresentation);
 
         // Prepare credential
@@ -56,13 +68,15 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("credentials: {}", userRepresentation.getCredentials());
 
-        try (Response response = keycloak.realm(realName)
+        try (Response response = keycloak.realm(realmName)
                 .users()
                 .create(userRepresentation)) {
+
             log.info("createUserResponse: {}", response.getStatus());
+
             if (response.getStatus() == HttpStatus.CREATED.value()) {
 
-                UserRepresentation ur = keycloak.realm(realName)
+                UserRepresentation ur = keycloak.realm(realmName)
                         .users()
                         .search(userRepresentation.getUsername(), true)
                         .stream()
@@ -74,6 +88,13 @@ public class AuthServiceImpl implements AuthService {
                 roleService.assignRole(ur.getId(), "SUBSCRIBER");
 
                 this.verifyEmail(ur.getId());
+
+                User user = new User();
+                user.setUsername(ur.getUsername());
+                user.setEmail(ur.getEmail());
+                user.setGender(registerRequest.gender());
+
+                userRepository.save(user);
 
             }
             return RegisterResponse.builder()
@@ -87,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String userId) {
-        UserResource userResource = keycloak.realm(realName)
+        UserResource userResource = keycloak.realm(realmName)
                 .users().get(userId);
         userResource.sendVerifyEmail();
     }

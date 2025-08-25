@@ -1,15 +1,14 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
-import kh.edu.istad.codecompass.domain.Problem;
-import kh.edu.istad.codecompass.domain.Tag;
-import kh.edu.istad.codecompass.domain.TestCase;
+import kh.edu.istad.codecompass.domain.*;
 import kh.edu.istad.codecompass.dto.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
 import kh.edu.istad.codecompass.repository.TagRepository;
+import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +26,37 @@ import java.util.stream.Collectors;
 public class ProblemServiceImpl implements ProblemService {
 
     private final ProblemRepository problemRepository;
+    private final UserRepository userRepository;
     private final ProblemMapper problemMapper;
     private final TagRepository tagRepository;
 
     @Override
-    public ProblemResponse createProblem(CreateProblemRequest problemRequest) {
+    public ProblemResponse createProblem(CreateProblemRequest problemRequest, String username) {
 
         if (problemRepository.existsProblemByTitle(problemRequest.title()))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem already exists");
 
+        User author = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+        );
+
         Problem problem = problemMapper.fromRequestToEntity(problemRequest);
+        problem.setAuthor(author);
+
+        List<Hint> hints = problemRequest.hints() == null ?
+                List.of()
+                :
+                problemRequest.hints()
+                .stream()
+                .map(hintRequest -> {
+                    Hint hint = new Hint();
+                    hint.setDescription(hintRequest.hint());
+                    hint.setIsLocked(hintRequest.isLocked());
+                    return hint;
+                }).toList();
+
+        problem.setHints(hints);
+
 
         // Map test cases
         Problem finalProblem = problem;
