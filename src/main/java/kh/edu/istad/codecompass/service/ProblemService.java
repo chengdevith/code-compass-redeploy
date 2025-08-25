@@ -25,4 +25,10 @@ public interface ProblemService {
      * @return A {@link ProblemResponse} object containing the details of the requested problem.
      */
     ProblemResponse getProblem(long problemId);
+
+    /**
+     *
+     * @param problemId The unique identifier of the problem to update.
+     */
+    void verifyProblem(long problemId, boolean isVerified);
 }

@@ -59,9 +59,6 @@ public class ProblemServiceImpl implements ProblemService {
 
         problem.setHints(hints);
 
-        log.info(problemRequest.testCases().toString());
-
-
         // Map test cases
         Problem finalProblem = problem;
         List<TestCase> testCases = (problemRequest.testCases() == null ? List.<TestCaseRequest>of() : problemRequest.testCases())
@@ -76,8 +73,6 @@ public class ProblemServiceImpl implements ProblemService {
                 .toList();
 
         problem.setTestCases(testCases);
-        log.info(testCases.toString());
-
 
         // Map tags
         Set<Tag> tags = problemRequest.tagNames().stream()
@@ -107,4 +102,18 @@ public class ProblemServiceImpl implements ProblemService {
 
         return problemMapper.fromEntityToResponse(problem);
     }
+
+    @Override
+    @Transactional
+    public void verifyProblem(long problemId, boolean isVerified) {
+
+        Problem problem  = problemRepository.findProblemByIdAndIsVerifiedFalse(problemId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+        problem.setIsVerified(isVerified);
+
+        problemRepository.save(problem);
+    }
+
+
 }
