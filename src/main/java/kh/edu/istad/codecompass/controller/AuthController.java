@@ -7,15 +7,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/code-compass/auth")
 public class AuthController {
+
     private final AuthService authService;
 
-    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/register")
     public RegisterResponse register(@RequestBody RegisterRequest registerRequest) {
         return authService.register(registerRequest);
     }
+
 }

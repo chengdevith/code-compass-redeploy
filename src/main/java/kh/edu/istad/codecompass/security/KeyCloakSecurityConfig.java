@@ -25,7 +25,10 @@ public class KeyCloakSecurityConfig {
 
         // Set all request must be authenticated
         http.authorizeHttpRequests( request ->
-                request.anyRequest().permitAll()
+                request
+                        .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
+                        .requestMatchers("/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
+                        .anyRequest().authenticated()
         );
 
         // Disable default form login
@@ -33,9 +36,6 @@ public class KeyCloakSecurityConfig {
 
         // Disable CSRF token
         http.csrf(AbstractHttpConfigurer::disable);
-
-//        Disable CrossOrigin
-        http.cors(AbstractHttpConfigurer::disable);
 
         // Set security mechanism
         http.oauth2ResourceServer(
