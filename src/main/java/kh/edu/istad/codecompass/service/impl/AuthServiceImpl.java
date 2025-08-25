@@ -39,9 +39,13 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         // Validate password
-        if (!registerRequest.password().equals(registerRequest.confirmPassword())) {
+        if (!registerRequest.password().equals(registerRequest.confirmPassword()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match");
-        }
+
+
+        if (userRepository.existsByUsername(registerRequest.username()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+
 
         log.info("Register request: {}", registerRequest);
 
@@ -93,6 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 user.setUsername(ur.getUsername());
                 user.setEmail(ur.getEmail());
                 user.setGender(registerRequest.gender());
+                user.setIsDeleted(false);
 
                 userRepository.save(user);
 

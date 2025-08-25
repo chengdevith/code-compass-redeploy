@@ -57,15 +57,24 @@ public class ProblemServiceImpl implements ProblemService {
 
         problem.setHints(hints);
 
+        log.info(problemRequest.testCases().toString());
+
 
         // Map test cases
         Problem finalProblem = problem;
         List<TestCase> testCases = (problemRequest.testCases() == null ? List.<TestCaseRequest>of() : problemRequest.testCases())
                 .stream()
-                .map(tc -> problemMapper.toTestCase(tc, finalProblem))
+                .map(tc -> {
+                    TestCase testCase = new TestCase();
+                    testCase.setInput(tc.input());
+                    testCase.setExpectedOutput(tc.expectedOutput());
+                    testCase.setProblem(finalProblem);
+                    return testCase;
+                })
                 .toList();
 
         problem.setTestCases(testCases);
+        log.info(testCases.toString());
 
 
         // Map tags

@@ -21,7 +21,7 @@ public record RegisterRequest(
         @NotBlank
         String password,
         @NotBlank
-        @JsonProperty("confirm_password")
+        @JsonProperty("confirmed_password")
         String confirmPassword,
         @Email
         String email

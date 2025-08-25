@@ -17,10 +17,12 @@ public class TestCase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String input;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String expectedOutput;
 
     @ManyToOne
