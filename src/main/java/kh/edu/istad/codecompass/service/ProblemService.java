@@ -4,6 +4,15 @@ import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
 
 public interface ProblemService {
-    ProblemResponse createProblem(CreateProblemRequest problemRequest, String username);
+
+    /**
+     *
+     * @param problemRequest
+     * @param author
+     * @return {@link ProblemResponse}
+     */
+    ProblemResponse createProblem(CreateProblemRequest problemRequest, String author);
+
+
     ProblemResponse getProblem(long problemId);
 }

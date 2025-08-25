@@ -19,7 +19,7 @@ import java.util.Set;
 public interface ProblemMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "tags", ignore = true) // handled manually in service
+    @Mapping(target = "tags", ignore = true)
     @Mapping(target = "createAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updateAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "isVerified", constant = "false")
@@ -40,13 +40,6 @@ public interface ProblemMapper {
     ProblemResponse fromEntityToResponse(Problem entity);
 
     // custom helpers
-    default TestCase toTestCase(TestCaseRequest request, Problem problem) {
-        TestCase tc = new TestCase();
-        tc.setInput(request.input());
-        tc.setExpectedOutput(request.expectedOutput());
-        tc.setProblem(problem);
-        return tc;
-    }
 
     default List<TestCaseResponse> mapTestCases(List<TestCase> testCases) {
         if (testCases == null) return List.of();

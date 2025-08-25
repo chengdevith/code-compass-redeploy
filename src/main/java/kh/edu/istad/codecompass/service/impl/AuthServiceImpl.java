@@ -98,6 +98,9 @@ public class AuthServiceImpl implements AuthService {
                 user.setEmail(ur.getEmail());
                 user.setGender(registerRequest.gender());
                 user.setIsDeleted(false);
+                user.setCoin(0);
+                user.setStar(0);
+                user.setTotal_problems_solved(0);
 
                 userRepository.save(user);
 
