@@ -52,15 +52,6 @@ dependencies {
 
      implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
 
-//    // Force patched version of spring-webmvc
-//    implementation("org.springframework:spring-webmvc:6.2.10")
-//
-//    // Override Tomcat version to patched release
-//    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.44'
-//
-//    // Override vulnerable commons-io
-//    implementation 'commons-io:commons-io:2.14.0'
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
