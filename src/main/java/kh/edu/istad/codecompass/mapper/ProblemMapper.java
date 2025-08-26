@@ -4,12 +4,12 @@ import kh.edu.istad.codecompass.domain.Hint;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.domain.TestCase;
-import kh.edu.istad.codecompass.dto.hint.HintResponse;
-import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.hint.response.HintResponse;
+import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
-import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import org.mapstruct.*;
 
 import java.util.List;

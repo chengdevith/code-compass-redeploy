@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.problem;
+package kh.edu.istad.codecompass.dto.problem.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
@@ -22,7 +22,7 @@ public record UpdateProblemRequest(
 
         Star star,
 
-        @Max(60)
+        @Max(40)
         @Min(20)
         Integer coin,
 

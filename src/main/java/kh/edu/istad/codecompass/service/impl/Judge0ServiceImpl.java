@@ -1,28 +1,41 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
+import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Submission;
+import kh.edu.istad.codecompass.domain.SubmissionHistories;
+import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.jugde0.request.BatchSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.CreateSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.Judge0BatchRequest;
 import kh.edu.istad.codecompass.dto.jugde0.response.Judge0BatchResponse;
 import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
 import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
+import kh.edu.istad.codecompass.enums.Star;
 import kh.edu.istad.codecompass.mapper.Judge0Mapper;
+import kh.edu.istad.codecompass.repository.ProblemRepository;
+import kh.edu.istad.codecompass.repository.SubmissionHistoryRepository;
+import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @AllArgsConstructor
@@ -31,7 +44,9 @@ public class Judge0ServiceImpl implements Judge0Service {
 
     private final WebClient judge0WebClient;
     private final Judge0Mapper judge0Mapper;
-//    private final SubmissionRepository submissionRepository;
+    private final SubmissionHistoryRepository submissionHistoryRepository;
+    private final UserRepository userRepository;
+    private final ProblemRepository problemRepository;
 
     @Override
     public SubmissionResult createSubmission(CreateSubmissionRequest request) {
@@ -51,6 +66,7 @@ public class Judge0ServiceImpl implements Judge0Service {
 
         Submission submission = judge0Mapper.fromJudge0ResponseToEntity(judge0SubmissionResponse);
         submission.setLanguageId(request.languageId());
+
         return judge0Mapper.fromEntityToResult(submission);
     }
 
@@ -63,17 +79,144 @@ public class Judge0ServiceImpl implements Judge0Service {
                 .block();
     }
 
+    @Transactional
     @Override
-    public Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest) {
-        log.info("Creating batch submissions for language: {}", batchRequest.languageId());
+    public Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest, String username, Long problemId) {
 
         List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
-        log.info("Creating {} submissions", submissions.size());
 
+        Judge0BatchRequest request = new Judge0BatchRequest(submissions);
+
+        Judge0BatchResponse responses = sendBatchRequestToJudge0(request, batchRequest.languageId());
+
+        User user = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+        );
+
+        Problem problem = problemRepository.findById(problemId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
+        );
+
+        boolean isOverlimited = submissionHistoryRepository.countSubmissionHistoriesByUser_Username(username) > 10;
+
+        if (isOverlimited)
+            submissionHistoryRepository.findSubmissionHistoriesByUser_Username(username).removeFirst();
+
+        SubmissionHistories submissionHistories = new SubmissionHistories();
+
+        AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger userMemoryUsage = new AtomicInteger(0);
+        AtomicReference<Double> userExecutionTime = new AtomicReference<>(0.0);
+        int earnedStars = 0;
+
+        responses.submissions().forEach(submission -> {
+            if (submission.status().description().equals("Accepted")) {
+                counter.incrementAndGet();
+                userMemoryUsage.updateAndGet(u -> u + submission.memory());
+                userExecutionTime.updateAndGet(t -> t + Double.parseDouble(submission.time()));
+            }
+        });
+
+        Double peekTimeExecution = problem.getBestTimeExecution();
+        Integer peekMemoryUsage = problem.getBestMemoryUsage();
+
+        if (counter.get() == submissions.size()) {
+            earnedStars++; // Base star for solving
+            double averageUserMemoryUsage = (double) userMemoryUsage.get() / counter.get();
+            double averageUserExecutionTime = userExecutionTime.get() / counter.get();
+
+            if (averageUserExecutionTime <= peekTimeExecution)
+                earnedStars++;
+
+            if (averageUserMemoryUsage <= peekMemoryUsage)
+                earnedStars++;
+
+            earnedStars = Math.min(earnedStars, 3);
+
+            int baseCoins = problem.getCoin();
+            int earnedCoins = baseCoins / 4;   // Base reward for solving
+
+            // Time efficiency reward
+            if (averageUserExecutionTime <= peekTimeExecution * 1.5) { // within 50% of best
+                earnedCoins += baseCoins / 4;
+            } else if (averageUserExecutionTime <= peekTimeExecution * 2) { // within 100% slower
+                earnedCoins += baseCoins / 6;
+            }
+
+            // Memory efficiency reward
+            if (averageUserMemoryUsage <= peekMemoryUsage * 1.5) {
+                earnedCoins += baseCoins / 4;
+            } else if (averageUserMemoryUsage <= peekMemoryUsage * 2) {
+                earnedCoins += baseCoins / 6;
+            }
+
+            user.setCoin(earnedCoins);
+            user.setStar(earnedStars);
+            user.updateLevel();
+
+            if (! submissionHistoryRepository.existsByStatusAndUser_Username("Accepted" ,username))
+                user.setTotal_problems_solved(user.getTotal_problems_solved() + 1);
+
+            userRepository.save(user);
+
+            List<User> users = userRepository.findAllByOrderByStarDesc();
+            long rank = 1;
+            Integer prevStar = -1;
+            long sameRank = 1;
+
+            for (User u : users) {
+                if (!u.getStar().equals(prevStar)) {
+                    rank = sameRank;
+                    prevStar = u.getStar();
+                }
+                u.setRank(rank);
+                sameRank++;
+            }
+            userRepository.saveAll(users);
+
+            submissionHistories.setCoin(earnedCoins);
+            submissionHistories.setProblem(problem);
+            submissionHistories.setUser(user);
+            submissionHistories.setCode(batchRequest.sourceCode());
+            submissionHistories.setStatus(responses.submissions().getFirst().status().description());
+            submissionHistories.setLanguageId(responses.submissions().getFirst().languageId());
+            submissionHistories.setSubmittedAt(LocalDateTime.now());
+
+            Star star = switch (earnedStars) {
+                case 1 -> Star.ONE;
+                case 2 -> Star.TWO;
+                case 3 -> Star.THREE;
+                default -> null;
+            };
+            submissionHistories.setStar(star);
+
+            submissionHistoryRepository.save(submissionHistories);
+
+        } else {
+            submissionHistories.setProblem(problem);
+            submissionHistories.setUser(user);
+            submissionHistories.setCode(batchRequest.sourceCode());
+            submissionHistories.setStatus(responses.submissions().getFirst().status().description());
+            submissionHistories.setLanguageId(responses.submissions().getFirst().languageId());
+            submissionHistories.setSubmittedAt(LocalDateTime.now());
+
+            submissionHistoryRepository.save(submissionHistories);
+
+        }
+
+        return responses;
+    }
+
+    @Transactional
+    @Override
+    public Judge0BatchResponse runSubmissionBatch(BatchSubmissionRequest batchRequest) {
+
+        List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
         Judge0BatchRequest request = new Judge0BatchRequest(submissions);
 
         return sendBatchRequestToJudge0(request, batchRequest.languageId());
     }
+
 
     private List<CreateSubmissionRequest> prepareSubmissionRequests(BatchSubmissionRequest batchRequest) {
         List<CreateSubmissionRequest> requests = new ArrayList<>();
@@ -85,7 +228,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .expectedOutput(i < batchRequest.expectedOutputs().size()
                             ? batchRequest.expectedOutputs().get(i)
                             : null)
-                    .cpuTimeLimit(2.0)
+                    .cpuTimeLimit(3.0)
                     .wallTimeLimit(5.0)
                     .memoryLimit(128000)
                     .build());
@@ -126,18 +269,6 @@ public class Judge0ServiceImpl implements Judge0Service {
 
             log.info("Received {} responses from Judge0", responses.length);
 
-            // Log first response for debugging
-            Judge0SubmissionResponse firstResponse = responses[0];
-            log.info("First response - Token: {}, Status: {}, Stdout: {}, Language: {}",
-                    firstResponse.token(),
-                    firstResponse.status(),
-                    firstResponse.stdout(),
-                    firstResponse.languageId());
-
-//            for (int i = 0; i < responses.length; i++) {
-//                responses[i].languageId()
-//            }
-
             // Check if we got actual results or just tokens
             boolean hasResults = Arrays.stream(responses)
                     .anyMatch(r -> r.status() != null || r.stdout() != null || r.stderr() != null);
@@ -155,7 +286,8 @@ public class Judge0ServiceImpl implements Judge0Service {
         }
     }
 
-    private Judge0BatchResponse pollForResults(Judge0SubmissionResponse[] tokenResponses, String languageId) {
+    @Transactional
+    protected Judge0BatchResponse pollForResults(Judge0SubmissionResponse[] tokenResponses, String languageId) {
         List<Judge0SubmissionResponse> results = new ArrayList<>();
 
         for (Judge0SubmissionResponse tokenResponse : tokenResponses) {
@@ -182,27 +314,40 @@ public class Judge0ServiceImpl implements Judge0Service {
         return new Judge0BatchResponse(results);
     }
 
-    private Judge0SubmissionResponse pollSingleSubmission(String token) {
-        int maxAttempts = 15;
+    @Transactional
+    protected Judge0SubmissionResponse pollSingleSubmission(String token) {
+        int maxAttempts = 20; // Reduced from 30
         int attempt = 0;
 
         log.info("Polling submission with token: {}", token);
 
         while (attempt < maxAttempts) {
             try {
+                // Add more detailed logging for the request
+                String url = "/submissions/" + token;
+                log.debug("Polling attempt {} for token {} using URL: {}", attempt + 1, token, url);
+
                 Judge0SubmissionResponse response = judge0WebClient.get()
                         .uri("/submissions/{token}", token)
                         .retrieve()
                         .onStatus(HttpStatusCode::isError, clientResponse -> {
-                            log.error("Error polling token {}: {}", token, clientResponse.statusCode());
-                            return Mono.error(new RuntimeException("Failed to poll submission"));
+                            log.error("Error polling token {}: {} - attempting to get error body",
+                                    token, clientResponse.statusCode());
+                            return clientResponse.bodyToMono(String.class)
+                                    .doOnNext(errorBody -> log.error("Error body for token {}: {}", token, errorBody))
+                                    .map(errorBody -> new RuntimeException(
+                                            MessageFormat.format("Failed to poll submission {0}: {1} - {2}",
+                                                    token, clientResponse.statusCode(), errorBody)));
                         })
                         .bodyToMono(Judge0SubmissionResponse.class)
-                        .timeout(Duration.ofSeconds(10))
+                        .timeout(Duration.ofSeconds(15))
                         .block();
 
                 if (response != null) {
-                    log.debug("Attempt {}: Token {}, Status: {}", attempt + 1, token, response.status());
+                    log.debug("Attempt {}: Token {}, Status: {} (ID: {})",
+                            attempt + 1, token,
+                            response.status() != null ? response.status().description() : "null",
+                            response.status() != null ? response.status().id() : "null");
 
                     if (response.status() != null && response.status().id() != null) {
                         // Status ID 1 = In Queue, 2 = Processing
@@ -211,23 +356,38 @@ public class Judge0ServiceImpl implements Judge0Service {
                                     token, response.status().id(), response.status().description());
                             return response;
                         }
+                    } else {
+                        log.warn("Received response with null status for token: {}", token);
                     }
+                } else {
+                    log.warn("Received null response for token: {}", token);
                 }
 
                 attempt++;
-                Thread.sleep(2000); // Wait for 2 seconds before next poll
+
+                // Exponential backoff: start with 1s, then 2s, 3s, max 5s
+                int sleepTime = Math.min(1000 + (attempt * 500), 5000);
+                log.debug("Waiting {}ms before next poll attempt for token: {}", sleepTime, token);
+                Thread.sleep(sleepTime);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.error("Polling interrupted for token: {}", token);
                 return createTimeoutResponse(token);
             } catch (Exception e) {
-                log.error("Error polling submission {}: {}", token, e.getMessage());
+                log.error("Error polling submission {} (attempt {}): {}", token, attempt + 1, e.getMessage());
+
+                // For debugging, log the full exception
+                if (log.isDebugEnabled()) {
+                    log.debug("Full exception for token " + token, e);
+                }
+
                 attempt++;
 
                 if (attempt < maxAttempts) {
                     try {
-                        Thread.sleep(1000);
+                        int sleepTime = Math.min(1000 + (attempt * 200), 3000);
+                        Thread.sleep(sleepTime);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         break;
@@ -236,7 +396,7 @@ public class Judge0ServiceImpl implements Judge0Service {
             }
         }
 
-        log.warn("Timeout polling submission: {}", token);
+        log.warn("Timeout polling submission after {} attempts: {}", maxAttempts, token);
         return createTimeoutResponse(token);
     }
 
@@ -268,12 +428,11 @@ public class Judge0ServiceImpl implements Judge0Service {
         );
     }
 
-    private Judge0BatchResponse mapResponses(Judge0SubmissionResponse[] responses, String languageId) {
+    @Transactional
+    protected Judge0BatchResponse mapResponses(Judge0SubmissionResponse[] responses, String languageId) {
         List<Judge0SubmissionResponse> mappedResponses = new ArrayList<>();
 
         for (Judge0SubmissionResponse resp : responses) {
-            //            String languageId = resp.languageId() == null ?  original.languageId() : resp.languageId();
-
             mappedResponses.add(new Judge0SubmissionResponse(
                     languageId,
                     resp.stdout(),

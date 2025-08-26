@@ -24,16 +24,34 @@ public interface Judge0Service {
      */
     Judge0SubmissionResponse getSubmissionByToken(String token);
 
-    //    batch submission
+    //===batch submission===
 
     /**
      * Submits a batch of code submission requests to the Judge0 service.
+     * <p>
      * This method is designed to handle multiple submissions simultaneously,
      * returning a single response that contains the results for each submission.
+     * It also records the submissions to the user's history for a specific problem.
      *
-     * @param batchRequest A {@link BatchSubmissionRequest} object containing a list of individual submission requests.
-     * @return A {@link Judge0BatchResponse} containing the results for all submissions in the batch.
+     * @param batchRequest A {@link BatchSubmissionRequest} object containing a list
+     * of individual submission requests (e.g., source code, language ID, etc.).
+     * @param username The unique identifier of the user making the submissions.
+     * This is used to link the submissions to a user's account for tracking history.
+     * @param problemId The unique ID of the problem to which these submissions belong.
+     * @return A {@link Judge0BatchResponse} containing the results for all
+     * submissions in the batch.
      * @author Panharoth
      */
-    Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest);
+    Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest, String username, Long problemId);
+
+    /**
+     * This method is specific to run the code without saving to user submission history.
+     * It is used for a "run and test" feature, where a user wants to check
+     * their code against test cases without making a formal submission.
+     *
+     * @param batchRequest A {@link BatchSubmissionRequest} object containing one or more submission requests to be executed.
+     * @return A {@link Judge0BatchResponse} containing the execution results for the provided batch of submissions.
+     * @author Panharoth
+     */
+    Judge0BatchResponse runSubmissionBatch(BatchSubmissionRequest batchRequest);
 }

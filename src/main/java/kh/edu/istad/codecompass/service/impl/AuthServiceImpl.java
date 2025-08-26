@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.enums.Level;
 import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
@@ -104,9 +105,11 @@ public class AuthServiceImpl implements AuthService {
                 user.setEmail(ur.getEmail());
                 user.setGender(registerRequest.gender());
                 user.setIsDeleted(false);
-                user.setCoin(0);
+                user.setCoin(20);
                 user.setStar(0);
                 user.setTotal_problems_solved(0);
+                user.setRank(userRepository.count() + 1);
+                user.updateLevel();
 
                 userRepository.save(user);
 

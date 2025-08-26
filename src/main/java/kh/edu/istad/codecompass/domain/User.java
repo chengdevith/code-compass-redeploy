@@ -42,7 +42,7 @@ public class User {
     private Level level;
     private Integer coin;
     private Integer star;
-    private Integer rank;
+    private Long rank;
     private Integer total_problems_solved;
 
     @Column(nullable = false)
@@ -74,4 +74,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserHint>  userHints = new ArrayList<>();
+
+    public void updateLevel() {
+        this.level = Level.fromStars(this.star);
+    }
 }

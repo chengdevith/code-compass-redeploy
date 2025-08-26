@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.dto.auth;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import kh.edu.istad.codecompass.enums.Gender;
 import lombok.Builder;
 
@@ -16,7 +17,7 @@ public record RegisterRequest(
         String lastName,
         @NotBlank
         String username,
-        @NotBlank
+        @NotNull
         Gender gender,
         @NotBlank
         String password,

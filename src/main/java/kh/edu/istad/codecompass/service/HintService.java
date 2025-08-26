@@ -11,6 +11,7 @@ public interface HintService {
      * @param id The unique identifier of the hint to be unlocked.
      * @param username The unique username of the user requesting to unlock the hint.
      * @return {@code true} if the hint was successfully unlocked; {@code false} if the user does not have enough coins or the hint is already unlocked.
+     * @author Panharoth
      */
     Boolean unlockHint(long id, String username);
 

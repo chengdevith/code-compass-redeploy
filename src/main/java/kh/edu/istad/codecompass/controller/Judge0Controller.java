@@ -10,6 +10,8 @@ import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,10 +34,25 @@ public class Judge0Controller {
         return judge0Service.getSubmissionByToken(token);
     }
 
-    @PostMapping("/batch")
+    @PostMapping("/batch/{problemId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Judge0BatchResponse executeBatch(@RequestBody @Valid BatchSubmissionRequest request) {
-        return judge0Service.createSubmissionBatch(request);
+    public Judge0BatchResponse executeBatch(
+            @RequestBody
+            @Valid
+            BatchSubmissionRequest request,
+
+            @PathVariable Long problemId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+
+        String username = jwt.getClaim("preferred_username");
+
+        return judge0Service.createSubmissionBatch(request, username, problemId);
+    }
+
+    @PostMapping("/run/batch")
+    public Judge0BatchResponse executeRun(@RequestBody @Valid BatchSubmissionRequest request) {
+        return judge0Service.runSubmissionBatch(request);
     }
 
 }

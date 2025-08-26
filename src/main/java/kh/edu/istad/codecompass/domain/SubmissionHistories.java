@@ -18,7 +18,8 @@ public class SubmissionHistories {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Lob
     private String code;
 
     @Column(nullable = false)

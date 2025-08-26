@@ -2,13 +2,13 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
-import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
-import kh.edu.istad.codecompass.dto.hint.UserHintResponse;
-import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.dto.hint.response.UserHintResponse;
+import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
 import kh.edu.istad.codecompass.repository.TagRepository;
@@ -32,10 +32,11 @@ public class ProblemServiceImpl implements ProblemService {
 
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
-    private final ProblemMapper problemMapper;
     private final TagRepository tagRepository;
     private final UserHintRepository userHintRepository;
+    private final ProblemMapper problemMapper;
 
+    @Transactional
     @Override
     public ProblemResponse createProblem(CreateProblemRequest problemRequest, String username) {
 
@@ -102,18 +103,15 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemResponseBySpecificUser getProblemBySpecificUser(String username, long problemId) {
 
-        // Get User
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        // Get Problem
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
 
-        //  Get UserHint for this user & problem
+        //  Get UserHint for a specific user & problem
         List<UserHint> userHints = userHintRepository.findByUserAndHintProblem(user, problem);
 
-//        Map hint to response
         List<UserHintResponse> hintResponses = problem.getHints().stream()
                 .map(hint -> {
                     Boolean unlocked = userHints.stream()
@@ -125,7 +123,6 @@ public class ProblemServiceImpl implements ProblemService {
                 })
                 .collect(Collectors.toList());
 
-        // Map tags
         List<String> tagNames = problem.getTags().stream()
                 .map(Tag::getTagName)
                 .toList();
@@ -162,13 +159,13 @@ public class ProblemServiceImpl implements ProblemService {
         return problemMapper.fromEntityToResponse(problem);
     }
 
-        @Transactional
-        @Override
-        public List<ProblemResponse> getProblems() {
-            return problemRepository
-                    .findAll()
-                    .stream().map(problemMapper::fromEntityToResponse).toList();
-        }
+    @Transactional
+    @Override
+    public List<ProblemResponse> getProblems() {
+        return problemRepository
+                .findAll()
+                .stream().map(problemMapper::fromEntityToResponse).toList();
+    }
 
     @Transactional
     @Override

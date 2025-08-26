@@ -14,6 +14,12 @@ spring:
     show-sql: true
     properties:
       hibernate.hibernate.format_sql: true
+
+  elasticsearch: #Config Elasticsearch
+    uris: https://elastic.devith.it.com
+    username: elastic
+    password: benz3528
+
   security:
     oauth2:
       resource server:

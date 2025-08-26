@@ -1,10 +1,9 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.domain.Problem;
-import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
-import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 
 import java.util.List;
 
@@ -17,6 +16,7 @@ public interface ProblemService {
      * @param author The unique name of the user creating the problem.
      * @return A {@link ProblemResponse} object containing the details of the newly created
      * problem, including its unique ID.
+     * @author Panharoth
      */
     ProblemResponse createProblem(CreateProblemRequest problemRequest, String author);
 
@@ -28,6 +28,7 @@ public interface ProblemService {
      * @param username  The username of the user for whom the problem data is being retrieved.
      * @param problemId The unique identifier of the problem.
      * @return A {@link ProblemResponseBySpecificUser} object that contains problem details along with the user's past submissions and status for that problem.
+     * @author Panharoth
      */
     ProblemResponseBySpecificUser getProblemBySpecificUser(String username, long problemId);
 
@@ -36,6 +37,7 @@ public interface ProblemService {
      *
      * @param problemId The unique identifier of the problem to retrieve.
      * @return A {@link ProblemResponse} object containing the details of the requested problem.
+     * @author Panharoth
      */
     ProblemResponse getProblem(long problemId);
 
@@ -46,6 +48,7 @@ public interface ProblemService {
      *
      * @return A {@link List} of {@link ProblemResponse} objects, each containing the details of a problem.
      * The list may be empty if no problems exist.
+     * @author Panharoth
      */
     List<ProblemResponse> getProblems();
 
@@ -57,6 +60,7 @@ public interface ProblemService {
      *
      * @return A {@link List} of {@link ProblemResponse} objects representing all problems
      * that are currently unverified. The list will be empty if all problems are verified
+     * @author Panharoth
      */
     List<ProblemResponse> getUnverifiedProblems();
 
@@ -68,6 +72,7 @@ public interface ProblemService {
      *
      * @return A {@link List} of {@link ProblemResponse} objects, each containing the details of a
      * verified problem. The list will be empty if there are no verified problems.
+     * @author Panharoth
      */
     List<ProblemResponse> getVerifiedProblems();
 
@@ -79,6 +84,7 @@ public interface ProblemService {
      *
      * @param problemId The unique identifier of the problem to verify or un-verify.
      * @param isVerified A boolean flag; {@code true} to verify the problem, {@code false} to un-verify it.
+     * @author Panharoth
      */
     void verifyProblem(long problemId, boolean isVerified);
 
@@ -92,6 +98,7 @@ public interface ProblemService {
      * @param problemId The unique identifier of the problem to be updated.
      * @param username  The username of the user who is attempting to update the problem.
      * This is used to verify that the user is the problem's original author.
+     * @author Panharoth
      */
     void updateProblem(Long problemId, String username, UpdateProblemRequest updateProblemRequest);
 }

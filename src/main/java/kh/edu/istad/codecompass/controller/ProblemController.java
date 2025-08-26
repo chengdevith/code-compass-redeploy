@@ -1,10 +1,10 @@
 package kh.edu.istad.codecompass.controller;
 
 import jakarta.validation.Valid;
-import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
-import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
-import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

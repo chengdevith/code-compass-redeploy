@@ -1,14 +1,16 @@
-package kh.edu.istad.codecompass.dto.problem;
+package kh.edu.istad.codecompass.dto.problem.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kh.edu.istad.codecompass.dto.hint.response.HintResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
-import kh.edu.istad.codecompass.dto.hint.UserHintResponse;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
+import lombok.Builder;
 
 import java.util.List;
 
-public record ProblemResponseBySpecificUser (
+@Builder
+public record ProblemResponse(
         Long id,
 
         @JsonProperty("best_memory_usage")
@@ -33,8 +35,8 @@ public record ProblemResponseBySpecificUser (
         @JsonProperty("tag_names")
         List<String> tags,
 
-        List<UserHintResponse> hints,
+        List<HintResponse> hints,
 
         String author
-){
-}
+) { }
+
