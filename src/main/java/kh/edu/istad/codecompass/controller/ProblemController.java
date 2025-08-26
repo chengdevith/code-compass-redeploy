@@ -1,13 +1,14 @@
 package kh.edu.istad.codecompass.controller;
 
+import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +24,25 @@ public class ProblemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProblemResponse createProblem(@RequestBody CreateProblemRequest problemRequest, @AuthenticationPrincipal Jwt jwt) {
+    public ProblemResponse createProblem(
+            @RequestBody @Valid
+            CreateProblemRequest problemRequest,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
         String username = jwt.getClaim("preferred_username");
         return problemService.createProblem(problemRequest, username);
     }
 
     @GetMapping("/{problemId}/me")
-    public ProblemResponseBySpecificUser getProblemBySpecificUser(@PathVariable Long problemId, @AuthenticationPrincipal Jwt jwt) {
+    public ProblemResponseBySpecificUser getProblemBySpecificUser(
+            @PathVariable
+            Long problemId,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
         String username = jwt.getClaim("preferred_username");
         return problemService.getProblemBySpecificUser(username, problemId);
     }
@@ -42,11 +55,34 @@ public class ProblemController {
 
     @PatchMapping("/{problemId}/verification")
     ResponseEntity<String> verifyProblem(
-            @PathVariable Long problemId,
-            @RequestParam(defaultValue = "true") boolean verified
+            @PathVariable
+            Long problemId,
+
+            @RequestParam(defaultValue = "true")
+            boolean verified
     ) {
         problemService.verifyProblem(problemId, verified);
         return ResponseEntity.ok("The problem has been verified successfully");
+    }
+
+    @PatchMapping("/{problemId}")
+    ResponseEntity<String> updateCreatedProblem(
+            @PathVariable
+            Long problemId,
+
+            @RequestBody
+            @Valid
+            UpdateProblemRequest updateProblemRequest,
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+
+        String authorUsername = jwt.getClaim("preferred_username");
+
+        problemService.updateProblem(problemId, authorUsername, updateProblemRequest);
+
+        return ResponseEntity.ok("The problem has been updated successfully");
+
     }
 
     @GetMapping("/unverified")

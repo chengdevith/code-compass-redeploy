@@ -4,6 +4,7 @@ import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
 
 import java.util.List;
 
@@ -11,8 +12,6 @@ public interface ProblemService {
 
     /**
      * Creates a new coding problem with the provided details.
-     * <p>
-     *
      * @param problemRequest A {@link CreateProblemRequest} object containing all the details
      * of the problem.
      * @param author The unique name of the user creating the problem.
@@ -82,4 +81,17 @@ public interface ProblemService {
      * @param isVerified A boolean flag; {@code true} to verify the problem, {@code false} to un-verify it.
      */
     void verifyProblem(long problemId, boolean isVerified);
+
+
+    /**
+     * Updates an existing problem created by a specific user.
+     * <p>
+     * This method allows a problem's author to edit its details. It ensures that
+     * only the original creator can modify the problem.
+     *
+     * @param problemId The unique identifier of the problem to be updated.
+     * @param username  The username of the user who is attempting to update the problem.
+     * This is used to verify that the user is the problem's original author.
+     */
+    void updateProblem(Long problemId, String username, UpdateProblemRequest updateProblemRequest);
 }

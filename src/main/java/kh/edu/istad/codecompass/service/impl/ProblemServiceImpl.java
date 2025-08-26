@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
+import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.dto.hint.UserHintResponse;
@@ -197,6 +198,16 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setIsVerified(isVerified);
 
         problemRepository.save(problem);
+    }
+
+    @Transactional
+    @Override
+    public void updateProblem(Long problemId, String authorUsername, UpdateProblemRequest updateProblemRequest) {
+
+        Problem problem = problemRepository.findProblemByIdAndAuthor_Username(problemId ,authorUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
+
+        problemMapper.fromUpdateRequestToEntity(updateProblemRequest, problem);
     }
 
 

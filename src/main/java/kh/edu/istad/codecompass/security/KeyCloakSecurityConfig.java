@@ -41,7 +41,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/v1/code-compass/hints/**").permitAll()
                         .requestMatchers("/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/unverified").hasRole("ADMIN")

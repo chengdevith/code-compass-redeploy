@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.controller;
 
+import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
 import kh.edu.istad.codecompass.service.AuthService;
@@ -16,7 +17,7 @@ public class AuthController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/register")
-    public RegisterResponse register(@RequestBody RegisterRequest registerRequest) {
+    public RegisterResponse register(@RequestBody @Valid RegisterRequest registerRequest) {
         return authService.register(registerRequest);
     }
 

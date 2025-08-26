@@ -5,12 +5,12 @@ import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.domain.TestCase;
 import kh.edu.istad.codecompass.dto.hint.HintResponse;
+import kh.edu.istad.codecompass.dto.problem.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 import java.util.Set;
@@ -38,6 +38,9 @@ public interface ProblemMapper {
     @Mapping(target = "author", source = "author.username")
     @Mapping(target = "hints", expression = "java(mapHints(entity.getHints()))")
     ProblemResponse fromEntityToResponse(Problem entity);
+    
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void fromUpdateRequestToEntity(UpdateProblemRequest request, @MappingTarget Problem entity);
 
     // custom helpers
 
