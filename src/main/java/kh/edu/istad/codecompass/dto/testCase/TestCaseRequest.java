@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto;
+package kh.edu.istad.codecompass.dto.testCase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

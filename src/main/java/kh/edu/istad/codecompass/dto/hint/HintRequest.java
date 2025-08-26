@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto;
+package kh.edu.istad.codecompass.dto.hint;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

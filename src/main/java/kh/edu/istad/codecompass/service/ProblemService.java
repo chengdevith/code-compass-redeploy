@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.service;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
 
 import java.util.List;
 
@@ -20,6 +21,16 @@ public interface ProblemService {
      */
     ProblemResponse createProblem(CreateProblemRequest problemRequest, String author);
 
+
+    /**
+     * Retrieves a problem tailored to a specific user, including their submission history and hints they've unlocked on that problem.
+     * This method is for providing a personalized view of a problem to a user.
+     *
+     * @param username  The username of the user for whom the problem data is being retrieved.
+     * @param problemId The unique identifier of the problem.
+     * @return A {@link ProblemResponseBySpecificUser} object that contains problem details along with the user's past submissions and status for that problem.
+     */
+    ProblemResponseBySpecificUser getProblemBySpecificUser(String username, long problemId);
 
     /**
      * Retrieves a specific coding problem by its unique ID.

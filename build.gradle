@@ -46,9 +46,20 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
 //    swagger dependency
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.11'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
+
 
     // implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
+
+    // Force patched version of spring-webmvc
+    implementation("org.springframework:spring-webmvc:6.2.10")
+
+    // Override Tomcat version to patched release
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.44'
+
+    // Override vulnerable commons-io
+    implementation 'commons-io:commons-io:2.14.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

@@ -27,9 +27,19 @@ public class KeyCloakSecurityConfig {
         // Set all request must be authenticated
         http.authorizeHttpRequests( request ->
                 request
+                        .requestMatchers(
+                                "/api-docs",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/index.html",
+                                "/swagger-ui/index.html/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/code-compass/problems/verified").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/api/v1/code-compass/hints/**").permitAll()
                         .requestMatchers("/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")

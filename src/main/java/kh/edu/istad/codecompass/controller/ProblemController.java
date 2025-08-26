@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.controller;
 
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,13 @@ public class ProblemController {
         String username = jwt.getClaim("preferred_username");
         return problemService.createProblem(problemRequest, username);
     }
+
+    @GetMapping("/{problemId}/me")
+    public ProblemResponseBySpecificUser getProblemBySpecificUser(@PathVariable Long problemId, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return problemService.getProblemBySpecificUser(username, problemId);
+    }
+
 
     @GetMapping("/{problemId}")
     public ProblemResponse findProblemById(@PathVariable Long problemId) {

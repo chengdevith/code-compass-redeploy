@@ -2,12 +2,16 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
-import kh.edu.istad.codecompass.dto.TestCaseRequest;
+import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
+import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
+import kh.edu.istad.codecompass.dto.hint.UserHintResponse;
 import kh.edu.istad.codecompass.dto.problem.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.ProblemResponse;
+import kh.edu.istad.codecompass.dto.problem.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
 import kh.edu.istad.codecompass.repository.TagRepository;
+import kh.edu.istad.codecompass.repository.UserHintRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final UserRepository userRepository;
     private final ProblemMapper problemMapper;
     private final TagRepository tagRepository;
+    private final UserHintRepository userHintRepository;
 
     @Override
     public ProblemResponse createProblem(CreateProblemRequest problemRequest, String username) {
@@ -94,6 +99,59 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Transactional
     @Override
+    public ProblemResponseBySpecificUser getProblemBySpecificUser(String username, long problemId) {
+
+        // Get User
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Get Problem
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
+
+        //  Get UserHint for this user & problem
+        List<UserHint> userHints = userHintRepository.findByUserAndHintProblem(user, problem);
+
+//        Map hint to response
+        List<UserHintResponse> hintResponses = problem.getHints().stream()
+                .map(hint -> {
+                    Boolean unlocked = userHints.stream()
+                            .filter(uh -> uh.getHint().getId().equals(hint.getId()))
+                            .findFirst()
+                            .map(UserHint::getIsUnlocked)
+                            .orElse(false);
+                    return new UserHintResponse(hint.getDescription(), !unlocked); // isLocked = !unlocked
+                })
+                .collect(Collectors.toList());
+
+        // Map tags
+        List<String> tagNames = problem.getTags().stream()
+                .map(Tag::getTagName)
+                .toList();
+
+        List<TestCaseResponse> testCaseResponses = problem.getTestCases().stream()
+                .map(tc -> new TestCaseResponse(tc.getInput(), tc.getExpectedOutput()))
+                .toList();
+
+        return new ProblemResponseBySpecificUser(
+                problem.getId(),
+                problem.getBestMemoryUsage(),
+                problem.getBestTimeExecution(),
+                problem.getCoin().byteValue(),
+                problem.getDescription(),
+                problem.getDifficulty(),
+                problem.getStar(),
+                problem.getTitle(),
+                testCaseResponses,
+                tagNames,
+                hintResponses,
+                problem.getAuthor().getUsername()
+        );
+    }
+
+
+    @Transactional
+    @Override
     public ProblemResponse getProblem(long problemId) {
 
         Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
@@ -103,13 +161,13 @@ public class ProblemServiceImpl implements ProblemService {
         return problemMapper.fromEntityToResponse(problem);
     }
 
-    @Transactional
-    @Override
-    public List<ProblemResponse> getProblems() {
-        return problemRepository
-                .findAll()
-                .stream().map(problemMapper::fromEntityToResponse).toList();
-    }
+        @Transactional
+        @Override
+        public List<ProblemResponse> getProblems() {
+            return problemRepository
+                    .findAll()
+                    .stream().map(problemMapper::fromEntityToResponse).toList();
+        }
 
     @Transactional
     @Override

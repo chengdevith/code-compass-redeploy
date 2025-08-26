@@ -44,6 +44,12 @@ keycloak-admin:
   client-id: nextjs
   client-secret: rHTSRHjbS7WwfOvfze1aO6hrgjsa7r2i
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /api-docs
+
 logging:
   level:
     root: INFO

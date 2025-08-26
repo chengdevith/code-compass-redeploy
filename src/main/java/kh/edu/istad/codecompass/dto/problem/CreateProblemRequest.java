@@ -2,8 +2,8 @@ package kh.edu.istad.codecompass.dto.problem;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
-import kh.edu.istad.codecompass.dto.HintRequest;
-import kh.edu.istad.codecompass.dto.TestCaseRequest;
+import kh.edu.istad.codecompass.dto.hint.HintRequest;
+import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
 import lombok.Builder;
