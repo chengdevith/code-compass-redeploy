@@ -12,9 +12,10 @@ spring:
 #    show-sql: true
 #    properties:
 #      hibernate.hibernate.format_sql: true
-#  elasticsearch: #Config Elasticsearch
-#    uris: http://localhost:9200
-#    username: elastic
+  elasticsearch: #Config Elasticsearch
+    uris: https://elastic.devith.it.com
+    username: elastic
+    password: benz3528
   security: #Config Resource Server Keycloak
     oauth2:
       resourceserver:
