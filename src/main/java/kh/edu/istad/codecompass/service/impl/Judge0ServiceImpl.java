@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import kh.edu.istad.codecompass.config.Judge0TimeoutConfig;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Submission;
 import kh.edu.istad.codecompass.domain.SubmissionHistories;
@@ -26,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Mono;
 
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class Judge0ServiceImpl implements Judge0Service {
 
+    private final Judge0TimeoutConfig judge0TimeoutConfig;
     private final WebClient judge0WebClient;
     private final Judge0Mapper judge0Mapper;
     private final SubmissionHistoryRepository submissionHistoryRepository;
@@ -228,9 +229,9 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .expectedOutput(i < batchRequest.expectedOutputs().size()
                             ? batchRequest.expectedOutputs().get(i)
                             : null)
-                    .cpuTimeLimit(3.0)
-                    .wallTimeLimit(5.0)
-                    .memoryLimit(128000)
+                    .cpuTimeLimit(judge0TimeoutConfig.getCpuTimeLimit())
+                    .wallTimeLimit(judge0TimeoutConfig.getWallTimeLimit())
+                    .memoryLimit(judge0TimeoutConfig.getMemoryLimit())
                     .build());
         }
         return requests;
@@ -316,7 +317,7 @@ public class Judge0ServiceImpl implements Judge0Service {
 
     @Transactional
     protected Judge0SubmissionResponse pollSingleSubmission(String token) {
-        int maxAttempts = 20; // Reduced from 30
+        int maxAttempts = judge0TimeoutConfig.getMaxPollingAttempts();
         int attempt = 0;
 
         log.info("Polling submission with token: {}", token);
@@ -340,7 +341,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                                                     token, clientResponse.statusCode(), errorBody)));
                         })
                         .bodyToMono(Judge0SubmissionResponse.class)
-                        .timeout(Duration.ofSeconds(15))
+                        .timeout(judge0TimeoutConfig.getPollingTimeout())
                         .block();
 
                 if (response != null) {
