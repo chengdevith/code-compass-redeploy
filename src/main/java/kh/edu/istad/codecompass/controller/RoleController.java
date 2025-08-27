@@ -4,7 +4,6 @@ import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
