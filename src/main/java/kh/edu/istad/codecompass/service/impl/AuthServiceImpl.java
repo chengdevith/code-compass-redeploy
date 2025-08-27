@@ -6,6 +6,9 @@ import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
 import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
+import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
+import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
+import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
@@ -32,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     private final Keycloak keycloak;
     private final RoleService roleService;
     private final UserRepository userRepository;
+    private final UserElasticsearchRepository userElasticsearchRepository;
 
     @Value("${keycloak-admin.realm}")
     private String realmName;
@@ -103,7 +107,10 @@ public class AuthServiceImpl implements AuthService {
                 User user = new User();
                 user.setUsername(ur.getUsername());
                 user.setEmail(ur.getEmail());
-                user.setGender(registerRequest.gender());
+
+                // Get gender from UserRepresentation, convert to enum and set to user
+                user.setGender(Gender.valueOf(ur.getAttributes().get("gender").getFirst()));
+
                 user.setIsDeleted(false);
                 user.setCoin(20);
                 user.setStar(0);
@@ -113,6 +120,18 @@ public class AuthServiceImpl implements AuthService {
 
                 userRepository.save(user);
 
+                // Save in Elasticsearch
+                UserIndex index = UserIndex.builder()
+                        .id(user.getId().toString())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .gender(user.getGender().name())
+                        .level(user.getLevel().name())
+                        .rank(user.getRank())
+                        .totalProblemsSolved(user.getTotal_problems_solved())
+                        .build();
+
+                userElasticsearchRepository.save(index);
             }
             return RegisterResponse.builder()
                     .email(userRepresentation.getEmail())
@@ -167,7 +186,6 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, resetPasswordRequest.email())
                 );
-
         // Send Link to user for reset password
         keycloak.realm(realmName)
                 .users()
