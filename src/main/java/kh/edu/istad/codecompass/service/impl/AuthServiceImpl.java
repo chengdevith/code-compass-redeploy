@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
 
         // Find the user by email
-        UserRepresentation user = keycloak.realm("code-compass")
+        UserRepresentation user = keycloak.realm(realmName)
                 .users()
                 .searchByEmail(resetPasswordRequest.email(), true)
                 .stream().findFirst()
@@ -143,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
                 );
 
         // Get the UserResource
-        UserResource userResource = keycloak.realm("code-compass")
+        UserResource userResource = keycloak.realm(realmName)
                 .users().get(user.getId());
 
         // Create new credential
@@ -160,7 +160,7 @@ public class AuthServiceImpl implements AuthService {
     public void requestPasswordReset(ResetPasswordRequest resetPasswordRequest) {
 
         // Find the user by email
-        UserRepresentation user = keycloak.realm("code-compass")
+        UserRepresentation user = keycloak.realm(realmName)
                 .users()
                 .searchByEmail(resetPasswordRequest.email(), true)
                 .stream().findFirst()
@@ -169,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
                 );
 
         // Send Link to user for reset password
-        keycloak.realm("code-compass")
+        keycloak.realm(realmName)
                 .users()
                 .get(user.getId())
                 .executeActionsEmail(List.of("UPDATE_PASSWORD"));
