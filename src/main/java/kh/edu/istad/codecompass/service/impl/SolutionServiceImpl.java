@@ -9,6 +9,9 @@ import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.SolutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,11 +26,10 @@ public class SolutionServiceImpl implements SolutionService {
     @Override
     public SolutionResponse postSolution(SolutionRequest request, String author) {
 
-        SubmissionHistories submissionHistories = submissionHistoryRepository.findByProblemIdAndUser_Username(request.problemId(), author);
+        List<SubmissionHistories> submissionHistories = submissionHistoryRepository.findByProblemIdAndUser_Username(request.problemId(), author);
 
 //      now user can post the solution because the problem that the user have solved has status accepted
-        if (submissionHistories.getStatus().equals("Accepted")) {
-        }
+        // code here
 
         return null;
     }
