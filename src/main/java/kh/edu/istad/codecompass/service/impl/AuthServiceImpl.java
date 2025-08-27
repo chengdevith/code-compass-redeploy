@@ -5,7 +5,6 @@ import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.enums.Level;
 import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
