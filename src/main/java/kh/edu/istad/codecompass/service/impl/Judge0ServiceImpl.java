@@ -98,10 +98,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
         );
 
-        boolean isOverlimited = submissionHistoryRepository.countSubmissionHistoriesByUser_Username(username) > 10;
-
-        if (isOverlimited)
-            submissionHistoryRepository.findSubmissionHistoriesByUser_Username(username).removeFirst();
+        submissionHistoryRepository.deleteOldSubmissions(username);
 
         SubmissionHistories submissionHistories = new SubmissionHistories();
 
@@ -135,27 +132,34 @@ public class Judge0ServiceImpl implements Judge0Service {
             earnedStars = Math.min(earnedStars, 3);
 
             int baseCoins = problem.getCoin();
-            int earnedCoins = baseCoins / 4;   // Base reward for solving
+            double earnedCoins = baseCoins / 4.0;   // Base reward for solving
 
             // Time efficiency reward
             if (averageUserExecutionTime <= peekTimeExecution * 1.5) { // within 50% of best
-                earnedCoins += baseCoins / 4;
+                earnedCoins += baseCoins / 4.0;
             } else if (averageUserExecutionTime <= peekTimeExecution * 2) { // within 100% slower
-                earnedCoins += baseCoins / 6;
+                earnedCoins += baseCoins / 6.0;
             }
 
             // Memory efficiency reward
             if (averageUserMemoryUsage <= peekMemoryUsage * 1.5) {
-                earnedCoins += baseCoins / 4;
+                earnedCoins += baseCoins / 4.0;
             } else if (averageUserMemoryUsage <= peekMemoryUsage * 2) {
-                earnedCoins += baseCoins / 6;
+                earnedCoins += baseCoins / 6.0;
             }
 
-            user.setCoin(earnedCoins);
-            user.setStar(earnedStars);
+            earnedCoins = (int) Math.min(Math.round(earnedCoins), problem.getCoin());
+
+            user.setCoin((int) earnedCoins + user.getCoin());
+            user.setStar(earnedStars + user.getStar());
             user.updateLevel();
 
-            if (! submissionHistoryRepository.existsByStatusAndUser_Username("Accepted" ,username))
+            boolean alreadySolved = submissionHistoryRepository
+                    .findByProblemIdAndUser_Username(problemId, username)
+                    .stream()
+                    .anyMatch(history -> history.getStatus().equals("Accepted"));
+
+            if (!alreadySolved)
                 user.setTotal_problems_solved(user.getTotal_problems_solved() + 1);
 
             userRepository.save(user);
@@ -175,7 +179,7 @@ public class Judge0ServiceImpl implements Judge0Service {
             }
             userRepository.saveAll(users);
 
-            submissionHistories.setCoin(earnedCoins);
+            submissionHistories.setCoin((int) earnedCoins);
             submissionHistories.setProblem(problem);
             submissionHistories.setUser(user);
             submissionHistories.setCode(batchRequest.sourceCode());
