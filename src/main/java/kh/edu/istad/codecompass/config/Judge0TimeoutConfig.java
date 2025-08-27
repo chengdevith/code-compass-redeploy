@@ -1,15 +1,8 @@
 package kh.edu.istad.codecompass.config;
 
-import kh.edu.istad.codecompass.dto.jugde0.request.Judge0BatchRequest;
-import kh.edu.istad.codecompass.dto.jugde0.response.Judge0BatchResponse;
-import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 
