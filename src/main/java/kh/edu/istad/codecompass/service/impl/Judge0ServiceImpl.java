@@ -98,10 +98,14 @@ public class Judge0ServiceImpl implements Judge0Service {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
         );
 
-        boolean isOverlimited = submissionHistoryRepository.countSubmissionHistoriesByUser_Username(username) > 10;
+        boolean isOverlimited = submissionHistoryRepository.countByUser_Username(username) > 10;
 
-        if (isOverlimited)
-            submissionHistoryRepository.findSubmissionHistoriesByUser_Username(username).removeFirst();
+        if (isOverlimited) {
+            SubmissionHistories oldest = submissionHistoryRepository.findByUser_UsernameOrderBySubmittedAtAsc(username).get(0);
+
+            submissionHistoryRepository.delete(oldest);
+        }
+
 
         SubmissionHistories submissionHistories = new SubmissionHistories();
 
