@@ -8,18 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubmissionHistoryRepository extends JpaRepository<SubmissionHistories, Long> {
 
-    Integer countByUser_Username(String username);
-
-    List<SubmissionHistories> findByUser_UsernameOrderBySubmittedAtAsc(String username);
-
     @Modifying
     @Transactional
-    @Query("DELETE FROM SubmissionHistories s WHERE s.id = :id")
-    void deleteByIdCustom(@Param("id") Long id);
+    @Query("DELETE FROM SubmissionHistories s WHERE s.user.username = :username " +
+            "AND s.id NOT IN (SELECT s2.id FROM SubmissionHistories s2 " +
+            "WHERE s2.user.username = :username ORDER BY s2.submittedAt DESC LIMIT 5)")
+    void deleteOldSubmissions(@Param("username") String username);
 
-    boolean existsByStatusAndUser_Username(String status, String userUsername);
+    List<SubmissionHistories> findByProblemIdAndUser_Username(Long problemId, String userUsername);
 
 }

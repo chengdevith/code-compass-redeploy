@@ -15,8 +15,13 @@ public class Solution {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String submissionToken;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Lob
+    private String sourceCode;
+
+    @Column(columnDefinition = "TEXT")
+    @Lob
+    private String explanation;
 
     @Column(nullable = false)
     private Boolean isDeleted;
