@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
 import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
@@ -127,6 +128,51 @@ public class AuthServiceImpl implements AuthService {
         UserResource userResource = keycloak.realm(realmName)
                 .users().get(userId);
         userResource.sendVerifyEmail();
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
+
+        // Find the user by email
+        UserRepresentation user = keycloak.realm("code-compass")
+                .users()
+                .searchByEmail(resetPasswordRequest.email(), true)
+                .stream().findFirst()
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email")
+                );
+
+        // Get the UserResource
+        UserResource userResource = keycloak.realm("code-compass")
+                .users().get(user.getId());
+
+        // Create new credential
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(resetPasswordRequest.newPassword());
+        credential.setTemporary(false); // false = permanent
+
+        // Reset password
+        userResource.resetPassword(credential);
+    }
+
+    @Override
+    public void requestPasswordReset(ResetPasswordRequest resetPasswordRequest) {
+
+        // Find the user by email
+        UserRepresentation user = keycloak.realm("code-compass")
+                .users()
+                .searchByEmail(resetPasswordRequest.email(), true)
+                .stream().findFirst()
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, resetPasswordRequest.email())
+                );
+
+        // Send Link to user for reset password
+        keycloak.realm("code-compass")
+                .users()
+                .get(user.getId())
+                .executeActionsEmail(List.of("UPDATE_PASSWORD"));
     }
 
 }

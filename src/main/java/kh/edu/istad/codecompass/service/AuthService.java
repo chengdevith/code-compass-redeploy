@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.service;
 
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
 
 public interface AuthService {
 
@@ -23,4 +24,8 @@ public interface AuthService {
      * @author Panharoth
      */
     void verifyEmail(String userId);
+
+    void resetPassword(ResetPasswordRequest resetPasswordRequest);
+
+    void requestPasswordReset(ResetPasswordRequest resetPasswordRequest);
 }

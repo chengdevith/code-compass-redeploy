@@ -3,9 +3,11 @@ package kh.edu.istad.codecompass.controller;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
+import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
 import kh.edu.istad.codecompass.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,4 +23,15 @@ public class AuthController {
         return authService.register(registerRequest);
     }
 
+    @PostMapping("reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        authService.resetPassword(resetPasswordRequest);
+        return ResponseEntity.ok("Reset Password successfully");
+    }
+
+    @PostMapping("request-reset-password")
+    public ResponseEntity<String> requestResetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        authService.requestPasswordReset(resetPasswordRequest);
+        return ResponseEntity.ok("We sent your password reset link to your email");
+    }
 }
