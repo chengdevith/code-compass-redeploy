@@ -15,11 +15,6 @@ public class UserController {
 
     private final UserIndexService userIndexService;
 
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userIndexService.save(user);
-    }
-
     @GetMapping("/search")
     public List<UserIndex> searchUsers(@RequestParam String keyword) {
         return userIndexService.searchUsers(keyword);
