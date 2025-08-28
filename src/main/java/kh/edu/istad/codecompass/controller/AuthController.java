@@ -23,15 +23,15 @@ public class AuthController {
         return authService.register(registerRequest);
     }
 
-    @PostMapping("reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset Password successfully");
     }
 
-    @PostMapping("request-reset-password")
-    public ResponseEntity<String> requestResetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+    @PostMapping("/request-reset-password")
+    public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
-        return ResponseEntity.ok("We sent your password reset link to your email");
+        return ResponseEntity.ok("We have sent link to your email to reset password");
     }
 }
