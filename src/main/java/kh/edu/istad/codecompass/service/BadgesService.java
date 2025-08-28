@@ -1,7 +1,7 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.dto.BadgeRequest;
-import kh.edu.istad.codecompass.dto.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.BadgeRequest;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 
 import java.util.List;
 

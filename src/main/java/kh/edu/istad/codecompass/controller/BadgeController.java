@@ -1,7 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
-import kh.edu.istad.codecompass.dto.BadgeRequest;
-import kh.edu.istad.codecompass.dto.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.BadgeRequest;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.service.BadgesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/badges")
+@RequestMapping("/api/v1/code-compass/badges")
 @RequiredArgsConstructor
 public class BadgeController {
 

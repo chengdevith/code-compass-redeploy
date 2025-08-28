@@ -2,8 +2,8 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.Package;
-import kh.edu.istad.codecompass.dto.PackageRequest;
-import kh.edu.istad.codecompass.dto.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.PackageRequest;
+import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 import kh.edu.istad.codecompass.mapper.PackageMapper;
 import kh.edu.istad.codecompass.repository.PackageRepository;
 import kh.edu.istad.codecompass.service.PackageService;

@@ -2,10 +2,10 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.ws.rs.core.Response;
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
+import kh.edu.istad.codecompass.dto.auth.ResetPasswordRequest;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.enums.Gender;

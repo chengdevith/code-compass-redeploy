@@ -1,10 +1,8 @@
 package kh.edu.istad.codecompass.controller;
 
-import kh.edu.istad.codecompass.dto.BadgesResponse;
-import kh.edu.istad.codecompass.dto.PackageRequest;
-import kh.edu.istad.codecompass.dto.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.PackageRequest;
+import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 
-import kh.edu.istad.codecompass.service.BadgesService;
 import kh.edu.istad.codecompass.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/packages")
+@RequestMapping("/api/v1/code-compass/packages")
 @RequiredArgsConstructor
 public class PackageController {
 

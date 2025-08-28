@@ -2,8 +2,8 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.Badge;
-import kh.edu.istad.codecompass.dto.BadgeRequest;
-import kh.edu.istad.codecompass.dto.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.BadgeRequest;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.mapper.BadgeMapper;
 import kh.edu.istad.codecompass.repository.BadgeRepository;
 import kh.edu.istad.codecompass.service.BadgesService;
