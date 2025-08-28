@@ -9,4 +9,6 @@ public interface SolutionRepository extends CrudRepository<Solution, Long> {
 
     List<Solution> findByIsDeletedFalse();
 
+    List<Solution> findSolutionByProblemIdAndIsDeletedFalse(Long problemId);
+
 }

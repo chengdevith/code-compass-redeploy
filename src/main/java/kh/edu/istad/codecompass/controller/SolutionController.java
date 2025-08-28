@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.solution.SolutionRequest;
 import kh.edu.istad.codecompass.dto.solution.SolutionResponse;
@@ -26,9 +27,10 @@ public class SolutionController {
         return solutionService.postSolution(solutionRequest, author);
     }
 
-    @GetMapping
-    public List<SolutionResponse> getAllSolutions() {
-        return solutionService.getAllSolutions();
+    @GetMapping("/problem/{problemId}")
+    public List<SolutionResponse> getAllSolutions(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
+        String username = jwt.getClaim("preferred_username");
+        return solutionService.getAllSolutions(username, problemId);
     }
 
 }

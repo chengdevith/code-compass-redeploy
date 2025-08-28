@@ -33,6 +33,10 @@ public class SolutionServiceImpl implements SolutionService {
     @Override
     public SolutionResponse postSolution(SolutionRequest request, String author) {
 
+        User user = userRepository.findUserByUsername(author).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+        );
+
         List<SubmissionHistories> submissionHistories = submissionHistoryRepository
                 .findByProblemIdAndUser_Username(request.problemId(), author);
 
@@ -49,11 +53,7 @@ public class SolutionServiceImpl implements SolutionService {
         }
 
         if (!isAccepted)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "To post solution, you must solve the problem first");
-
-        User user = userRepository.findUserByUsername(author).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
-        );
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "To post the solution, you must solve the problem first");
 
         Solution solution = new Solution();
         solution.setExplanation(request.explanation());
@@ -69,9 +69,24 @@ public class SolutionServiceImpl implements SolutionService {
 
     @Transactional
     @Override
-    public List<SolutionResponse> getAllSolutions() {
-        return solutionRepository.findByIsDeletedFalse().stream().map(
+    public List<SolutionResponse> getAllSolutions(String username, Long problemId) {
+
+        boolean isUserSolved = false;
+        List<SubmissionHistories>  submissionHistories = submissionHistoryRepository.findByProblemIdAndUser_Username(problemId, username);
+
+        for  (SubmissionHistories history : submissionHistories) {
+            if (history.getStatus().equals("Accepted")) {
+                isUserSolved = true;
+                break;
+            }
+        }
+
+        if (!isUserSolved)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "To view the solutions, you must solve the problem first");
+
+        return solutionRepository.findSolutionByProblemIdAndIsDeletedFalse(problemId).stream().map(
             solutionMapper::toResponse
         ).toList();
     }
+
 }

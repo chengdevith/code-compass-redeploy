@@ -9,6 +9,6 @@ public interface SolutionService {
 
     SolutionResponse postSolution(SolutionRequest request, String author);
 
-    List<SolutionResponse> getAllSolutions();
+    List<SolutionResponse> getAllSolutions(String username, Long problemId);
 
 }

@@ -38,7 +38,6 @@ public class HintServiceImpl implements HintService {
         if (userHint.getIsUnlocked())
             throw new ResponseStatusException(HttpStatus.OK, "The hint is already unlocked");
 
-
         int coinsAfterUnlock = user.getCoin() - 10;
         if (coinsAfterUnlock < 0) {
             return false; // Not enough coins
