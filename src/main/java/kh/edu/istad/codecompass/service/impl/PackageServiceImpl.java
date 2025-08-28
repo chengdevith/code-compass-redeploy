@@ -29,7 +29,7 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public void verifyPackage(Long id, Boolean isVerified) {
         Package pack = packageRepository.findPackageByIdAndIsVerifiedFalse(id).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
         );
         pack.setIsVerified(isVerified);
         packageRepository.save(pack);

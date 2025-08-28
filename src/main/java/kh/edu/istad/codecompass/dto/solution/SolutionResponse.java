@@ -9,6 +9,7 @@ public record SolutionResponse(
         String sourceCode,
         String explanation,
         String author,
-        @JsonProperty("problem_id") Long problemId
+        @JsonProperty("problem_id")
+        Long problemId
 ) {
 }

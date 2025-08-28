@@ -7,7 +7,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: bvni
+    password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: update
