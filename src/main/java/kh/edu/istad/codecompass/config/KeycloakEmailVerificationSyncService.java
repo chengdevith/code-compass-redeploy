@@ -75,7 +75,7 @@ public class KeycloakEmailVerificationSyncService {
                             .location(user.getLocation())
                             .github(user.getGithub())
                             .linkedin(user.getLinkedin())
-                            .imageUrl(user.getImage_url())
+                            .imageUrl(user.getImageUrl())
                             .build();
 
                     userElasticsearchRepository.save(index);

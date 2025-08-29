@@ -31,8 +31,8 @@ spring:
 
 # Config Server Path and BaseUri for media
 media:
-  server-path: /home/panha/Pictures/media/
-  base-uri: http://localhost:8081/media/
+  server-path: /home/benz/ISTAD/SPRING/medias/
+  base-uri: http://localhost:8080/media/
 
 server:
   forward-headers-strategy: none
