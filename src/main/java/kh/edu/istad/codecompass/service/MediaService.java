@@ -7,4 +7,6 @@ public interface MediaService {
 
     MediaResponse upload(MultipartFile file);
 
+    void deleteFile(String fileName);
+
 }

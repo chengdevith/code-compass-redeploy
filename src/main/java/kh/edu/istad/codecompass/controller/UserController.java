@@ -1,8 +1,10 @@
 package kh.edu.istad.codecompass.controller;
 
-import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.UpdateUserProfileRequest;
+import kh.edu.istad.codecompass.dto.UserResponse;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.service.UserIndexService;
+import kh.edu.istad.codecompass.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +16,15 @@ import java.util.List;
 public class UserController {
 
     private final UserIndexService userIndexService;
-
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userIndexService.save(user);
-    }
+    private final UserProfileService userProfileService;
 
     @GetMapping("/search")
     public List<UserIndex> searchUsers(@RequestParam String keyword) {
         return userIndexService.searchUsers(keyword);
+    }
+
+    @PatchMapping("update/{id}")
+    public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable long id) {
+       return userProfileService.updateUserProfile(request,id);
     }
 }

@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         if (userRepository.existsByUsername(registerRequest.username()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
 
 
         log.info("Register request: {}", registerRequest);
@@ -120,18 +120,6 @@ public class AuthServiceImpl implements AuthService {
 
                 userRepository.save(user);
 
-                // Save in Elasticsearch
-                UserIndex index = UserIndex.builder()
-                        .id(user.getId().toString())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .gender(user.getGender().name())
-                        .level(user.getLevel().name())
-                        .rank(user.getRank())
-                        .totalProblemsSolved(user.getTotal_problems_solved())
-                        .build();
-
-                userElasticsearchRepository.save(index);
             }
             return RegisterResponse.builder()
                     .email(userRepresentation.getEmail())
@@ -144,9 +132,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String userId) {
+
+        // 1. Get user resource from Keycloak
         UserResource userResource = keycloak.realm(realmName)
                 .users().get(userId);
+
+        // 2. Send verification email
         userResource.sendVerifyEmail();
+
     }
 
     @Override
