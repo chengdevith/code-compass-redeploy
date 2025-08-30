@@ -10,6 +10,5 @@ import java.util.List;
  */
 
 public interface UserIndexService {
-    User save(User user);
     List<UserIndex> searchUsers(String keyword);
 }

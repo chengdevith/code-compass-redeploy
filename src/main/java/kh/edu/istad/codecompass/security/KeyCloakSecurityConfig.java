@@ -34,7 +34,8 @@ public class KeyCloakSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/index.html",
                                 "/swagger-ui/index.html/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/media/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/code-compass/problems/verified").permitAll()

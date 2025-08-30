@@ -37,7 +37,7 @@ public class User {
     private String website;
     private String github;
     private String linkedin;
-    private String image_url;
+    private String imageUrl;
 
     private Level level;
     private Integer coin;

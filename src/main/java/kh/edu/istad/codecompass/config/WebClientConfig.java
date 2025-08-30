@@ -27,4 +27,11 @@ public class WebClientConfig {
 
         return clientBuilder.build();
     }
+
+    @Bean
+    public WebClient keycloakWebClient(){
+        return WebClient.builder()
+                .baseUrl("https://keyy.devith.it.com")
+                .build();
+    }
 }
