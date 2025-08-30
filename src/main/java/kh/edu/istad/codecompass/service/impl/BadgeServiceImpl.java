@@ -28,14 +28,14 @@ public class BadgeServiceImpl implements BadgesService {
     @Override
     public void updateBadge(Long id, BadgeRequest badgeRequest) {
     Badge badge = badgeRepository.findById(id)
-            .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
     badgeMapper.fromUpdateRequestToEntity(badgeRequest, badge);
     }
 
     @Override
     public void verifyBadges(Long id, Boolean isVerified) {
         Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedFalse(id).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
         badge.setIsVerified(isVerified);
         badgeRepository.save(badge);
 
@@ -85,8 +85,9 @@ public class BadgeServiceImpl implements BadgesService {
     @Transactional
     @Override
     public BadgesResponse getBadges(Long id) {
-        Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedTrue(id).orElseThrow(()
-                -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Badge not found"));
+        Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedTrue(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Badge not found")
+        );
         return badgeMapper.toBadgeResponse(badge);
     }
 }
