@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,8 @@ public class KeycloakEmailVerificationSyncService {
     private final UserElasticsearchRepository userElasticsearchRepository;
     private final KeycloakTokenService keycloakTokenService;
 
-    private final String realmName = "code-compass";
+    @Value("${keycloak-admin.realm}")
+    private String realmName;
     private long lastProcessedTime = 0;
 
     @Scheduled(fixedRate = 30000) // every 30 seconds

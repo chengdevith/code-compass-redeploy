@@ -36,6 +36,7 @@ media:
 
 server:
   forward-headers-strategy: none
+  port: 8081
 
 judge0:
   protocol: http

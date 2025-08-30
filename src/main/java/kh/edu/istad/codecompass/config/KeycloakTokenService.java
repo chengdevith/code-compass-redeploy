@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,7 +15,8 @@ public class KeycloakTokenService {
     private final WebClient keycloakWebClient;
     private final String clientId = "admin-cli";
     private final String clientSecret = "zqDaCTPP69W01T8qf3H6RWrfAyFRd0sr";
-    private final String realm = "code-compass";
+    @Value("${keycloak-admin.realm}")
+    private String realm;
 
     public String getAdminToken() {
         Map<String, Object> response = keycloakWebClient.post()

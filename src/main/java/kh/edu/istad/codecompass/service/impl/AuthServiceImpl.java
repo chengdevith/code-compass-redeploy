@@ -3,10 +3,9 @@ package kh.edu.istad.codecompass.service.impl;
 import jakarta.ws.rs.core.Response;
 import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
-import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Role;
@@ -49,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         if (userRepository.existsByUsername(registerRequest.username()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
 
 
         log.info("Register request: {}", registerRequest);
