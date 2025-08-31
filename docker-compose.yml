@@ -2,13 +2,28 @@ services:
   code-compass-db:
     image: postgres:16.9-bullseye
     container_name: code-compass-db
-    ports:
-      - "9999:5432"
     environment:
-      POSTGRES_PASSWORD: benz
       POSTGRES_USER: benz
+      POSTGRES_PASSWORD: benz
       POSTGRES_DB: code_compass_db
     volumes:
       - code-compass-vol:/var/lib/postgresql/data
+    restart: always
+
+  code-compass-app:
+    image: benz3528/code-compass:latest
+    container_name: code-compass-app
+    depends_on:
+      - code-compass-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://code-compass-db:5432/code_compass_db
+      SPRING_DATASOURCE_USERNAME: benz
+      SPRING_DATASOURCE_PASSWORD: benz
+      MEDIA_SERVER_PATH: /app/media/
+      MEDIA_BASE_URI: http://localhost:8080/media/
+    volumes:
+      - ./media:/app/media
+    restart: always
+
 volumes:
   code-compass-vol:

@@ -4,10 +4,10 @@ spring:
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://localhost:5432/code_compass_db
+    url: jdbc:postgresql://code-compass-db:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: qwer
+    username: benz
+    password: benz
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: update
@@ -31,11 +31,10 @@ spring:
 
 # Config Server Path and BaseUri for media
 media:
-  server-path: /home/panha/Pictures/media/
+  server-path: /app/media/
   base-uri: http://localhost:8081/media/
 
 server:
-  port: 8081
   forward-headers-strategy: none
 
 judge0:
