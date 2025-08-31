@@ -1,9 +1,9 @@
 # --------- Build Stage ---------
-FROM eclipse-temurin:24-jdk-alpine AS builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 
 # Install required tools for Gradle
-RUN apk add --no-cache bash unzip xargs procps curl git
+RUN apk add --no-cache bash unzip findutils curl git
 
 # Copy Gradle wrapper & make it executable
 COPY gradlew .
