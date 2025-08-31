@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: code_compass_db
     volumes:
       - code-compass-vol:/var/lib/postgresql/data
+    networks:
+      - code-compass-net
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U benz"]
@@ -30,7 +32,12 @@ services:
       MEDIA_BASE_URI: http://localhost:8080/media/
     volumes:
       - ./media:/app/media
+    networks:
+      - code-compass-net
     restart: always
 
 volumes:
   code-compass-vol:
+
+networks:
+  code-compass-net:
