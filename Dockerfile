@@ -1,5 +1,5 @@
 # --------- Build Stage ---------
-FROM ghcr.io/graalvm/jdk-community:21 AS builder
+FROM ghcr.io/graalvm/jdk-community:21-debian AS builder
 WORKDIR /app
 
 # Install required Linux tools for Gradle
