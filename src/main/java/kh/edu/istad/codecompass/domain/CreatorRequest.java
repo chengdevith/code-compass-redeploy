@@ -22,7 +22,7 @@ public class CreatorRequest {
 
     ReportStatus status;
 
-    @OneToMany(mappedBy = "creatorRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    List<User> users = new ArrayList<>();
+    @OneToOne(mappedBy = "creatorRequest", cascade = CascadeType.ALL)
+    User user;
 
 }

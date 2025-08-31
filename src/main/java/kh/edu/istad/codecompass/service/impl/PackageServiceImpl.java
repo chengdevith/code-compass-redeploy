@@ -6,7 +6,6 @@ import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.dto.packageDTO.AddProblemToPackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
-import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.mapper.PackageMapper;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.PackageRepository;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -56,20 +54,6 @@ public class PackageServiceImpl implements PackageService {
 
         pack = packageRepository.save(pack);
 
-        List<ProblemResponse> problemResponseSet = new ArrayList<>();
-        for (Long problemId : problemIds) {
-            Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
-            );
-            problemResponseSet.add(problemMapper.fromEntityToResponse(problem));
-        }
-
-//        return PackageResponse
-//                .builder()
-//                .name(pack.getName())
-//                .description(pack.getDescription())
-//                .problems(problemResponseSet)
-//                .build();
         return packageMapper.mapPackageToResponse(pack);
     }
 

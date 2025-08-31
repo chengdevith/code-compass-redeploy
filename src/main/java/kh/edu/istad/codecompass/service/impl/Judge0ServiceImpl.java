@@ -194,7 +194,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     case 3 -> Star.THREE;
                     default -> null;
                 };
-                if (currentStar != null && currentStar.compareTo(maxHistoryStars) > 0) {
+                if (currentStar.compareTo(maxHistoryStars) > 0) {
                     int additionalStars = currentStar.ordinal() - maxHistoryStars.ordinal();
                     user.setStar(user.getStar() + additionalStars);
                 }
@@ -312,9 +312,9 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .timeout(Duration.ofSeconds(30))
                     .block();
 
-            if (responses == null || responses.length == 0) {
+            if (responses == null || responses.length == 0)
                 throw new RuntimeException("No response received from Judge0");
-            }
+
 
             log.info("Received {} responses from Judge0", responses.length);
 
