@@ -7,10 +7,13 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 
-# Download dependencies (cache layer)
-RUN ./gradlew dependencies --no-daemon || return 0
+# Make wrapper executable
+RUN chmod +x ./gradlew
 
-# Copy the rest of the source code
+# Download dependencies (cache layer)
+RUN ./gradlew build -x test --no-daemon || true
+
+# Copy source code
 COPY src src
 
 # Build the jar
