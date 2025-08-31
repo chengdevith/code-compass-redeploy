@@ -1,5 +1,5 @@
 # --------- Build Stage ---------
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM eclipse-temurin:24-jdk-alpine AS builder
 WORKDIR /app
 
 # Install required tools for Gradle
