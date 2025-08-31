@@ -5,9 +5,6 @@ import kh.edu.istad.codecompass.enums.ReportStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
@@ -22,7 +19,7 @@ public class CreatorRequest {
 
     ReportStatus status;
 
-    @OneToOne(mappedBy = "creatorRequest", cascade = CascadeType.ALL)
+    @OneToOne
     User user;
 
 }
