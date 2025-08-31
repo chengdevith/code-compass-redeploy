@@ -75,6 +75,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserHint>  userHints = new ArrayList<>();
 
+    @ManyToOne
+    private CreatorRequest creatorRequest;
+
     public void updateLevel() {
         this.level = Level.fromStars(this.star);
     }

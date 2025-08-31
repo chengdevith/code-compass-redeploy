@@ -4,13 +4,13 @@ spring:
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://localhost:9999/code_compass_db
+    url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
-    username: benz
-    password: benz
+    username: postgres
+    password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate.hibernate.format_sql: true
@@ -31,17 +31,17 @@ spring:
 
 # Config Server Path and BaseUri for media
 media:
-  server-path: /home/benz/ISTAD/SPRING/medias/
-  base-uri: http://localhost:8080/media/
+  server-path: /home/panha/Pictures/media/
+  base-uri: http://localhost:8081/media/
 
 server:
-  forward-headers-strategy: none
   port: 8081
+  forward-headers-strategy: none
 
 judge0:
   protocol: http
   domain: judge0-code-compass.devith.it.com
-#  port: 8888
+  #  port: 8888
   auth-token: ""
   http-connection-timeout: 10s
   http-read-timeout: 30s

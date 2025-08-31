@@ -6,6 +6,7 @@ import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.domain.TestCase;
 import kh.edu.istad.codecompass.dto.hint.response.HintResponse;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
@@ -38,6 +39,10 @@ public interface ProblemMapper {
     @Mapping(target = "author", source = "author.username")
     @Mapping(target = "hints", expression = "java(mapHints(entity.getHints()))")
     ProblemResponse fromEntityToResponse(Problem entity);
+
+    @Named("toSummary")
+    @Mapping(target = "tags", expression = "java(mapTags(entity.getTags()))")
+    ProblemSummaryResponse fromEntityToSummaryResponse(Problem entity);
     
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void fromUpdateRequestToEntity(UpdateProblemRequest request, @MappingTarget Problem entity);

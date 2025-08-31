@@ -12,10 +12,7 @@ import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
 import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 import kh.edu.istad.codecompass.enums.Star;
 import kh.edu.istad.codecompass.mapper.Judge0Mapper;
-import kh.edu.istad.codecompass.repository.ProblemRepository;
-import kh.edu.istad.codecompass.repository.SubmissionHistoryRepository;
-import kh.edu.istad.codecompass.repository.UserProblemRepository;
-import kh.edu.istad.codecompass.repository.UserRepository;
+import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +44,8 @@ public class Judge0ServiceImpl implements Judge0Service {
     private final UserRepository userRepository;
     private final ProblemRepository problemRepository;
     private final UserProblemRepository userProblemRepository;
+    private final PackageRepository packageRepository;
+    private final BadgeRepository badgeRepository;
 
     @Override
     public SubmissionResult createSubmission(CreateSubmissionRequest request) {
@@ -236,6 +235,10 @@ public class Judge0ServiceImpl implements Judge0Service {
             submissionHistories.setStar(star);
 
             submissionHistoryRepository.save(submissionHistories);
+
+//            Badge badge = new Badge();
+//            User user1 = new User();
+//            user1.setBadges(List.of(badge));
 
         } else {
             submissionHistories.setProblem(problem);
