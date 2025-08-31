@@ -13,6 +13,23 @@ RUN chmod +x ./gradlew
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 
+# Copy source code before building
+COPY src src
+
+# Download dependencies and build jar (skip tests)
+RUN ./gradlew clean bootJar -x test --no-daemon
+
+# Install required tools for Gradle
+RUN apk add --no-cache bash unzip findutils curl git
+
+# Copy Gradle wrapper & make it executable
+COPY gradlew .
+RUN chmod +x ./gradlew
+
+# Copy Gradle config
+COPY gradle gradle
+COPY build.gradle settings.gradle ./
+
 # Download dependencies
 RUN ./gradlew build -x test --no-daemon
 
