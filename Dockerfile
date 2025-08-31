@@ -1,12 +1,15 @@
 # --------- Build Stage ---------
-FROM ghcr.io/graalvm/graalvm-community:23 AS builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
+
+# Install required tools for Gradle
+RUN apk add --no-cache bash unzip xargs procps curl git
 
 # Copy Gradle wrapper & make it executable
 COPY gradlew .
 RUN chmod +x ./gradlew
 
-# Copy Gradle configuration
+# Copy Gradle config
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 
@@ -20,7 +23,7 @@ COPY src src
 RUN ./gradlew clean bootJar --no-daemon
 
 # --------- Runtime Stage ---------
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copy built jar
