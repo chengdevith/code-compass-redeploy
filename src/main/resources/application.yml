@@ -8,6 +8,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: benz
     password: benz
+    hikari:
+      initialization-fail-timeout: 30000
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: update

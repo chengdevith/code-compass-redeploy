@@ -13,7 +13,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U benz"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 10s
 
   code-compass-app:
