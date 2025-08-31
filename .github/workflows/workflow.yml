@@ -4,63 +4,28 @@ on:
 
 env:
   IMAGE_NAME: code-compass
-
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     environment: DOCKER_REPOSITORY
-
-    steps:
+    steps: 
       - name: Checkout Code 
         uses: actions/checkout@v3
-
-      - name: Set Docker Image Tag
-        run: echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
-
-      - name: Show the TAG value
+      - name: Use with SHA 
+        run: | 
+          echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+      - name: Show the TAGS values
         run: |
-          echo "TAG value is: $TAG"
-
-      - name: Login to Docker Registry
+          echo "TAG value is : ${{ env.TAG }}"
+      - name: Login to Docker Registry 
         run: |
-          echo "${{ secrets.PASSWORD }}" | docker login -u "${{ secrets.USERNAME }}" --password-stdin
-
+          echo "${{ secrets.PASSWORD }}" | docker login -u ${{ secrets.USERNAME }} --password-stdin
       - name: Build Docker Image
+        run: docker build -t ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }} .
+      - name: Push the Docker image 
         run: |
-          docker build -t ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:$TAG .
-          docker tag ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:$TAG ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:$TAG
-          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Logout from Docker Registry
+          docker push ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }}
+      - name: Logout from the Registry
         if: always()
-        run: docker logout
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: SSH into server and deploy container
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            echo "Pulling latest image..."
-            docker pull ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
-
-            echo "Stopping and removing old container..."
-            docker stop ${{ env.IMAGE_NAME }} || true
-            docker rm ${{ env.IMAGE_NAME }} || true
-
-            echo "Running new container..."
-            docker run -d \
-              --name ${{ env.IMAGE_NAME }} \
-              -p 8080:8080 \
-              --restart=always \
-              ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        run: |
+          docker logout 
