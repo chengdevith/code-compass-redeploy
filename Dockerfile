@@ -1,53 +1,52 @@
-# --------- Build Stage ---------
-FROM eclipse-temurin:21-jdk-alpine AS builder
+# Multi-stage build for Spring Boot application
+FROM gradle:8.5-jdk21 AS build
+
+# Set working directory
 WORKDIR /app
 
-# Install required tools for Gradle
-RUN apk add --no-cache bash unzip findutils curl git
-
-# Copy Gradle wrapper & make it executable
-COPY gradlew .
-RUN chmod +x ./gradlew
-
-# Copy Gradle config
-COPY gradle gradle
+# Copy gradle files first for better caching
 COPY build.gradle settings.gradle ./
+COPY gradle/ gradle/
 
-# Copy source code before building
-COPY src src
-
-# Download dependencies and build jar (skip tests)
-RUN ./gradlew clean bootJar -x test --no-daemon
-
-# Install required tools for Gradle
-RUN apk add --no-cache bash unzip findutils curl git
-
-# Copy Gradle wrapper & make it executable
-COPY gradlew .
-RUN chmod +x ./gradlew
-
-# Copy Gradle config
-COPY gradle gradle
-COPY build.gradle settings.gradle ./
-
-# Download dependencies
-RUN ./gradlew build -x test --no-daemon
+# Download dependencies (this layer will be cached if dependencies don't change)
+RUN gradle dependencies --no-daemon
 
 # Copy source code
-COPY src src
+COPY src/ src/
 
-# Build the jar
-RUN ./gradlew clean bootJar --no-daemon
+# Build the application
+RUN gradle bootJar --no-daemon
 
-# --------- Runtime Stage ---------
-FROM eclipse-temurin:21-jre-alpine
+# Runtime stage
+FROM openjdk:21-jdk-slim
+
+# Set working directory
 WORKDIR /app
 
-# Copy built jar
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Create directory for media files
+RUN mkdir -p /app/media
 
-# Expose port 8080
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Install curl for health checks (optional)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Copy the built jar from build stage
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Change ownership of the app directory to appuser
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
 EXPOSE 8080
 
-# Run Spring Boot
-ENTRYPOINT ["java","-jar","app.jar"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
