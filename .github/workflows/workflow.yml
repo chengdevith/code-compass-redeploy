@@ -32,4 +32,5 @@ jobs:
 
       - name: Copy docker-compose.yml to VM
         run: |
-          scp -i ${{ secrets.SSH_PRIVATE_KEY }} docker-compose.yml ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:~/code-compass/
+          scp -i ~/.ssh/id_ed25519_work ./docker-compose.yml chengdevith5@34.1.198.237:~/code-compass/
+
