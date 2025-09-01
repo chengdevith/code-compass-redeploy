@@ -6,6 +6,8 @@ services:
       POSTGRES_USER: benz
       POSTGRES_PASSWORD: benz
       POSTGRES_DB: code_compass_db
+    port:
+      - "5432:5432"  
     volumes:
       - code-compass-vol:/var/lib/postgresql/data
     networks:
