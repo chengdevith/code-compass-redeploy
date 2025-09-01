@@ -34,7 +34,8 @@ public class KeyCloakSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/index.html",
                                 "/swagger-ui/index.html/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/media/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/code-compass/problems/verified").permitAll()
@@ -45,6 +46,8 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/unverified").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "api/v1/code-compass/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.PATCH, "api/v1/code-compass/creator-requests").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
         );
 

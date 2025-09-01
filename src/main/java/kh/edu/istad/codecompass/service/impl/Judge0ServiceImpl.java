@@ -3,10 +3,7 @@ package kh.edu.istad.codecompass.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.config.Judge0TimeoutConfig;
-import kh.edu.istad.codecompass.domain.Problem;
-import kh.edu.istad.codecompass.domain.Submission;
-import kh.edu.istad.codecompass.domain.SubmissionHistories;
-import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.domain.*;
 import kh.edu.istad.codecompass.dto.jugde0.request.BatchSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.CreateSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.Judge0BatchRequest;
@@ -15,9 +12,7 @@ import kh.edu.istad.codecompass.dto.jugde0.response.Judge0SubmissionResponse;
 import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 import kh.edu.istad.codecompass.enums.Star;
 import kh.edu.istad.codecompass.mapper.Judge0Mapper;
-import kh.edu.istad.codecompass.repository.ProblemRepository;
-import kh.edu.istad.codecompass.repository.SubmissionHistoryRepository;
-import kh.edu.istad.codecompass.repository.UserRepository;
+import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.Judge0Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +43,9 @@ public class Judge0ServiceImpl implements Judge0Service {
     private final SubmissionHistoryRepository submissionHistoryRepository;
     private final UserRepository userRepository;
     private final ProblemRepository problemRepository;
+    private final UserProblemRepository userProblemRepository;
+    private final PackageRepository packageRepository;
+    private final BadgeRepository badgeRepository;
 
     @Override
     public SubmissionResult createSubmission(CreateSubmissionRequest request) {
@@ -148,19 +146,60 @@ public class Judge0ServiceImpl implements Judge0Service {
                 earnedCoins += baseCoins / 6.0;
             }
 
-            earnedCoins = (int) Math.min(Math.round(earnedCoins), problem.getCoin());
+            long roundedCoins = Math.round(earnedCoins);
+            earnedCoins = (int) Math.min(roundedCoins, problem.getCoin());
 
-            user.setCoin((int) earnedCoins + user.getCoin());
-            user.setStar(earnedStars + user.getStar());
-            user.updateLevel();
-
-            boolean alreadySolved = submissionHistoryRepository
+            boolean hasSolvedBefore = submissionHistoryRepository
                     .findByProblemIdAndUser_Username(problemId, username)
                     .stream()
                     .anyMatch(history -> history.getStatus().equals("Accepted"));
 
-            if (!alreadySolved)
+            if (! hasSolvedBefore) {
+                user.setCoin((int) earnedCoins + user.getCoin());
+                user.setStar(earnedStars + user.getStar());
+                user.updateLevel();
+
                 user.setTotal_problems_solved(user.getTotal_problems_solved() + 1);
+
+                UserProblem userProblem = new UserProblem();
+                userProblem.setUser(user);
+                userProblem.setProblem(problem);
+                userProblem.setIsSolved(true);
+                userProblemRepository.save(userProblem);
+            } else {
+
+                List<SubmissionHistories> submissionHistoriesList =
+                        submissionHistoryRepository.findByProblemIdAndUser_Username(problemId, username);
+
+                int maxHistoryCoins = submissionHistoriesList.getFirst().getCoin();
+                Star maxHistoryStars = submissionHistoriesList.getFirst().getStar();
+
+                // find max coin + max star from history
+                for (int i = 1; i < submissionHistoriesList.size(); i++) {
+                    maxHistoryCoins = Math.max(maxHistoryCoins, submissionHistoriesList.get(i).getCoin());
+                    if (submissionHistoriesList.get(i).getStar().compareTo(maxHistoryStars) > 0) {
+                        maxHistoryStars = submissionHistoriesList.get(i).getStar();
+                    }
+                }
+
+                // coins: only add if earned > history
+                if (earnedCoins > maxHistoryCoins)
+                    user.setCoin((int) (user.getCoin() + (earnedCoins - maxHistoryCoins)));
+
+
+                // stars: only add if earned > history
+                Star currentStar = switch (earnedStars) {
+                    case 1 -> Star.ONE;
+                    case 2 -> Star.TWO;
+                    case 3 -> Star.THREE;
+                    default -> null;
+                };
+                if (currentStar.compareTo(maxHistoryStars) > 0) {
+                    int additionalStars = currentStar.ordinal() - maxHistoryStars.ordinal();
+                    user.setStar(user.getStar() + additionalStars);
+                }
+                user.updateLevel();
+            }
 
             userRepository.save(user);
 
@@ -196,6 +235,10 @@ public class Judge0ServiceImpl implements Judge0Service {
             submissionHistories.setStar(star);
 
             submissionHistoryRepository.save(submissionHistories);
+
+//            Badge badge = new Badge();
+//            User user1 = new User();
+//            user1.setBadges(List.of(badge));
 
         } else {
             submissionHistories.setProblem(problem);
@@ -241,7 +284,8 @@ public class Judge0ServiceImpl implements Judge0Service {
         return requests;
     }
 
-        private Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
+    @Transactional
+        protected Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
         try {
             log.info("Sending batch request to Judge0 with {} submissions", request.submissions().size());
 
@@ -268,9 +312,9 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .timeout(Duration.ofSeconds(30))
                     .block();
 
-            if (responses == null || responses.length == 0) {
+            if (responses == null || responses.length == 0)
                 throw new RuntimeException("No response received from Judge0");
-            }
+
 
             log.info("Received {} responses from Judge0", responses.length);
 
@@ -381,11 +425,6 @@ public class Judge0ServiceImpl implements Judge0Service {
                 return createTimeoutResponse(token);
             } catch (Exception e) {
                 log.error("Error polling submission {} (attempt {}): {}", token, attempt + 1, e.getMessage());
-
-                // For debugging, log the full exception
-                if (log.isDebugEnabled()) {
-                    log.debug("Full exception for token " + token, e);
-                }
 
                 attempt++;
 

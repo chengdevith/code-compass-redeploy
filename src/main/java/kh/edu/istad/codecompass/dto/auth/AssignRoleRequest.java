@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto;
+package kh.edu.istad.codecompass.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import kh.edu.istad.codecompass.enums.Role;

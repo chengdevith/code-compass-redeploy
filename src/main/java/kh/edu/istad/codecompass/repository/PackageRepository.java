@@ -10,4 +10,7 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
 
     Optional<Package> findPackageByIdAndIsVerifiedFalse(Long id);
     Optional<Package> findByIdAndIsVerifiedTrue(Long id);
+    Boolean existsByName(String name);
+    Optional<Package> findByName(String name);
+    Optional<Package> findByNameAndIsVerifiedTrue(String name);
 }

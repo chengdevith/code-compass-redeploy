@@ -1,6 +1,6 @@
 package kh.edu.istad.codecompass.controller;
 
-import kh.edu.istad.codecompass.dto.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
 import kh.edu.istad.codecompass.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

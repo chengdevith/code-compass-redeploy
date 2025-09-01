@@ -31,7 +31,7 @@ public class Judge0TimeoutConfig {
     @Value("${judge0.max-polling-interval}")
     private Duration maxPollingInterval;                            // Max time between polls
     @Value("${judge0.max-polling-attempts}")
-    private int maxPollingAttempts = 36;                            // 3 minutes / 5 seconds
+    private int maxPollingAttempts;                            // 3 minutes / 5 seconds
 
     // Code execution limits (what Judge0 will enforce)
     @Value("${judge0.cpu-time-limit}")

@@ -20,4 +20,9 @@ public class MediaController {
         return mediaService.upload(file);
     }
 
+    @DeleteMapping("{fileName}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String fileName) {
+        mediaService.deleteFile(fileName);
+    }
 }

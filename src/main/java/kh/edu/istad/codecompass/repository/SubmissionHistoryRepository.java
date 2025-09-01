@@ -20,4 +20,6 @@ public interface SubmissionHistoryRepository extends JpaRepository<SubmissionHis
 
     List<SubmissionHistories> findByProblemIdAndUser_Username(Long problemId, String userUsername);
 
+    Boolean existsByProblemIdAndUser_Username(Long problemId, String userUsername);
+
 }

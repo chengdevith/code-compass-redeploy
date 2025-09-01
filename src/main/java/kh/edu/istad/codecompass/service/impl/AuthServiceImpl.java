@@ -2,10 +2,10 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.ws.rs.core.Response;
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.dto.ResetPasswordRequest;
+import kh.edu.istad.codecompass.dto.auth.ResetPasswordRequest;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.enums.Gender;
@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         if (userRepository.existsByUsername(registerRequest.username()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
 
 
         log.info("Register request: {}", registerRequest);
@@ -120,18 +120,6 @@ public class AuthServiceImpl implements AuthService {
 
                 userRepository.save(user);
 
-                // Save in Elasticsearch
-                UserIndex index = UserIndex.builder()
-                        .id(user.getId().toString())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .gender(user.getGender().name())
-                        .level(user.getLevel().name())
-                        .rank(user.getRank())
-                        .totalProblemsSolved(user.getTotal_problems_solved())
-                        .build();
-
-                userElasticsearchRepository.save(index);
             }
             return RegisterResponse.builder()
                     .email(userRepresentation.getEmail())
@@ -144,9 +132,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String userId) {
+
+        // 1. Get user resource from Keycloak
         UserResource userResource = keycloak.realm(realmName)
                 .users().get(userId);
+
+        // 2. Send verification email
         userResource.sendVerifyEmail();
+
     }
 
     @Override

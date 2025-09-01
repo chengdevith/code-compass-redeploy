@@ -34,13 +34,13 @@ public class MediaServiceImpl implements MediaService {
     public MediaResponse upload(MultipartFile file) {
 
         String name = UUID.randomUUID().toString();
-        int lastIndex = Objects.requireNonNull(file.getOriginalFilename()).lastIndexOf(".");
-        String extension = file.getOriginalFilename().substring(lastIndex + 1);
+        int lastIndex = Objects.requireNonNull(file.getOriginalFilename()).lastIndexOf('.');
+        String extension =file.getOriginalFilename().substring(lastIndex + 1);
         Path path = Paths.get(serverPath + String.format("%s.%s", name, extension));
 
-        try{
-            Files.copy(file.getInputStream(), path);
-        }catch (IOException e){
+        try {
+            Files.copy(file.getInputStream(),path);
+        } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"File upload failed");
         }
 
@@ -50,7 +50,7 @@ public class MediaServiceImpl implements MediaService {
         media.setMineTypeFile(file.getContentType());
         media.setIsDeleted(false);
 
-        mediaRepository.save(media);
+        media =  mediaRepository.save(media);
 
         return MediaResponse.builder()
                 .name(media.getName())
@@ -59,5 +59,19 @@ public class MediaServiceImpl implements MediaService {
                 .uri(baseUri + String.format("%s.%s", name, extension))
                 .size(file.getSize())
                 .build();
+    }
+
+    @Override
+    public void deleteFile(String fileName) {
+        Path filePath = Paths.get(serverPath + fileName);
+
+        if(!Files.exists(filePath)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"File not found");
+        }
+        try{
+            Files.delete(filePath);
+        }catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"File upload failed");
+        }
     }
 }

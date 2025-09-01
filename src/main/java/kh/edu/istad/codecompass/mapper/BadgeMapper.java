@@ -1,8 +1,8 @@
 package kh.edu.istad.codecompass.mapper;
 
 import kh.edu.istad.codecompass.domain.Badge;
-import kh.edu.istad.codecompass.dto.BadgeRequest;
-import kh.edu.istad.codecompass.dto.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.BadgeRequest;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
