@@ -4,6 +4,7 @@ on:
 
 env:
   IMAGE_NAME: code-compass
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest 
@@ -11,21 +12,24 @@ jobs:
     steps: 
       - name: Checkout Code 
         uses: actions/checkout@v3
-      - name: Use with SHA 
-        run: | 
-          echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
-      - name: Show the TAGS values
-        run: |
-          echo "TAG value is : ${{ env.TAG }}"
+
+      - name: Set TAG from SHA
+        run: echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
       - name: Login to Docker Registry 
         run: |
           echo "${{ secrets.PASSWORD }}" | docker login -u ${{ secrets.USERNAME }} --password-stdin
+
       - name: Build Docker Image
         run: docker build -t ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }} .
+
       - name: Push the Docker image 
-        run: |
-          docker push ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }}
-      - name: Logout from the Registry
+        run: docker push ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }}
+
+      - name: Logout from Docker Registry
         if: always()
+        run: docker logout
+
+      - name: Copy docker-compose.yml to VM
         run: |
-          docker logout 
+          scp -i ${{ secrets.SSH_PRIVATE_KEY }} docker-compose.yml ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:~/code-compass/
