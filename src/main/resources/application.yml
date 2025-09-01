@@ -4,7 +4,7 @@ spring:
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://code-compass-db:5432/code_compass_db
+    url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
     username: benz
     password: benz

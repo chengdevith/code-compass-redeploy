@@ -1,39 +1,15 @@
 services:
-  code-compass-db:
-    image: postgres:16.9-bullseye
-    container_name: code-compass-db
-    environment:
-      POSTGRES_USER: benz
-      POSTGRES_PASSWORD: benz
-      POSTGRES_DB: code_compass_db
-    port:
-      - "5432:5432"  
-    volumes:
-      - code-compass-vol:/var/lib/postgresql/data
-    networks:
-      - code-compass-net
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U benz"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
-
   code-compass-app:
     port:
       - "8080:8080"
     image: benz3528/code-compass:latest
     container_name: code-compass-app
-    depends_on:
-      code-compass-db:
-        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://code-compass-db:5432/code_compass_db
       SPRING_DATASOURCE_USERNAME: benz
       SPRING_DATASOURCE_PASSWORD: benz
       MEDIA_SERVER_PATH: /app/media/
-      MEDIA_BASE_URI: http://localhost:8080/media/
+      MEDIA_BASE_URI: https://code-compass.devith.it.com/media/
     volumes:
       - ./media:/app/media
     networks:
