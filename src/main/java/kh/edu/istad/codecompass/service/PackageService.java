@@ -1,8 +1,8 @@
 package kh.edu.istad.codecompass.service;
 
 
-import kh.edu.istad.codecompass.dto.packageDTO.AddProblemToPackageRequest;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageRequest;
+import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageRequest;
+import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 
 import java.util.List;

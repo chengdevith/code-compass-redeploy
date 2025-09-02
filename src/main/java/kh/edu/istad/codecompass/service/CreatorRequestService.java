@@ -1,9 +1,9 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.dto.creatorRequest.CreatorRequestDto;
-import kh.edu.istad.codecompass.dto.creatorRequest.CreatorResponseDTO;
-import kh.edu.istad.codecompass.dto.creatorRequest.ReviewCreatorResponse;
-import kh.edu.istad.codecompass.dto.creatorRequest.UpdateRoleRequest;
+import kh.edu.istad.codecompass.dto.creatorRequest.request.CreatorRequestDto;
+import kh.edu.istad.codecompass.dto.creatorRequest.response.CreatorResponseDTO;
+import kh.edu.istad.codecompass.dto.creatorRequest.response.ReviewCreatorResponse;
+import kh.edu.istad.codecompass.dto.creatorRequest.request.UpdateRoleRequest;
 
 import java.util.List;
 

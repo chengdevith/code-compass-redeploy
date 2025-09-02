@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.packageDTO;
+package kh.edu.istad.codecompass.dto.packageDTO.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;

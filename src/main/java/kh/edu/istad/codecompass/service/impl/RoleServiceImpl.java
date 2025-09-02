@@ -1,6 +1,6 @@
 package kh.edu.istad.codecompass.service.impl;
 
-import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.request.AssignRoleRequest;
 import kh.edu.istad.codecompass.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;

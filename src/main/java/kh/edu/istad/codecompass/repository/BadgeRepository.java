@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface BadgeRepository extends JpaRepository<Badge, Long> {
 
+    Optional<Badge> findBadgeByNameAndIsVerifiedTrue(String name);
 
     Optional<Badge> findBadgeByIdAndIsVerifiedFalse(long id);
 
@@ -19,4 +20,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
     List<Badge> findBadgeByIsVerifiedTrue();
 
     boolean existsBadgeByName(String name);
+
+    Optional<Badge> findBadgesByProblemPackage_Name(String name);
 }

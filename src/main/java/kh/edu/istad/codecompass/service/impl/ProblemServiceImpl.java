@@ -2,7 +2,9 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
+import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.dto.hint.response.UserHintResponse;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -106,7 +109,7 @@ public class ProblemServiceImpl implements ProblemService {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        Problem problem = problemRepository.findById(problemId)
+        Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
 
         //  Get UserHint for a specific user & problem
@@ -161,28 +164,53 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Transactional
     @Override
-    public List<ProblemResponse> getProblems() {
+    public List<ProblemSummaryResponse> getProblems() {
         return problemRepository
                 .findAll()
-                .stream().map(problemMapper::fromEntityToResponse).toList();
+                .stream().map(problem ->
+                {
+                    return ProblemSummaryResponse
+                            .builder()
+                            .id(problem.getId())
+                            .difficulty(problem.getDifficulty())
+                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                            .title(problem.getTitle())
+                            .build();
+                }).toList();
     }
 
     @Transactional
     @Override
-    public List<ProblemResponse> getUnverifiedProblems() {
+    public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemRepository.findProblemsByIsVerifiedFalse()
                 .stream()
-                .map(problemMapper::fromEntityToResponse)
-                .toList();
+                .map(problem ->
+                {
+                    return ProblemSummaryResponse
+                            .builder()
+                            .id(problem.getId())
+                            .difficulty(problem.getDifficulty())
+                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                            .title(problem.getTitle())
+                            .build();
+                }).toList();
     }
 
     @Transactional
     @Override
-    public List<ProblemResponse> getVerifiedProblems() {
+    public List<ProblemSummaryResponse> getVerifiedProblems() {
         return problemRepository.findProblemsByIsVerifiedTrue()
                 .stream()
-                .map(problemMapper::fromEntityToResponse)
-                .toList();
+                .map(problem ->
+                {
+                    return ProblemSummaryResponse
+                            .builder()
+                            .id(problem.getId())
+                            .difficulty(problem.getDifficulty())
+                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                            .title(problem.getTitle())
+                            .build();
+                }).toList();
     }
 
     @Transactional

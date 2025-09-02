@@ -31,4 +31,7 @@ public class Package {
 
     @ManyToMany
     private Set<Problem> problems = new HashSet<>();
+
+    @OneToOne(mappedBy = "problemPackage")
+    Badge badge;
 }

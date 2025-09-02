@@ -1,15 +1,16 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.ws.rs.core.Response;
+import kh.edu.istad.codecompass.domain.LeaderBoard;
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
-import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.dto.auth.ResetPasswordRequest;
-import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
+import kh.edu.istad.codecompass.dto.auth.request.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.request.RegisterRequest;
+import kh.edu.istad.codecompass.dto.auth.request.ResetPasswordRequest;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Role;
+import kh.edu.istad.codecompass.repository.LeaderBoardRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
 import kh.edu.istad.codecompass.service.RoleService;
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleService roleService;
     private final UserRepository userRepository;
     private final UserElasticsearchRepository userElasticsearchRepository;
+    private final LeaderBoardRepository leaderBoardRepository;
 
     @Value("${keycloak-admin.realm}")
     private String realmName;
@@ -114,11 +116,23 @@ public class AuthServiceImpl implements AuthService {
                 user.setIsDeleted(false);
                 user.setCoin(20);
                 user.setStar(0);
-                user.setTotal_problems_solved(0);
+                user.setTotalProblemsSolved(0);
                 user.setRank(userRepository.count() + 1);
                 user.updateLevel();
 
                 userRepository.save(user);
+
+                LeaderBoard leaderBoard = leaderBoardRepository.findById(1L)
+                        .orElseGet(LeaderBoard::new);
+
+                // Set the user-leaderboard relationship
+                user.setLeaderBoard(leaderBoard);
+
+                // Add user to leaderboard's list
+                leaderBoard.getUsers().add(user);
+
+                // Save leaderboard (cascade will save user too)
+                leaderBoardRepository.save(leaderBoard);
 
             }
             return RegisterResponse.builder()

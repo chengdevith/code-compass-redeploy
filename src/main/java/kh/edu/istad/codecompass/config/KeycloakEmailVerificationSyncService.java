@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.config;
 
+import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
@@ -30,10 +31,12 @@ public class KeycloakEmailVerificationSyncService {
     private long lastProcessedTime = 0;
 
     @Scheduled(fixedRate = 30000) // every 30 seconds
+    @Transactional
     public void syncVerifiedUsersScheduled() {
         syncVerifiedUsers();
     }
 
+    @Transactional
     public void syncVerifiedUsers() {
 
         String adminToken = keycloakTokenService.getAdminToken();
@@ -58,6 +61,8 @@ public class KeycloakEmailVerificationSyncService {
                         .bodyToMono(Map.class)
                         .block();
 
+                assert userMap != null;
+
                 String username = (String) userMap.get("username");
 
                 User user = userRepository.findUserByUsername(username)
@@ -73,7 +78,7 @@ public class KeycloakEmailVerificationSyncService {
                             .gender(user.getGender() != null ? user.getGender().name() : null)
                             .level(user.getLevel() != null ? user.getLevel().name() : null)
                             .rank(user.getRank())
-                            .totalProblemsSolved(user.getTotal_problems_solved())
+                            .totalProblemsSolved(user.getTotalProblemsSolved())
                             .location(user.getLocation())
                             .github(user.getGithub())
                             .linkedin(user.getLinkedin())

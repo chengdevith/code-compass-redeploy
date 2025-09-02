@@ -1,6 +1,6 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.dto.auth.AssignRoleRequest;
+import kh.edu.istad.codecompass.dto.auth.request.AssignRoleRequest;
 
 public interface RoleService {
 

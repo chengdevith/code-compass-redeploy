@@ -17,11 +17,9 @@ public class TestCase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String input;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String expectedOutput;
 

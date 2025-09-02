@@ -1,9 +1,9 @@
 package kh.edu.istad.codecompass.controller;
 
 import jakarta.validation.Valid;
-import kh.edu.istad.codecompass.dto.auth.RegisterRequest;
+import kh.edu.istad.codecompass.dto.auth.request.RegisterRequest;
 import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
-import kh.edu.istad.codecompass.dto.auth.ResetPasswordRequest;
+import kh.edu.istad.codecompass.dto.auth.request.ResetPasswordRequest;
 import kh.edu.istad.codecompass.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

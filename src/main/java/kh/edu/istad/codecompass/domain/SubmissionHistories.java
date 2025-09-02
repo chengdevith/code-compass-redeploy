@@ -19,7 +19,6 @@ public class SubmissionHistories {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @Lob
     private String code;
 
     @Column(nullable = false)
