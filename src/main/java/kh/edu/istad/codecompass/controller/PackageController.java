@@ -20,12 +20,12 @@ public class PackageController {
 
     private final PackageService packageService;
 
-    @PatchMapping("/add-problems")
+    @PutMapping("/add-problems")
     public PackageResponse addProblemsToPackage(@RequestBody @Valid AddProblemToPackageRequest request) {
         return  packageService.addProblemsToPackage(request);
     }
 
-    @PatchMapping("/{id}/verification")
+    @PutMapping("/{id}/verification")
    ResponseEntity<String>verifyPackage(@PathVariable Long id,
                                       @RequestParam(defaultValue = "true") Boolean verified){
        packageService.verifyPackage(id, verified);
@@ -40,14 +40,14 @@ public class PackageController {
 //    }
 
 
-    @GetMapping("/all")
+    @GetMapping
     public List<PackageResponse>getAllPackages() {
     return packageService.getAllPackages();
     }
 
     @PatchMapping("/{id}")
     public PackageResponse updatePackage(@PathVariable Long id,
-         @RequestBody   PackageRequest packageRequest) {
+         @RequestBody PackageRequest packageRequest) {
         return packageService.updatePackage(id, packageRequest);
 
     }

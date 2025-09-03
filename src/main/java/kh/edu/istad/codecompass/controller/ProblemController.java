@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/code-compass/problems")
+@RequestMapping("/api/v1/code-compass/problems")
 //@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
     private final ProblemService problemService;
@@ -55,6 +55,7 @@ public class ProblemController {
         return problemService.getProblem(problemId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{problemId}/verification")
     ResponseEntity<String> verifyProblem(
             @PathVariable
@@ -92,7 +93,7 @@ public class ProblemController {
         return problemService.getUnverifiedProblems();
     }
 
-    @GetMapping()
+    @GetMapping
     public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
     }

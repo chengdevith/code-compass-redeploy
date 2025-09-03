@@ -14,7 +14,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("assign-role")
+    @PutMapping("/assign-role")
     public void assignRole(@RequestBody AssignRoleRequest assignRoleRequest) {
         this.roleService.assignRole(assignRoleRequest);
     }

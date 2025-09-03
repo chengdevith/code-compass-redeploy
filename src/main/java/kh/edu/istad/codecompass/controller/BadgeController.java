@@ -27,7 +27,7 @@ public class BadgeController {
         return ResponseEntity.ok("The badge has successfully been added to package");
     }
 
-     @PatchMapping("/{id}")
+    @PatchMapping("/{id}")
     ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);
         return ResponseEntity.ok("The badge been updated successfully");
@@ -58,7 +58,7 @@ public class BadgeController {
 
     }
 
-    @GetMapping()
+    @GetMapping
     public List<BadgesResponse> getAllBadges(){
         return badgesService.getAllBadges();
     }

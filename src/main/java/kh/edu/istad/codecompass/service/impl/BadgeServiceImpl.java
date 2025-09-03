@@ -76,7 +76,6 @@ public class BadgeServiceImpl implements BadgesService {
     }
 
 
-    @Transactional
     @Override
     public List<BadgesResponse> VerifiedBadges() {
 
@@ -114,7 +113,6 @@ public class BadgeServiceImpl implements BadgesService {
         return badgeMapper.toBadgeResponse(badge);
     }
 
-    @Transactional
     @Override
     public BadgesResponse getBadgeById(Long id) {
         Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedTrue(id).orElseThrow(
