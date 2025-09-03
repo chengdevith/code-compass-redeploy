@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Code Compass",
                 version = "V1",
-                description = "CodeCompass is an innovative online platform designed for coders of all skill levels to sharpen their programming skills and tackle coding challenges similar to LeetCode. With a user-friendly interface, CodeCompass offers a diverse range of coding tasks across various programming languages, allowing users to solve problems, test their solutions, and improve their algorithmic thinking. Whether you're preparing for technical interviews or simply looking to enhance your coding expertise, CodeCompass provides a dynamic and engaging environment to practice, learn, and grow."
+                description = "CodeCompass is an online platform for coders to practice coding challenges like LeetCode. It offers diverse tasks across multiple programming languages, helping users enhance their algorithmic skills and prepare for technical interviews in a user-friendly environment."
         )
 )
 public class SwaggerConfig {
