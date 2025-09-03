@@ -1,0 +1,65 @@
+name: Build and Deploy Code Compass
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  IMAGE_NAME: code-compass
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Create commit SHA tag
+      - name: Set TAG
+        run: echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - name: Show TAG value
+        run: echo "Using TAG ${{ env.TAG }}"
+
+      # Login to Docker Hub
+      - name: Login to Docker Registry
+        run: echo "${{ secrets.PASSWORD }}" | docker login -u ${{ secrets.USERNAME }} --password-stdin
+
+      # Build and tag image with SHA and latest
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -t ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} \
+            -t ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+
+      # Push both tags
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Logout from Docker Registry
+        if: always()
+        run: docker logout
+
+      # Deploy to server via SSH
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd postgres/
+            # Stop old containers
+            docker compose down
+            
+            # Remove old images for this app
+            docker rmi -f benz3528/code-compass:latest || true
+
+            # Pull fresh latest image
+            docker pull benz3528/code-compass:latest
+
+            # Start with new image
+            docker compose up -d --force-recreate --remove-orphans

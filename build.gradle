@@ -37,7 +37,7 @@ dependencies {
 
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+//    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     //  mapstruct dependencies
     compileOnly 'org.mapstruct:mapstruct:1.6.3'

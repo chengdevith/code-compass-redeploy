@@ -9,6 +9,7 @@ import lombok.Builder;
 
 @Builder
 public record RegisterRequest(
+        
         @NotBlank
         @JsonProperty("first_name")
         String firstName,
