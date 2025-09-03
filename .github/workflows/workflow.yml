@@ -52,4 +52,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd postgres/
-            docker compose down && docker compose up -d
+            # Stop old containers
+            docker compose down
+            
+            # Remove old images for this app
+            docker rmi -f benz3528/code-compass:latest || true
+
+            # Pull fresh latest image
+            docker pull benz3528/code-compass:latest
+
+            # Start with new image
+            docker compose up -d --force-recreate --remove-orphans
