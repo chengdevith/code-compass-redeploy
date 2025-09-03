@@ -17,7 +17,6 @@ public class Hint {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 

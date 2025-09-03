@@ -4,7 +4,7 @@ package kh.edu.istad.codecompass.mapper;
 import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageRequest;
+import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import org.mapstruct.*;

@@ -2,10 +2,10 @@ package kh.edu.istad.codecompass.service.impl;
 
 import kh.edu.istad.codecompass.domain.CreatorRequest;
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.creatorRequest.CreatorRequestDto;
-import kh.edu.istad.codecompass.dto.creatorRequest.CreatorResponseDTO;
-import kh.edu.istad.codecompass.dto.creatorRequest.ReviewCreatorResponse;
-import kh.edu.istad.codecompass.dto.creatorRequest.UpdateRoleRequest;
+import kh.edu.istad.codecompass.dto.creatorRequest.request.CreatorRequestDto;
+import kh.edu.istad.codecompass.dto.creatorRequest.response.CreatorResponseDTO;
+import kh.edu.istad.codecompass.dto.creatorRequest.response.ReviewCreatorResponse;
+import kh.edu.istad.codecompass.dto.creatorRequest.request.UpdateRoleRequest;
 import kh.edu.istad.codecompass.enums.ReportStatus;
 import kh.edu.istad.codecompass.repository.CreatorRequestRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;

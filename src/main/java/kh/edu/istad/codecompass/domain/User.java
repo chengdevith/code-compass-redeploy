@@ -43,7 +43,7 @@ public class User {
     private Integer coin;
     private Integer star;
     private Long rank;
-    private Integer total_problems_solved;
+    private Integer totalProblemsSolved;
 
     @Column(nullable = false)
     private Boolean isDeleted;
@@ -52,6 +52,7 @@ public class User {
     private List<Problem> problems = new ArrayList<>();
 
     @ManyToOne
+    @JoinColumn(name = "leader_board_id")
     private LeaderBoard leaderBoard;
 
     @ManyToMany

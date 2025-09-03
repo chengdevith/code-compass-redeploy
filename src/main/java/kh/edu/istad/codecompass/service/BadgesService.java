@@ -1,11 +1,13 @@
 package kh.edu.istad.codecompass.service;
 
-import kh.edu.istad.codecompass.dto.badge.BadgeRequest;
+import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
+import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
 import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 
 import java.util.List;
 
 public interface BadgesService {
+    void addBadgeToPackage(AddBadgeToPackageRequest request);
 
     void updateBadge(Long id, BadgeRequest badgeRequest);
 
@@ -15,9 +17,9 @@ public interface BadgesService {
 
     List<BadgesResponse>VerifiedBadges();
 
-    List<BadgesResponse> getAllBadges(BadgeRequest badgeRequest);
+    List<BadgesResponse> getAllBadges();
 
-    BadgesResponse createBadge(BadgeRequest badgeRequest);
+    BadgesResponse createBadge(BadgeRequest badgeRequest, String author);
 
-    BadgesResponse getBadges(Long id);
+    BadgesResponse getBadgeById(Long id);
 }

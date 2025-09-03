@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.auth;
+package kh.edu.istad.codecompass.dto.auth.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;

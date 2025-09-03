@@ -4,6 +4,7 @@ import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public interface ProblemService {
      * The list may be empty if no problems exist.
      * @author Panharoth
      */
-    List<ProblemResponse> getProblems();
+    List<ProblemSummaryResponse> getProblems();
 
     /**
      * Retrieves a list of all unverified problems.
@@ -62,7 +63,7 @@ public interface ProblemService {
      * that are currently unverified. The list will be empty if all problems are verified
      * @author Panharoth
      */
-    List<ProblemResponse> getUnverifiedProblems();
+    List<ProblemSummaryResponse> getUnverifiedProblems();
 
     /**
      * Retrieves a list of all verified problems.
@@ -74,7 +75,7 @@ public interface ProblemService {
      * verified problem. The list will be empty if there are no verified problems.
      * @author Panharoth
      */
-    List<ProblemResponse> getVerifiedProblems();
+    List<ProblemSummaryResponse> getVerifiedProblems();
 
     /**
      * Verifies or un-verifies a problem, changing its public visibility.

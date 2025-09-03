@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.creatorRequest;
+package kh.edu.istad.codecompass.dto.creatorRequest.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

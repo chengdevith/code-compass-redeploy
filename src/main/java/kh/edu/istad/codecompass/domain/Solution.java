@@ -16,11 +16,9 @@ public class Solution {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @Lob
     private String sourceCode;
 
     @Column(columnDefinition = "TEXT")
-    @Lob
     private String explanation;
 
     @Column(nullable = false)

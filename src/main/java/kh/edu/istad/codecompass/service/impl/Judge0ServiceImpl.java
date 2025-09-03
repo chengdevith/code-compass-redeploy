@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.config.Judge0TimeoutConfig;
 import kh.edu.istad.codecompass.domain.*;
+import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.dto.jugde0.request.BatchSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.CreateSubmissionRequest;
 import kh.edu.istad.codecompass.dto.jugde0.request.Judge0BatchRequest;
@@ -29,8 +30,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -46,6 +49,7 @@ public class Judge0ServiceImpl implements Judge0Service {
     private final UserProblemRepository userProblemRepository;
     private final PackageRepository packageRepository;
     private final BadgeRepository badgeRepository;
+    private final LeaderBoardRepository leaderBoardRepository;
 
     @Override
     public SubmissionResult createSubmission(CreateSubmissionRequest request) {
@@ -92,7 +96,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         );
 
-        Problem problem = problemRepository.findById(problemId).orElseThrow(
+        Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
         );
 
@@ -116,6 +120,7 @@ public class Judge0ServiceImpl implements Judge0Service {
         Double peekTimeExecution = problem.getBestTimeExecution();
         Integer peekMemoryUsage = problem.getBestMemoryUsage();
 
+//                  status = accepted
         if (counter.get() == submissions.size()) {
             earnedStars++; // Base star for solving
             double averageUserMemoryUsage = (double) userMemoryUsage.get() / counter.get();
@@ -133,18 +138,17 @@ public class Judge0ServiceImpl implements Judge0Service {
             double earnedCoins = baseCoins / 4.0;   // Base reward for solving
 
             // Time efficiency reward
-            if (averageUserExecutionTime <= peekTimeExecution * 1.5) { // within 50% of best
+            if (averageUserExecutionTime <= peekTimeExecution * 1.5) // within 50% of best
                 earnedCoins += baseCoins / 4.0;
-            } else if (averageUserExecutionTime <= peekTimeExecution * 2) { // within 100% slower
+             else if (averageUserExecutionTime <= peekTimeExecution * 2)  // within 100% slower
                 earnedCoins += baseCoins / 6.0;
-            }
 
             // Memory efficiency reward
-            if (averageUserMemoryUsage <= peekMemoryUsage * 1.5) {
+            if (averageUserMemoryUsage <= peekMemoryUsage * 1.5)
                 earnedCoins += baseCoins / 4.0;
-            } else if (averageUserMemoryUsage <= peekMemoryUsage * 2) {
+            else if (averageUserMemoryUsage <= peekMemoryUsage * 2)
                 earnedCoins += baseCoins / 6.0;
-            }
+
 
             long roundedCoins = Math.round(earnedCoins);
             earnedCoins = (int) Math.min(roundedCoins, problem.getCoin());
@@ -154,18 +158,60 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .stream()
                     .anyMatch(history -> history.getStatus().equals("Accepted"));
 
-            if (! hasSolvedBefore) {
+//            user has solved this specific problem for the first time
+            if (! hasSolvedBefore ) {
                 user.setCoin((int) earnedCoins + user.getCoin());
                 user.setStar(earnedStars + user.getStar());
                 user.updateLevel();
 
-                user.setTotal_problems_solved(user.getTotal_problems_solved() + 1);
+                user.setTotalProblemsSolved(user.getTotalProblemsSolved() + 1);
 
                 UserProblem userProblem = new UserProblem();
                 userProblem.setUser(user);
                 userProblem.setProblem(problem);
                 userProblem.setIsSolved(true);
                 userProblemRepository.save(userProblem);
+
+                List<UserProblem> userProblemList = userProblemRepository
+                        .findAllByUserIdAndIsSolvedTrue(user.getId());
+
+                // collect all solved problem IDs
+                Set<Long> solvedProblemIds = userProblemList.stream()
+                        .map(u -> u.getProblem().getId())
+                        .collect(Collectors.toSet());
+
+                List<Package> packageList = packageRepository.findPackagesByProblems_Id(problemId);
+
+                for (Package pack : packageList) {
+                    Set<Long> packageProblemIds = pack.getProblems().stream()
+                            .map(Problem::getId)
+                            .collect(Collectors.toSet());
+
+                    // check if user solved all problems in the package
+                    boolean solvedAll = solvedProblemIds.containsAll(packageProblemIds);
+                    if (solvedAll) {
+                        Badge badge = badgeRepository.findBadgesByProblemPackage_Name(pack.getName())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
+
+                        if (!user.getBadges().contains(badge))  // prevent duplicates
+                            user.getBadges().add(badge);
+
+                    }
+                }
+
+                // Fetch the shared leaderboard (create if it doesn't exist)
+                LeaderBoard leaderBoard = leaderBoardRepository.findById(1L)
+                        .orElseGet(LeaderBoard::new);
+
+                // Set the user-leaderboard relationship
+                user.setLeaderBoard(leaderBoard);
+
+                // Add user to leaderboard's list
+                leaderBoard.getUsers().add(user);
+
+                // Save leaderboard (cascade will save user too)
+                leaderBoardRepository.save(leaderBoard);
+
             } else {
 
                 List<SubmissionHistories> submissionHistoriesList =
@@ -235,10 +281,6 @@ public class Judge0ServiceImpl implements Judge0Service {
             submissionHistories.setStar(star);
 
             submissionHistoryRepository.save(submissionHistories);
-
-//            Badge badge = new Badge();
-//            User user1 = new User();
-//            user1.setBadges(List.of(badge));
 
         } else {
             submissionHistories.setProblem(problem);
@@ -493,4 +535,3 @@ public class Judge0ServiceImpl implements Judge0Service {
         return new Judge0BatchResponse(mappedResponses);
     }
 }
-

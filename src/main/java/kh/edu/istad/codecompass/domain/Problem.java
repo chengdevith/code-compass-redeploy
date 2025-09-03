@@ -20,7 +20,6 @@ public class Problem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 

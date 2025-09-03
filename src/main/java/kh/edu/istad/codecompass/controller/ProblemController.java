@@ -5,10 +5,12 @@ import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/code-compass/problems")
+@RequestMapping("/api/v1/code-compass/problems")
 //@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
     private final ProblemService problemService;
@@ -53,6 +55,7 @@ public class ProblemController {
         return problemService.getProblem(problemId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{problemId}/verification")
     ResponseEntity<String> verifyProblem(
             @PathVariable
@@ -86,17 +89,17 @@ public class ProblemController {
     }
 
     @GetMapping("/unverified")
-    public List<ProblemResponse> getUnverifiedProblems() {
+    public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemService.getUnverifiedProblems();
     }
 
-    @GetMapping("/all")
-    public List<ProblemResponse> getAllProblems() {
+    @GetMapping
+    public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
     }
 
     @GetMapping("/verified")
-    public List<ProblemResponse> getVerifiedProblems() {
+    public List<ProblemSummaryResponse> getVerifiedProblems() {
         return problemService.getVerifiedProblems();
     }
 

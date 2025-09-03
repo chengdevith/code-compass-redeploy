@@ -22,9 +22,9 @@ public class Badge {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
+    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private String icon_url;
 
     @Column(nullable = false)
@@ -36,9 +36,12 @@ public class Badge {
     @Column(nullable = false)
     private Boolean isVerified;
 
+    @Column(nullable = false)
+    private String author;
+
     @ManyToMany(mappedBy = "badges")
     private List<User> user = new ArrayList<>();
 
     @OneToOne
-    private Package problem_package;
+    private Package problemPackage;
 }

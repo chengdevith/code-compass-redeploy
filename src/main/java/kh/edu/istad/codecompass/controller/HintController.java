@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/code-compass/hints")
+@RequestMapping("/api/v1/code-compass/hints")
 public class HintController {
 
     private final HintService hintService;
