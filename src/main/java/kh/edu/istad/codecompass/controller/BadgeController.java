@@ -36,12 +36,12 @@ public class BadgeController {
 
     @GetMapping("/unverified")
     public List<BadgesResponse>getUnverifiedBadges(){
-        return badgesService.UnverifiedBadges();
+        return badgesService.unverifiedBadges();
     }
 
     @GetMapping("/verified")
     public List<BadgesResponse>getVerifiedBadges(){
-        return badgesService.VerifiedBadges();
+        return badgesService.verifiedBadges();
     }
 
     @GetMapping("/{id}")

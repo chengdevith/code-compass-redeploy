@@ -13,9 +13,9 @@ public interface BadgesService {
 
     void verifyBadges(Long id, Boolean isVerified);
 
-    List<BadgesResponse>UnverifiedBadges();
+    List<BadgesResponse>unverifiedBadges();
 
-    List<BadgesResponse>VerifiedBadges();
+    List<BadgesResponse>verifiedBadges();
 
     List<BadgesResponse> getAllBadges();
 

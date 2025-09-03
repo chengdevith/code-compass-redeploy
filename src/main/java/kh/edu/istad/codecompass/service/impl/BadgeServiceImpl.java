@@ -1,11 +1,10 @@
 package kh.edu.istad.codecompass.service.impl;
 
-import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.Badge;
 import kh.edu.istad.codecompass.domain.Package;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.mapper.BadgeMapper;
 import kh.edu.istad.codecompass.repository.BadgeRepository;
 import kh.edu.istad.codecompass.repository.PackageRepository;
@@ -66,7 +65,7 @@ public class BadgeServiceImpl implements BadgesService {
     }
 
     @Override
-    public List<BadgesResponse> UnverifiedBadges() {
+    public List<BadgesResponse> unverifiedBadges() {
 
         return badgeRepository
                 .findBadgeByIsVerifiedFalse()
@@ -77,7 +76,7 @@ public class BadgeServiceImpl implements BadgesService {
 
 
     @Override
-    public List<BadgesResponse> VerifiedBadges() {
+    public List<BadgesResponse> verifiedBadges() {
 
         return badgeRepository.findBadgeByIsVerifiedTrue()
                 .stream()
