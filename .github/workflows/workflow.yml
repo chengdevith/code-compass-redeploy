@@ -1,31 +1,56 @@
+name: Build and Deploy Code Compass
+
 on:
   push:
     branches: [ "main" ]
 
 env:
   IMAGE_NAME: code-compass
+
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest 
-    environment: DOCKER_REPOSITORY
-    steps: 
-      - name: Checkout Code 
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo
+      - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Use with SHA 
-        run: | 
-          echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
-      - name: Show the TAGS values
-        run: |
-          echo "TAG value is : ${{ env.TAG }}"
-      - name: Login to Docker Registry 
-        run: |
-          echo "${{ secrets.PASSWORD }}" | docker login -u ${{ secrets.USERNAME }} --password-stdin
+
+      # Create commit SHA tag
+      - name: Set TAG
+        run: echo "TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - name: Show TAG value
+        run: echo "Using TAG ${{ env.TAG }}"
+
+      # Login to Docker Hub
+      - name: Login to Docker Registry
+        run: echo "${{ secrets.PASSWORD }}" | docker login -u ${{ secrets.USERNAME }} --password-stdin
+
+      # Build and tag image with SHA and latest
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }} .
-      - name: Push the Docker image 
         run: |
-          docker push ${{ secrets.USERNAME }}/${{env.IMAGE_NAME }}:${{ env.TAG }}
-      - name: Logout from the Registry
+          docker build \
+            -t ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }} \
+            -t ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+
+      # Push both tags
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          docker push ${{ secrets.USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Logout from Docker Registry
         if: always()
-        run: |
-          docker logout 
+        run: docker logout
+
+      # Deploy to server via SSH
+      - name: Deploy on Server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd postgres/
+            docker-compose pull
+            docker-compose up -d
