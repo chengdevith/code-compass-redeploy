@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/v1/code-compass/submissions")
 @CrossOrigin(origins = {"http://localhost:3000"})
-public class Judge0Controller {
+public class SubmissionController {
 
     private final Judge0Service judge0Service;
 
