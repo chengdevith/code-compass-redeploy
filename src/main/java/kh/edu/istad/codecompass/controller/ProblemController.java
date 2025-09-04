@@ -1,5 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
@@ -25,6 +27,7 @@ public class ProblemController {
     private final ProblemService problemService;
 
     @PostMapping
+    @Operation(summary = "Creates a new problem", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     public ProblemResponse createProblem(
             @RequestBody @Valid
@@ -38,6 +41,7 @@ public class ProblemController {
     }
 
     @GetMapping("/{problemId}/me")
+    @Operation(summary = "Access to different problem details for different user", security = {@SecurityRequirement(name = "bearerAuth")})
     public ProblemResponseBySpecificUser getProblemBySpecificUser(
             @PathVariable
             Long problemId,
@@ -51,11 +55,14 @@ public class ProblemController {
 
 
     @GetMapping("/{problemId}")
+    @Operation(summary = "Access to a problem (public)")
+    @PreAuthorize("permitAll()")
     public ProblemResponse findProblemById(@PathVariable Long problemId) {
         return problemService.getProblem(problemId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Verifies a problem to be created", security = {@SecurityRequirement(name = "bearerAuth")})
     @PatchMapping("/{problemId}/verification")
     ResponseEntity<String> verifyProblem(
             @PathVariable
@@ -69,6 +76,7 @@ public class ProblemController {
     }
 
     @PatchMapping("/{problemId}")
+    @Operation(summary = "Updates a specific problem", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateCreatedProblem(
             @PathVariable
             Long problemId,
@@ -89,16 +97,19 @@ public class ProblemController {
     }
 
     @GetMapping("/unverified")
+    @Operation(summary = "Acts as a filter for admin to access all unverified problems", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemService.getUnverifiedProblems();
     }
 
     @GetMapping
+    @Operation(summary = "For admin to view all problems - both verified and unverified", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
     }
 
     @GetMapping("/verified")
+    @Operation(summary = "Displays verified problems (public)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemSummaryResponse> getVerifiedProblems() {
         return problemService.getVerifiedProblems();
     }

@@ -1,5 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import kh.edu.istad.codecompass.dto.UpdateUserProfileRequest;
 import kh.edu.istad.codecompass.dto.UserResponse;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
@@ -19,11 +21,13 @@ public class UserController {
     private final UserProfileService userProfileService;
 
     @GetMapping("/search")
+    @Operation(summary = "For searching users", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<UserIndex> searchUsers(@RequestParam String keyword) {
         return userIndexService.searchUsers(keyword);
     }
 
     @PatchMapping("update/{id}")
+    @Operation(summary = "Updates user information", security = {@SecurityRequirement(name = "bearerAuth")})
     public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable long id) {
        return userProfileService.updateUserProfile(request,id);
     }
