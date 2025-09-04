@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -13,6 +14,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
+        servers = {
+                @Server(url = "https://code-compass.devith.it.com", description = "Production")
+        },
         info = @Info(
                 title = "Code Compass",
                 version = "V1",
