@@ -1,5 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import kh.edu.istad.codecompass.dto.auth.request.AssignRoleRequest;
 import kh.edu.istad.codecompass.service.RoleService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ public class RoleController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/assign-role")
+    @Operation(summary = "For admin to assign role to users", security = {@SecurityRequirement(name = "bearerAuth")})
     public void assignRole(@RequestBody AssignRoleRequest assignRoleRequest) {
         this.roleService.assignRole(assignRoleRequest);
     }

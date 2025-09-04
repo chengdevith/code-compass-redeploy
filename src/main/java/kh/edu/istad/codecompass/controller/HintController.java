@@ -1,5 +1,7 @@
 package kh.edu.istad.codecompass.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import kh.edu.istad.codecompass.service.HintService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ public class HintController {
     private final HintService hintService;
 
     @PatchMapping("/{id}")
+    @Operation(summary = "Use subscriber's earned coins to unlock a hint ", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> unlockHint(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
 
         String username = jwt.getClaim("preferred_username");

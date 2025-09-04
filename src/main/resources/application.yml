@@ -1,13 +1,14 @@
 spring:
+
   main:
     web-application-type: servlet
   application:
     name: CodeCompass
   datasource:
-    url: jdbc:postgresql://localhost:9999/code_compass_db
+    url: jdbc:postgresql://localhost:5432/code_compass_db
     driver-class-name: org.postgresql.Driver
-    username: benz
-    password: benz
+    username: postgres
+    password: qwer
   jpa: #Config JPA Hibernate DDL
     hibernate:
       ddl-auto: update
@@ -36,7 +37,7 @@ media:
 
 server:
   forward-headers-strategy: none
-#  port: 8081
+  port: 8081
 
 judge0:
   protocol: http
@@ -67,6 +68,12 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /api-docs
+    oauth:
+      client-id: nextjs
+      use-pkce-with-authorization-code-grant: false
+      oauth2:
+        redirect-url: http://localhost:8081/swagger-ui/oauth2-redirect.html
+
 
 logging:
   level:
