@@ -2,7 +2,6 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
-import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
@@ -11,6 +10,8 @@ import kh.edu.istad.codecompass.dto.hint.response.UserHintResponse;
 import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
+import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
+import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
 import kh.edu.istad.codecompass.repository.TagRepository;
@@ -23,7 +24,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 public class ProblemServiceImpl implements ProblemService {
 
     private final ProblemRepository problemRepository;
+    private final ProblemElasticsearchRepository problemElasticsearchRepository;
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
     private final UserHintRepository userHintRepository;
@@ -98,6 +99,18 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setIsDeleted(false);
 
         problem = problemRepository.save(problem);
+        ProblemIndex problemIndex = ProblemIndex.builder()
+                .description(problem.getDescription())
+                .title(problem.getTitle())
+                .difficulty(problem.getDifficulty())
+                .coin(problem.getCoin())
+                .star(problem.getStar())
+                .bestTimeExecution(problem.getBestTimeExecution())
+                .bestMemoryUsage(problem.getBestMemoryUsage())
+                .author(problem.getAuthor())
+                .build();
+
+        problemElasticsearchRepository.save(problemIndex);
 
         return problemMapper.fromEntityToResponse(problem);
     }
@@ -168,15 +181,13 @@ public class ProblemServiceImpl implements ProblemService {
         return problemRepository
                 .findAll()
                 .stream().map(problem ->
-                {
-                    return ProblemSummaryResponse
-                            .builder()
-                            .id(problem.getId())
-                            .difficulty(problem.getDifficulty())
-                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
-                            .title(problem.getTitle())
-                            .build();
-                }).toList();
+                        ProblemSummaryResponse
+                                .builder()
+                                .id(problem.getId())
+                                .difficulty(problem.getDifficulty())
+                                .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                                .title(problem.getTitle())
+                                .build()).toList();
     }
 
     @Transactional
@@ -185,15 +196,13 @@ public class ProblemServiceImpl implements ProblemService {
         return problemRepository.findProblemsByIsVerifiedFalse()
                 .stream()
                 .map(problem ->
-                {
-                    return ProblemSummaryResponse
-                            .builder()
-                            .id(problem.getId())
-                            .difficulty(problem.getDifficulty())
-                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
-                            .title(problem.getTitle())
-                            .build();
-                }).toList();
+                        ProblemSummaryResponse
+                                .builder()
+                                .id(problem.getId())
+                                .difficulty(problem.getDifficulty())
+                                .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                                .title(problem.getTitle())
+                                .build()).toList();
     }
 
     @Transactional
@@ -202,15 +211,13 @@ public class ProblemServiceImpl implements ProblemService {
         return problemRepository.findProblemsByIsVerifiedTrue()
                 .stream()
                 .map(problem ->
-                {
-                    return ProblemSummaryResponse
-                            .builder()
-                            .id(problem.getId())
-                            .difficulty(problem.getDifficulty())
-                            .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
-                            .title(problem.getTitle())
-                            .build();
-                }).toList();
+                        ProblemSummaryResponse
+                                .builder()
+                                .id(problem.getId())
+                                .difficulty(problem.getDifficulty())
+                                .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
+                                .title(problem.getTitle())
+                                .build()).toList();
     }
 
     @Transactional
@@ -233,6 +240,20 @@ public class ProblemServiceImpl implements ProblemService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
 
         problemMapper.fromUpdateRequestToEntity(updateProblemRequest, problem);
+
+        ProblemIndex problemIndex = ProblemIndex.builder()
+                .description(problem.getDescription())
+                .title(problem.getTitle())
+                .difficulty(problem.getDifficulty())
+                .coin(problem.getCoin())
+                .star(problem.getStar())
+                .bestTimeExecution(problem.getBestTimeExecution())
+                .bestMemoryUsage(problem.getBestMemoryUsage())
+                .author(problem.getAuthor())
+                .build();
+
+        problemElasticsearchRepository.save(problemIndex);
+
     }
 
 

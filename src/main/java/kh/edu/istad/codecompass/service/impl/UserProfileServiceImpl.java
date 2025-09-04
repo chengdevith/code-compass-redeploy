@@ -29,17 +29,13 @@ public class UserProfileServiceImpl implements UserProfileService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Postgres")
         );
 
-        // Step 2: Update fields using mapper
-        userMapper.toUserPartially(request, user);
-        userRepository.save(user);
-
-        // Step 3: Find user in Elasticsearch
+        // Step 2: Find user in Elasticsearch
         UserIndex userIndex = userElasticsearchRepository.findById(user.getId().toString())
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Elasticsearch")
                 );
 
-        // Step 4: Verify Postgres user and ES user match (by username or email)
+        // Step 3: Verify Postgres user and ES user match (by username or email)
         if (!user.getUsername().equals(userIndex.getUsername()) ||
                 !user.getEmail().equals(userIndex.getEmail())) {
             throw new ResponseStatusException(
@@ -47,6 +43,10 @@ public class UserProfileServiceImpl implements UserProfileService {
                     "User data mismatch between Postgres and Elasticsearch"
             );
         }
+
+        // Step 4: Update fields using mapper
+        userMapper.toUserPartially(request, user);
+        userRepository.save(user);
 
         // Step 5: Update ES fields
         userIndex.setGender(user.getGender() != null ? user.getGender().name() : null);

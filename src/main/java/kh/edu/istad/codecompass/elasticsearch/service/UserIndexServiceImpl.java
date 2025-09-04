@@ -18,4 +18,9 @@ public class UserIndexServiceImpl implements UserIndexService {
     public List<UserIndex> searchUsers(String keyword) {
         return userElasticsearchRepository.findByUsernameContaining(keyword);
     }
+
+    @Override
+    public void deleteUserIndex(String id) {
+        userElasticsearchRepository.deleteById(id);
+    }
 }

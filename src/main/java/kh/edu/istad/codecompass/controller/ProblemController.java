@@ -8,6 +8,8 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
+import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
+import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,8 @@ import java.util.List;
 @RequestMapping("/api/v1/code-compass/problems")
 //@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
+
+    private final ProblemElasticsearchRepository  problemElasticsearchRepository;
     private final ProblemService problemService;
 
     @PostMapping
@@ -114,4 +118,8 @@ public class ProblemController {
         return problemService.getVerifiedProblems();
     }
 
+    @GetMapping("/search")
+    public List<ProblemIndex> searchProblems(@RequestParam String keyword) {
+        return problemElasticsearchRepository.findByTitleContaining(keyword);
+    }
 }

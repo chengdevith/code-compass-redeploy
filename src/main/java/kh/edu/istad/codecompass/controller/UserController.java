@@ -8,6 +8,7 @@ import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.service.UserIndexService;
 import kh.edu.istad.codecompass.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,4 +32,12 @@ public class UserController {
     public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable long id) {
        return userProfileService.updateUserProfile(request,id);
     }
+
+    @DeleteMapping("delete/elastic/{id}")
+    @Operation(summary = "Deletes user", security = {@SecurityRequirement(name = "bearerAuth")})
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        userIndexService.deleteUserIndex(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
