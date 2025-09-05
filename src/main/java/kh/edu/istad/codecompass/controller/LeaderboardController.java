@@ -19,7 +19,7 @@ public class LeaderboardController {
     private final LeaderBoardService leaderBoardService;
 
     @GetMapping("/me")
-    @Operation(summary = "View leader board", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "View leader board (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public LeaderboardResponse getLeaderboard(@AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         return leaderBoardService.getLeaderboardWithUser(username);

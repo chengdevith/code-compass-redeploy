@@ -8,6 +8,8 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
+import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
+import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,12 @@ import java.util.List;
 @RequestMapping("/api/v1/code-compass/problems")
 //@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
+
+    private final ProblemElasticsearchRepository  problemElasticsearchRepository;
     private final ProblemService problemService;
 
     @PostMapping
-    @Operation(summary = "Creates a new problem", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Creates a new problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     public ProblemResponse createProblem(
             @RequestBody @Valid
@@ -41,7 +45,7 @@ public class ProblemController {
     }
 
     @GetMapping("/{problemId}/me")
-    @Operation(summary = "Access to different problem details for different user", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Access to different problem details for different user (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ProblemResponseBySpecificUser getProblemBySpecificUser(
             @PathVariable
             Long problemId,
@@ -62,7 +66,7 @@ public class ProblemController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Verifies a problem to be created", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Verifies a problem to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PatchMapping("/{problemId}/verification")
     ResponseEntity<String> verifyProblem(
             @PathVariable
@@ -76,7 +80,7 @@ public class ProblemController {
     }
 
     @PatchMapping("/{problemId}")
-    @Operation(summary = "Updates a specific problem", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Updates a specific problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateCreatedProblem(
             @PathVariable
             Long problemId,
@@ -97,21 +101,25 @@ public class ProblemController {
     }
 
     @GetMapping("/unverified")
-    @Operation(summary = "Acts as a filter for admin to access all unverified problems", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Acts as a filter for admin to access all unverified problems (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemService.getUnverifiedProblems();
     }
 
     @GetMapping
-    @Operation(summary = "For admin to view all problems - both verified and unverified", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For admin to view all problems - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
     }
 
     @GetMapping("/verified")
-    @Operation(summary = "Displays verified problems (public)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Displays verified problems (public)")
     public List<ProblemSummaryResponse> getVerifiedProblems() {
         return problemService.getVerifiedProblems();
     }
 
+    @GetMapping("/search")
+    public List<ProblemIndex> searchProblems(@RequestParam String keyword) {
+        return problemElasticsearchRepository.findByTitleContaining(keyword);
+    }
 }

@@ -17,7 +17,7 @@ public class RoleController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/assign-role")
-    @Operation(summary = "For admin to assign role to users", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For admin to assign role to users (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public void assignRole(@RequestBody AssignRoleRequest assignRoleRequest) {
         this.roleService.assignRole(assignRoleRequest);
     }

@@ -165,14 +165,14 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset Password", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset Password successfully");
     }
 
     @PostMapping("/request-reset-password")
-    @Operation(summary = "Request reset Password", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Request reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
         return ResponseEntity.ok("We have sent link to your email to reset password");

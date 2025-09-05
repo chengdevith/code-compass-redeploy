@@ -11,4 +11,5 @@ import java.util.List;
 
 public interface UserIndexService {
     List<UserIndex> searchUsers(String keyword);
+    void deleteUserIndex(String id);
 }
