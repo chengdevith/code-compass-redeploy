@@ -106,6 +106,8 @@ public class KeyCloakSecurityConfig {
         // Disable CSRF token
         http.csrf(AbstractHttpConfigurer::disable);
 
+        http.cors(Customizer.withDefaults());
+
         // Set security mechanism
         http.oauth2ResourceServer(
                 oauth -> oauth.jwt(Customizer.withDefaults())
