@@ -37,10 +37,8 @@ media:
   base-uri: http://localhost:8081/media/
 
 server:
-<<<<<<< HEAD
-  forward-headers-strategy: framework
-=======
   forward-headers-strategy: none
+>>>>>>> f39d1aee214f5fce57ee04c38005ae16415310ef
   port: 8080
 >>>>>>> 63d5524485d2eda0400136db9e5c5f4f1c893f3f
 
