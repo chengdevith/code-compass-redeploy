@@ -79,6 +79,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/packages/").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER")
 
 //                        problems
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/search", "/api/v1/code-compass/problems/search/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/verified").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
@@ -94,7 +95,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/solutions/problem/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
 
 //                        users
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/users/search").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/users/update/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
 
                         .anyRequest().authenticated()

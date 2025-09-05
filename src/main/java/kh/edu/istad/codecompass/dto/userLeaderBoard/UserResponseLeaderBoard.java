@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.dto.userLeaderBoard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.enums.Level;
 
 public record UserResponseLeaderBoard(
@@ -12,6 +13,7 @@ public record UserResponseLeaderBoard(
         Level level,
         @JsonProperty("profile_image") String imageUrl,
         String location
+
 ) {
     public static UserResponseLeaderBoard fromEntity(User user) {
         return new UserResponseLeaderBoard(

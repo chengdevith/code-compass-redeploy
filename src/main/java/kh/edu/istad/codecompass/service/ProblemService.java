@@ -47,7 +47,7 @@ public interface ProblemService {
      * This method is intended for use by administrators to manage the full set of
      * available problems.
      *
-     * @return A {@link List} of {@link ProblemResponse} objects, each containing the details of a problem.
+     * @return A {@link List} of {@link ProblemSummaryResponse} objects, each containing the details of a problem.
      * The list may be empty if no problems exist.
      * @author Panharoth
      */
@@ -59,7 +59,7 @@ public interface ProblemService {
      * This method serves as a filtering feature for administrators to easily view
      * and manage problems that have not yet been approved.
      *
-     * @return A {@link List} of {@link ProblemResponse} objects representing all problems
+     * @return A {@link List} of {@link ProblemSummaryResponse} objects representing all problems
      * that are currently unverified. The list will be empty if all problems are verified
      * @author Panharoth
      */
@@ -71,7 +71,7 @@ public interface ProblemService {
      * This method is a key feature for both administrators—who use it to view approved content—and
      * subscribers, who can access this list as a curated set of problems.
      *
-     * @return A {@link List} of {@link ProblemResponse} objects, each containing the details of a
+     * @return A {@link List} of {@link ProblemSummaryResponse} objects, each containing the details of a
      * verified problem. The list will be empty if there are no verified problems.
      * @author Panharoth
      */
