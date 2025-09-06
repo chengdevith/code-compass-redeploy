@@ -3,10 +3,10 @@ package kh.edu.istad.codecompass.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
 import kh.edu.istad.codecompass.dto.auth.request.LoginRequest;
 import kh.edu.istad.codecompass.dto.auth.request.RefreshTokenRequest;
 import kh.edu.istad.codecompass.dto.auth.request.RegisterRequest;
-import kh.edu.istad.codecompass.dto.auth.RegisterResponse;
 import kh.edu.istad.codecompass.dto.auth.request.ResetPasswordRequest;
 import kh.edu.istad.codecompass.dto.auth.response.KeycloakTokenResponse;
 import kh.edu.istad.codecompass.dto.auth.response.TokenResponse;
@@ -109,7 +109,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/token")
     @Operation(summary = "Refresh access token (public)")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {
@@ -165,14 +165,14 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset Password", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset Password successfully");
     }
 
     @PostMapping("/request-reset-password")
-    @Operation(summary = "Request reset Password", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Request reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
         return ResponseEntity.ok("We have sent link to your email to reset password");

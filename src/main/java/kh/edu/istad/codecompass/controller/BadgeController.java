@@ -25,14 +25,14 @@ public class BadgeController {
  private final BadgesService badgesService;
 
     @PatchMapping("/add-to-package")
-    @Operation(summary = "For adding a badge to a package", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For adding a badge to a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> addBadgeToPackage(@RequestBody @Valid AddBadgeToPackageRequest request) {
         badgesService.addBadgeToPackage(request);
         return ResponseEntity.ok("The badge has successfully been added to package");
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Input a badge ID to update", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Input a badge ID to update (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);
         return ResponseEntity.ok("The badge been updated successfully");
@@ -40,7 +40,7 @@ public class BadgeController {
     }
 
     @GetMapping("/unverified")
-    @Operation(summary = "This endpoint acts like a display filtering for admin to unverified badges", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "This endpoint acts like a display filtering for admin to unverified badges (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<BadgesResponse>getUnverifiedBadges(){
         return badgesService.unverifiedBadges();
     }
@@ -60,7 +60,7 @@ public class BadgeController {
 
 
     @PatchMapping("/{id}/verification")
-    @Operation(summary = "For verifying badges", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For verifying badges (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity <String>VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
                                           boolean verified) {
         badgesService.verifyBadges(id, verified);
@@ -69,13 +69,13 @@ public class BadgeController {
     }
 
     @GetMapping
-    @Operation(summary = "For displaying all badges - both verified and unverified", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For displaying all badges - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<BadgesResponse> getAllBadges(){
         return badgesService.getAllBadges();
     }
 
     @PostMapping
-    @Operation(summary = "For creating a new badge", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For creating a new badge (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     public BadgesResponse createBadge(
             @RequestBody @Valid BadgeRequest badgeRequest,

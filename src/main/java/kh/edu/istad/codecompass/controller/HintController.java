@@ -20,7 +20,7 @@ public class HintController {
     private final HintService hintService;
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Use subscriber's earned coins to unlock a hint ", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Use subscriber's earned coins to unlock a hint (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> unlockHint(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
 
         String username = jwt.getClaim("preferred_username");

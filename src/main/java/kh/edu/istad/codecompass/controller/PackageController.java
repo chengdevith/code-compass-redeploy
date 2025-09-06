@@ -23,13 +23,13 @@ public class PackageController {
     private final PackageService packageService;
 
     @PutMapping("/add-problems")
-    @Operation(summary = "Adds problems to a package", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Adds problems to a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public PackageResponse addProblemsToPackage(@RequestBody @Valid AddProblemToPackageRequest request) {
         return  packageService.addProblemsToPackage(request);
     }
 
     @PutMapping("/{id}/verification")
-    @Operation(summary = "Verifies package to be created", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Verifies package to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
    ResponseEntity<String>verifyPackage(@PathVariable Long id,
                                       @RequestParam(defaultValue = "true") Boolean verified){
        packageService.verifyPackage(id, verified);

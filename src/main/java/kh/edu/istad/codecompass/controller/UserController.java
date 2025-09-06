@@ -22,19 +22,19 @@ public class UserController {
     private final UserProfileService userProfileService;
 
     @GetMapping("/search")
-    @Operation(summary = "For searching users", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "For searching users (public)")
     public List<UserIndex> searchUsers(@RequestParam String keyword) {
         return userIndexService.searchUsers(keyword);
     }
 
     @PatchMapping("update/{id}")
-    @Operation(summary = "Updates user information", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Updates user information (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable long id) {
        return userProfileService.updateUserProfile(request,id);
     }
 
     @DeleteMapping("delete/elastic/{id}")
-    @Operation(summary = "Deletes user", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Deletes user (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
         userIndexService.deleteUserIndex(id);
         return ResponseEntity.noContent().build();
