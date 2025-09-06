@@ -51,7 +51,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
 
 
-     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
