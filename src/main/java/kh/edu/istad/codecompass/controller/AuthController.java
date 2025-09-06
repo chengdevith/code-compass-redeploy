@@ -109,7 +109,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/token")
     @Operation(summary = "Refresh access token (public)")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {
