@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class KeyCloakSecurityConfig {
 
     @Bean
@@ -48,7 +50,7 @@ public class KeyCloakSecurityConfig {
 //                        badges
                         .requestMatchers("/api/v1/code-compass/badges/verified").permitAll()
                         .requestMatchers( "/api/v1/code-compass/badges/add-to-package").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers("/api/v1/code-compass/badges/").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers("/api/v1/code-compass/badges").hasAnyRole("ADMIN", "CREATOR") // REMOVED trailing slash
                         .requestMatchers("/api/v1/code-compass/badges/unverified").hasRole("ADMIN")
                         .requestMatchers("/api/v1/code-compass/badges/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/code-compass/badges").hasRole("ADMIN")
@@ -60,11 +62,11 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/creator-requests").hasRole("ADMIN")
 
 //                        hints
-                        .requestMatchers(HttpMethod.PATCH, "api/v1/code-compass/hints/").hasAnyRole("CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        submissions
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions/run/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions/batch/").hasAnyRole("CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        leader board
@@ -73,29 +75,29 @@ public class KeyCloakSecurityConfig {
 //                        packages
                         .requestMatchers("/api/v1/code-compass/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/packages").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/packages").hasRole("ADMIN")
-                        .requestMatchers( HttpMethod.PUT,"/api/v1/code-compass/packages/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/packages/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/packages/").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER")
+                        // NOTE: You have duplicate POST mapping above - remove one
+                        .requestMatchers( HttpMethod.PUT,"/api/v1/code-compass/packages/*").hasRole("ADMIN") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/packages/*").hasRole("ADMIN") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/packages").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER") // REMOVED trailing slash
 
-//                        problems
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/").permitAll()
+//                        problems - SIMPLIFIED FOR METHOD-LEVEL SECURITY
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/verified").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/unverified").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
+                        // Removed path variable endpoints - handled by method-level security
 
 //                        roles
                         .requestMatchers(HttpMethod.PUT, "/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
 
 //                        solutions
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/solutions").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/solutions/problem/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/solutions/problem/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        users
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/users/update/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
                         .anyRequest().authenticated()
         );

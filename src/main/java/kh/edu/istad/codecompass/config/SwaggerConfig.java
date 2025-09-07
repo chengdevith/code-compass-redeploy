@@ -54,8 +54,8 @@ public class SwaggerConfig {
                                 .bearerFormat("JWT")
                                 .description("JWT access token from Keycloak (format: Bearer <token>)")
                         )
-                )
-                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement()
-                        .addList("bearerAuth"));
+                );
+//                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement()
+//                        .addList("bearerAuth"));
     }
 }
