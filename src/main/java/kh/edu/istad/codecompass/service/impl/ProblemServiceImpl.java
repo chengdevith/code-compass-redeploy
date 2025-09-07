@@ -107,7 +107,8 @@ public class ProblemServiceImpl implements ProblemService {
                 .star(problem.getStar())
                 .bestTimeExecution(problem.getBestTimeExecution())
                 .bestMemoryUsage(problem.getBestMemoryUsage())
-                .author(problem.getAuthor())
+                .authorId(problem.getAuthor().getId())
+                .authorUsername(problem.getAuthor().getUsername())
                 .build();
 
         problemElasticsearchRepository.save(problemIndex);
@@ -249,7 +250,8 @@ public class ProblemServiceImpl implements ProblemService {
                 .star(problem.getStar())
                 .bestTimeExecution(problem.getBestTimeExecution())
                 .bestMemoryUsage(problem.getBestMemoryUsage())
-                .author(problem.getAuthor())
+                .authorId(problem.getAuthor().getId())
+                .authorUsername(problem.getAuthor().getUsername())
                 .build();
 
         problemElasticsearchRepository.save(problemIndex);

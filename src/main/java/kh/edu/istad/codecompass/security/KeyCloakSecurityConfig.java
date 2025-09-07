@@ -83,9 +83,13 @@ public class KeyCloakSecurityConfig {
 //                        problems - SIMPLIFIED FOR METHOD-LEVEL SECURITY
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/verified").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/*").permitAll() // For {problemId} - public access
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/unverified").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/*/verification").hasRole("ADMIN") // For verification
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/*").hasAnyRole("ADMIN", "CREATOR") // For updates
                         .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/*/me").authenticated() // For specific user access
                         // Removed path variable endpoints - handled by method-level security
 
 //                        roles
