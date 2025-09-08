@@ -40,7 +40,6 @@ server:
 judge0:
   protocol: http
   domain: judge0-code-compass.devith.it.com
-  #  port: 8888
   auth-token: ""
   http-connection-timeout: 10s
   http-read-timeout: 30s

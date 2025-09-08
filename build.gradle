@@ -24,6 +24,11 @@ repositories {
 }
 
 dependencies {
+
+// WebSocket / STOMP support
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+
 //  for web client
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "io.projectreactor.addons:reactor-extra:3.5.0"

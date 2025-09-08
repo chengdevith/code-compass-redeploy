@@ -33,5 +33,6 @@ public class ProblemIndex {
 
     private Integer bestMemoryUsage;
 
-    private User author;
+    private Long authorId;
+    private String authorUsername;
 }
