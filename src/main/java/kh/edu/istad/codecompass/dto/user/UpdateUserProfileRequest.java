@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto;
+package kh.edu.istad.codecompass.dto.user;
 
 import kh.edu.istad.codecompass.enums.Gender;
 
