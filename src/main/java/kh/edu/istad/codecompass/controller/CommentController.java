@@ -27,7 +27,10 @@ public class CommentController {
 
         CommentResponse commentResponse = commentService.createComment(createCommentRequest);
 
-        messagingTemplate.convertAndSend("/topic/comments", commentResponse);
+        // broadcast to topic for this discussion
+        messagingTemplate.convertAndSend(
+                "/topic/comments" + commentResponse.problemId(), commentResponse
+        );
 
         return commentResponse;
     }

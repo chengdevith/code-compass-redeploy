@@ -1,6 +1,6 @@
 package kh.edu.istad.codecompass.controller;
 
-import kh.edu.istad.codecompass.dto.MediaResponse;
+import kh.edu.istad.codecompass.dto.media.MediaResponse;
 import kh.edu.istad.codecompass.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
