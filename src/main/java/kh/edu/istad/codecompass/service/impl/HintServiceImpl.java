@@ -40,7 +40,8 @@ public class HintServiceImpl implements HintService {
 
         int coinsAfterUnlock = user.getCoin() - 10;
         if (coinsAfterUnlock < 0) {
-            return false; // Not enough coins
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough coins");
+            // Not enough coins
         }
 
         user.setCoin(coinsAfterUnlock);

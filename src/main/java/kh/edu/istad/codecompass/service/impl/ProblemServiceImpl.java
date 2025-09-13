@@ -62,7 +62,7 @@ public class ProblemServiceImpl implements ProblemService {
                 .stream()
                 .map(hintRequest -> {
                     Hint hint = new Hint();
-                    hint.setDescription(hintRequest.hint());
+                    hint.setDescription(hintRequest.description());
                     hint.setIsLocked(hintRequest.isLocked());
                     hint.setProblem(finalProblem1);
                     return hint;
@@ -136,7 +136,7 @@ public class ProblemServiceImpl implements ProblemService {
                             .findFirst()
                             .map(UserHint::getIsUnlocked)
                             .orElse(false);
-                    return new UserHintResponse(hint.getDescription(), !unlocked); // isLocked = !unlocked
+                    return new UserHintResponse(hint.getId(), hint.getDescription(), !unlocked); // isLocked = !unlocked
                 })
                 .collect(Collectors.toList());
 
