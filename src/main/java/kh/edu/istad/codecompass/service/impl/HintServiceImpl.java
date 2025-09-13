@@ -29,6 +29,10 @@ public class HintServiceImpl implements HintService {
         Hint hint = hintRepository.findById(hintId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hint does not exist"));
 
+        if (! hint.getIsLocked())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The hint is already unlocked");
+
+
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist"));
 
