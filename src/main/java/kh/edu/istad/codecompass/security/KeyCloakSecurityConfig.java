@@ -41,67 +41,67 @@ public class KeyCloakSecurityConfig {
                         ).permitAll()
 
 //                        auth
-                        .requestMatchers("/api/v1/code-compass/auth/register").permitAll()
-                        .requestMatchers("/api/v1/code-compass/auth/login").permitAll()
-                        .requestMatchers("/api/v1/code-compass/auth/refresh").permitAll()
-                        .requestMatchers("/api/v1/code-compass/auth/reset-password").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/code-compass/auth/request-reset-password").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers("/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh").permitAll()
+                        .requestMatchers("/api/v1/auth/reset-password").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/auth/request-reset-password").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
 
 //                        badges
-                        .requestMatchers("/api/v1/code-compass/badges/verified").permitAll()
-                        .requestMatchers( "/api/v1/code-compass/badges/add-to-package").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers("/api/v1/code-compass/badges").hasAnyRole("ADMIN", "CREATOR") // REMOVED trailing slash
-                        .requestMatchers("/api/v1/code-compass/badges/unverified").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/code-compass/badges/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/code-compass/badges").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/badges").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers("/api/v1/badges/verified").permitAll()
+                        .requestMatchers( "/api/v1/badges/add-to-package").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers("/api/v1/badges").hasAnyRole("ADMIN", "CREATOR") // REMOVED trailing slash
+                        .requestMatchers("/api/v1/badges/unverified").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/badges/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/badges").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/badges").hasAnyRole("ADMIN", "CREATOR")
 
 //                        creator requests
-                        .requestMatchers(HttpMethod.POST,"/api/v1/code-compass/creator-requests").hasRole("SUBSCRIBER")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/creator-requests").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/creator-requests").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/creator-requests").hasRole("SUBSCRIBER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/creator-requests").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/creator-requests").hasRole("ADMIN")
 
 //                        hints
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        submissions
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions/run/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/submissions").hasAnyRole("CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/run/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        leader board
-                        .requestMatchers("/api/v1/code-compass/leaderboard/me").hasAnyRole("ADMIN" ,"CREATOR", "SUBSCRIBER")
+                        .requestMatchers("/api/v1/leaderboard/me").hasAnyRole("ADMIN" ,"CREATOR", "SUBSCRIBER")
 
 //                        packages
-                        .requestMatchers("/api/v1/code-compass/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/packages").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers("/api/v1/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasAnyRole("ADMIN", "CREATOR")
                         // NOTE: You have duplicate POST mapping above - remove one
-                        .requestMatchers( HttpMethod.PUT,"/api/v1/code-compass/packages/*").hasRole("ADMIN") // REMOVED trailing slash
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/packages/*").hasRole("ADMIN") // REMOVED trailing slash
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/packages").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers( HttpMethod.PUT,"/api/v1/packages/*").hasRole("ADMIN") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/*").hasRole("ADMIN") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER") // REMOVED trailing slash
 
 //                        problems - SIMPLIFIED FOR METHOD-LEVEL SECURITY
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/verified").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/*").permitAll() // For {problemId} - public access
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/unverified").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/*/verification").hasRole("ADMIN") // For verification
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/problems/*").hasAnyRole("ADMIN", "CREATOR") // For updates
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/problems").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/problems/*/me").authenticated() // For specific user access
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/verified").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/*").permitAll() // For {problemId} - public access
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/unverified").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/problems/*/verification").hasRole("ADMIN") // For verification
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/problems/*").hasAnyRole("ADMIN", "CREATOR") // For updates
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/problems").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/*/me").authenticated() // For specific user access
                         // Removed path variable endpoints - handled by method-level security
 
 //                        roles
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/code-compass/roles/assign-role").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/roles/assign-role").hasRole("ADMIN")
 
 //                        solutions
-                        .requestMatchers(HttpMethod.POST, "/api/v1/code-compass/solutions").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/solutions/problem/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.POST, "/api/v1/solutions").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/solutions/problem/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        users
-                        .requestMatchers(HttpMethod.GET, "/api/v1/code-compass/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/code-compass/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
                         .anyRequest().authenticated()
         );
