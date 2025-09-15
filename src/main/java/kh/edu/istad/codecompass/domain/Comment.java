@@ -31,9 +31,9 @@ public class Comment {
     @ManyToOne
     private User user;
 
-    @ManyToOne
-    private Discussion discussion;
-
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Report> report = new ArrayList<>();
+
+    @ManyToOne
+    private Problem problem;
 }

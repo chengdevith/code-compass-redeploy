@@ -1,8 +1,9 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.UpdateUserProfileRequest;
-import kh.edu.istad.codecompass.dto.UserResponse;
+import kh.edu.istad.codecompass.dto.user.UpdateUserProfileRequest;
+import kh.edu.istad.codecompass.dto.user.UserProfileResponse;
+import kh.edu.istad.codecompass.dto.user.UserResponse;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
 import kh.edu.istad.codecompass.mapper.UserMapper;
@@ -10,6 +11,9 @@ import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,6 +24,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserElasticsearchRepository userElasticsearchRepository;
+    private final JwtDecoder jwtDecoder;
 
     @Override
     public UserResponse updateUserProfile(UpdateUserProfileRequest request, Long id) {
@@ -59,5 +64,36 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Step 6: Return updated response
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public UserProfileResponse getUserProfile(String username) {
+
+            User user = userRepository.findUserByUsername(username).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+            );
+
+            return UserProfileResponse.builder()
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .gender(String.valueOf(user.getGender()))
+                    .dob(user.getDob())
+                    .location(user.getLocation())
+                    .website(user.getWebsite())
+                    .github(user.getGithub())
+                    .linkedin(user.getLinkedin())
+                    .imageUrl(user.getImageUrl())
+                    .level(String.valueOf(user.getLevel()))
+                    .coin(user.getCoin())
+                    .star(user.getStar())
+                    .rank(user.getRank())
+                    .totalProblemsSolved(user.getTotalProblemsSolved())
+                    .isDeleted(user.getIsDeleted())
+                    .badge(user.getBadges().size())
+                    .submissionHistories(user.getSubmissionHistories().size())
+                    .solution(user.getSolutions().size())
+                    .view(0) // optional
+                    .comment(user.getComments().size())
+                    .build();
     }
 }

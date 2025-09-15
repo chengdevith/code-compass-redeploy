@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/code-compass/problems")
+@RequestMapping("/api/v1/problems")
 //@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
 
@@ -32,13 +32,11 @@ public class ProblemController {
 
     @PostMapping
     @Operation(summary = "Creates a new problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasAnyRole('ADMIN', 'CREATOR')")
     @ResponseStatus(HttpStatus.CREATED)
     public ProblemResponse createProblem(
-            @RequestBody @Valid
-            CreateProblemRequest problemRequest,
-
-            @AuthenticationPrincipal
-            Jwt jwt
+            @RequestBody @Valid CreateProblemRequest problemRequest,
+            @AuthenticationPrincipal Jwt jwt
     ) {
         String username = jwt.getClaim("preferred_username");
         return problemService.createProblem(problemRequest, username);
@@ -46,17 +44,14 @@ public class ProblemController {
 
     @GetMapping("/{problemId}/me")
     @Operation(summary = "Access to different problem details for different user (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("isAuthenticated()")
     public ProblemResponseBySpecificUser getProblemBySpecificUser(
-            @PathVariable
-            Long problemId,
-
-            @AuthenticationPrincipal
-            Jwt jwt
+            @PathVariable Long problemId,
+            @AuthenticationPrincipal Jwt jwt
     ) {
         String username = jwt.getClaim("preferred_username");
         return problemService.getProblemBySpecificUser(username, problemId);
     }
-
 
     @GetMapping("/{problemId}")
     @Operation(summary = "Access to a problem (public)")
@@ -65,15 +60,12 @@ public class ProblemController {
         return problemService.getProblem(problemId);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Verifies a problem to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PatchMapping("/{problemId}/verification")
-    ResponseEntity<String> verifyProblem(
-            @PathVariable
-            Long problemId,
-
-            @RequestParam(defaultValue = "true")
-            boolean verified
+    @Operation(summary = "Verifies a problem to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> verifyProblem(
+            @PathVariable Long problemId,
+            @RequestParam(defaultValue = "true") boolean verified
     ) {
         problemService.verifyProblem(problemId, verified);
         return ResponseEntity.ok("The problem has been verified successfully");
@@ -81,44 +73,41 @@ public class ProblemController {
 
     @PatchMapping("/{problemId}")
     @Operation(summary = "Updates a specific problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    ResponseEntity<String> updateCreatedProblem(
-            @PathVariable
-            Long problemId,
-
-            @RequestBody
-            @Valid
-            UpdateProblemRequest updateProblemRequest,
-            @AuthenticationPrincipal
-            Jwt jwt
+    @PreAuthorize("hasAnyRole('ADMIN', 'CREATOR')")
+    public ResponseEntity<String> updateCreatedProblem(
+            @PathVariable Long problemId,
+            @RequestBody @Valid UpdateProblemRequest updateProblemRequest,
+            @AuthenticationPrincipal Jwt jwt
     ) {
-
         String authorUsername = jwt.getClaim("preferred_username");
-
         problemService.updateProblem(problemId, authorUsername, updateProblemRequest);
-
         return ResponseEntity.ok("The problem has been updated successfully");
-
     }
 
     @GetMapping("/unverified")
     @Operation(summary = "Acts as a filter for admin to access all unverified problems (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
     public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemService.getUnverifiedProblems();
     }
 
     @GetMapping
     @Operation(summary = "For admin to view all problems - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
     public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
     }
 
     @GetMapping("/verified")
     @Operation(summary = "Displays verified problems (public)")
+    @PreAuthorize("permitAll()")
     public List<ProblemSummaryResponse> getVerifiedProblems() {
         return problemService.getVerifiedProblems();
     }
 
     @GetMapping("/search")
+    @Operation(summary = "Search problems (public)")
+    @PreAuthorize("permitAll()")
     public List<ProblemIndex> searchProblems(@RequestParam String keyword) {
         return problemElasticsearchRepository.findByTitleContaining(keyword);
     }

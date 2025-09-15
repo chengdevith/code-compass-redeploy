@@ -1,7 +1,7 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import kh.edu.istad.codecompass.domain.Media;
-import kh.edu.istad.codecompass.dto.MediaResponse;
+import kh.edu.istad.codecompass.dto.media.MediaResponse;
 import kh.edu.istad.codecompass.repository.MediaRepository;
 import kh.edu.istad.codecompass.service.MediaService;
 import lombok.RequiredArgsConstructor;

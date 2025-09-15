@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/code-compass/creator-requests")
+@RequestMapping("/api/v1/creator-requests")
 public class CreatorRequestController {
 
     private final CreatorRequestService creatorRequestService;

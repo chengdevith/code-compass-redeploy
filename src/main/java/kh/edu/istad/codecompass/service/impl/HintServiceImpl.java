@@ -29,6 +29,10 @@ public class HintServiceImpl implements HintService {
         Hint hint = hintRepository.findById(hintId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hint does not exist"));
 
+        if (! hint.getIsLocked())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The hint is already unlocked");
+
+
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist"));
 
@@ -40,7 +44,8 @@ public class HintServiceImpl implements HintService {
 
         int coinsAfterUnlock = user.getCoin() - 10;
         if (coinsAfterUnlock < 0) {
-            return false; // Not enough coins
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough coins");
+            // Not enough coins
         }
 
         user.setCoin(coinsAfterUnlock);

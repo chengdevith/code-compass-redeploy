@@ -26,7 +26,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1/code-compass/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -109,7 +109,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/token")
     @Operation(summary = "Refresh access token (public)")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {

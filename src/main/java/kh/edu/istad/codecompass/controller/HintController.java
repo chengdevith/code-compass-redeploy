@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/code-compass/hints")
+@RequestMapping("/api/v1/hints")
 public class HintController {
 
     private final HintService hintService;
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/unlock")
     @Operation(summary = "Use subscriber's earned coins to unlock a hint (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> unlockHint(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
 

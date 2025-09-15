@@ -1,8 +1,9 @@
 package kh.edu.istad.codecompass.mapper;
 
 import kh.edu.istad.codecompass.domain.User;
-import kh.edu.istad.codecompass.dto.UpdateUserProfileRequest;
-import kh.edu.istad.codecompass.dto.UserResponse;
+import kh.edu.istad.codecompass.dto.user.UpdateUserProfileRequest;
+import kh.edu.istad.codecompass.dto.user.UserProfileResponse;
+import kh.edu.istad.codecompass.dto.user.UserResponse;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -18,5 +19,5 @@ public interface UserMapper {
 
     UserResponse toUserResponse(User user);
 
-
+//    UserProfileResponse toUserProfileResponse(User user);
 }

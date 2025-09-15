@@ -19,4 +19,5 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     List<Problem> findProblemsByIsVerifiedTrue();
 
     Optional<Problem> findProblemByIdAndAuthor_Username(Long problemId, String authorUsername);
+
 }

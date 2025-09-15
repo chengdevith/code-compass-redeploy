@@ -65,7 +65,7 @@ public interface ProblemMapper {
 
     default List<HintResponse> mapHints(List<Hint> hints) {
         if (hints == null) return List.of();
-        return hints.stream().map(hint -> new HintResponse(hint.getDescription(), hint.getIsLocked()))
+        return hints.stream().map(hint -> new HintResponse(hint.getId(), hint.getDescription(), hint.getIsLocked()))
                 .toList();
     }
 

@@ -24,6 +24,11 @@ repositories {
 }
 
 dependencies {
+
+// WebSocket / STOMP support
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+
 //  for web client
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation "io.projectreactor.addons:reactor-extra:3.5.0"
@@ -37,7 +42,6 @@ dependencies {
 
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-//    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     //  mapstruct dependencies
     compileOnly 'org.mapstruct:mapstruct:1.6.3'
@@ -51,7 +55,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11'
 
 
-     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch' // Elasticsearch integration
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

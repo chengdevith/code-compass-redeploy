@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
+import kh.edu.istad.codecompass.enums.AuthProvider;
 import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Level;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,4 +85,8 @@ public class User {
     public void updateLevel() {
         this.level = Level.fromStars(this.star);
     }
+
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider; // GOOGLE, GITHUB, LOCAL
+
 }

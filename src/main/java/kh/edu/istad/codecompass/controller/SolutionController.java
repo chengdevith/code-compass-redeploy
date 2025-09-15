@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/code-compass/solutions")
+@RequestMapping("/api/v1/solutions")
 @RequiredArgsConstructor
 public class SolutionController {
 
