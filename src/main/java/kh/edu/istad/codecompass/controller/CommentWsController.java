@@ -19,7 +19,7 @@ public class CommentWsController {
     private final SimpMessagingTemplate messagingTemplate;
 
     // Client sends STOMP frame to /app/init.{discussionId}
-    @MessageMapping("/init.{discussionId}")
+    @MessageMapping("/init.{problemId}")
     public void sendInitial(@DestinationVariable Long problemId) {
 
         List<CommentResponse> commentResponses = commentService.getCommentsByProblemId(problemId);

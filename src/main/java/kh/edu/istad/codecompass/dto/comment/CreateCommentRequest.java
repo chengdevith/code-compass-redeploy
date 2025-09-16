@@ -4,7 +4,7 @@ public record CreateCommentRequest(
 
         String comment,
         Long userId,
-        Long discussionId
+        Long problemId
 
 ) {
 }

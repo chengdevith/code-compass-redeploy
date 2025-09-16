@@ -11,9 +11,11 @@ import java.util.List;
 public interface CommentMapper {
 
     @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "problemId", source = "problem.id")
     CommentResponse toCommentResponse(Comment comment);
 
     @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "problemId", source = "problem.id")
     List<CommentResponse> toCommentResponses(List<Comment> comments);
 
 }
