@@ -29,7 +29,7 @@ public class CommentController {
 
         // broadcast to topic for this discussion
         messagingTemplate.convertAndSend(
-                "/topic/comments" + commentResponse.problemId(), commentResponse
+                "/topic/comments." + commentResponse.problemId(), commentResponse
         );
 
         return commentResponse;
