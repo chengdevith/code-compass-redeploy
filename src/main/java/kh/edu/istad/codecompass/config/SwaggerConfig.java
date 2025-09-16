@@ -15,12 +15,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         servers = {
-                @Server(url = "https://code-compass.devith.it.com", description = "Production")
+                @Server(url = "https://code-compass.devith.it.com", description = "Production"),
+                @Server(url = "http://localhost:8080", description = "Development")
         },
         info = @Info(
                 title = "Code Compass",
                 version = "V1",
-                description = "CodeCompass is an online platform for coders to practice coding challenges like LeetCode. It offers diverse tasks across multiple programming languages, helping users enhance their algorithmic skills and prepare for technical interviews in a user-friendly environment."
+                description = "CodeCompass is an online platform for coders to practice coding challenges. It offers diverse tasks across multiple programming languages, helping users enhance their algorithmic skills in a user-friendly environment."
         )
 )
 public class SwaggerConfig {

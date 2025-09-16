@@ -100,7 +100,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
         );
 
-        submissionHistoryRepository.deleteOldSubmissions(username);
+//        submissionHistoryRepository.deleteOldSubmissions(username);
 
         SubmissionHistories submissionHistories = new SubmissionHistories();
 
@@ -175,6 +175,8 @@ public class Judge0ServiceImpl implements Judge0Service {
                 List<UserProblem> userProblemList = userProblemRepository
                         .findAllByUserIdAndIsSolvedTrue(user.getId());
 
+
+
                 // collect all solved problem IDs
                 Set<Long> solvedProblemIds = userProblemList.stream()
                         .map(u -> u.getProblem().getId())
@@ -219,10 +221,14 @@ public class Judge0ServiceImpl implements Judge0Service {
 
                 int maxHistoryCoins = submissionHistoriesList.getFirst().getCoin();
                 Star maxHistoryStars = submissionHistoriesList.getFirst().getStar();
+                if (maxHistoryStars == null) maxHistoryStars = Star.ZERO;
 
                 // find max coin + max star from history
                 for (int i = 1; i < submissionHistoriesList.size(); i++) {
-                    maxHistoryCoins = Math.max(maxHistoryCoins, submissionHistoriesList.get(i).getCoin());
+                    maxHistoryCoins = Math.max(maxHistoryCoins, submissionHistoriesList.get(i).getCoin() == null ? 0 : submissionHistoriesList.get(i).getCoin());
+                    if (submissionHistoriesList.get(i).getStar() == null) {
+                        submissionHistoriesList.get(i).setStar(Star.ZERO);
+                    }
                     if (submissionHistoriesList.get(i).getStar().compareTo(maxHistoryStars) > 0) {
                         maxHistoryStars = submissionHistoriesList.get(i).getStar();
                     }
@@ -238,7 +244,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     case 1 -> Star.ONE;
                     case 2 -> Star.TWO;
                     case 3 -> Star.THREE;
-                    default -> null;
+                    default -> Star.ZERO;
                 };
                 if (currentStar.compareTo(maxHistoryStars) > 0) {
                     int additionalStars = currentStar.ordinal() - maxHistoryStars.ordinal();
