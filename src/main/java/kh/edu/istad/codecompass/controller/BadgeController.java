@@ -24,14 +24,14 @@ public class BadgeController {
 
  private final BadgesService badgesService;
 
-    @PatchMapping("/add-to-package")
+    @PutMapping("/add-to-package")
     @Operation(summary = "For adding a badge to a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> addBadgeToPackage(@RequestBody @Valid AddBadgeToPackageRequest request) {
         badgesService.addBadgeToPackage(request);
         return ResponseEntity.ok("The badge has successfully been added to package");
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "Input a badge ID to update (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);

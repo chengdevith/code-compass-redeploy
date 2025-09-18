@@ -60,7 +60,7 @@ public class ProblemController {
         return problemService.getProblem(problemId);
     }
 
-    @PatchMapping("/{problemId}/verification")
+    @PutMapping("/{problemId}/verification")
     @Operation(summary = "Verifies a problem to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> verifyProblem(

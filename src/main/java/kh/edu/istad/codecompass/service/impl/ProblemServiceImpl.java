@@ -13,10 +13,7 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUs
 import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
-import kh.edu.istad.codecompass.repository.ProblemRepository;
-import kh.edu.istad.codecompass.repository.TagRepository;
-import kh.edu.istad.codecompass.repository.UserHintRepository;
-import kh.edu.istad.codecompass.repository.UserRepository;
+import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +36,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final TagRepository tagRepository;
     private final UserHintRepository userHintRepository;
     private final ProblemMapper problemMapper;
+    private final HintRepository hintRepository;
 
     @Transactional
     @Override
@@ -129,7 +127,38 @@ public class ProblemServiceImpl implements ProblemService {
         //  Get UserHint for a specific user & problem
         List<UserHint> userHints = userHintRepository.findByUserAndHintProblem(user, problem);
 
-        List<UserHintResponse> hintResponses = problem.getHints().stream()
+        List<Hint> hints = hintRepository.findByProblem_Id(problemId);
+
+        for (Hint hint : hints) {
+            // find existing UserHint for this user
+            UserHint userHint = userHints.stream()
+                    .filter(uh -> uh.getHint().getId().equals(hint.getId()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        // create a new UserHint if it doesn't exist
+                        UserHint uh = new UserHint();
+                        uh.setUser(user);
+                        uh.setHint(hint);
+                        uh.setIsUnlocked(false);
+                        return uh;
+                    });
+
+            // unlock if the hint is unlocked by default
+            if (!hint.getIsLocked() && !userHint.getIsUnlocked()) {
+                userHint.setIsUnlocked(true);
+            }
+
+            // save or update
+            userHintRepository.save(userHint);
+
+            // add/update in userHints list so it can be used for response mapping
+            if (!userHints.contains(userHint)) {
+                userHints.add(userHint);
+            }
+        }
+
+
+        List<UserHintResponse> hintResponses = hints.stream()
                 .map(hint -> {
                     Boolean unlocked = userHints.stream()
                             .filter(uh -> uh.getHint().getId().equals(hint.getId()))
@@ -139,6 +168,7 @@ public class ProblemServiceImpl implements ProblemService {
                     return new UserHintResponse(hint.getId(), hint.getDescription(), !unlocked); // isLocked = !unlocked
                 })
                 .collect(Collectors.toList());
+
 
         List<String> tagNames = problem.getTags().stream()
                 .map(Tag::getTagName)
