@@ -37,7 +37,8 @@ public class KeyCloakSecurityConfig {
                                 "/swagger-ui/index.html",
                                 "/swagger-ui/index.html/**",
                                 "/webjars/**",
-                                "/media/**"
+                                "/media/**",
+                                "/api/v1/ws-comments/**"
                         ).permitAll()
 
 //                        auth
