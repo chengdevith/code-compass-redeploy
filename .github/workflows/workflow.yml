@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 env:
-  IMAGE_NAME: code-compass
+  IMAGE_NAME: redeploy
 
 jobs:
   build-and-deploy:
