@@ -25,7 +25,7 @@ public class Badge {
     @Column(nullable = false)
     private String description;
 
-    private String icon_url;
+    private String iconUrl;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
