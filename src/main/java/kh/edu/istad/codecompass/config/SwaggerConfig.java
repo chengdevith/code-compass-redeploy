@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Code Compass",
                 version = "V1",
-                description = "CodeCompass is an online platform for coders to practice coding challenges. It offers diverse tasks across multiple programming languages, helping users enhance their algorithmic skills in a user-friendly environment."
+                description = "kdmv CodeCompass is an online platform for coders to practice coding challenges. It offers diverse tasks across multiple programming languages, helping users enhance their algorithmic skills in a user-friendly environment."
         )
 )
 public class SwaggerConfig {
