@@ -27,4 +27,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
     // Count total users in leaderboard for edge case handling
     Long countByLeaderBoard(LeaderBoard leaderBoard);
 
+    boolean existsByEmail(String email);
+
+    Optional<User> findByEmail(String email);
 }
