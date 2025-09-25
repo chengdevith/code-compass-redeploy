@@ -1,7 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
-import kh.edu.istad.codecompass.enums.AuthProvider;
+import kh.edu.istad.codecompass.enums.OAuthProvider;
 import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Level;
 import lombok.Getter;
@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +85,6 @@ public class User {
     }
 
     @Enumerated(EnumType.STRING)
-    private AuthProvider authProvider; // GOOGLE, GITHUB, LOCAL
+    private OAuthProvider authProvider; // GOOGLE, GITHUB, NONE
 
 }

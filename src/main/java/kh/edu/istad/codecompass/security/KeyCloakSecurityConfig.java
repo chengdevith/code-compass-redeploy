@@ -100,6 +100,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/solutions/problem/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        users
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/by-email/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 

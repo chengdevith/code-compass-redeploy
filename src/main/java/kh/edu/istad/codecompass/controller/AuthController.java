@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -162,6 +164,13 @@ public class AuthController {
     @Operation(summary = "Register account (public)")
     public RegisterResponse register(@RequestBody @Valid RegisterRequest registerRequest) {
         return authService.register(registerRequest);
+    }
+
+    @PostMapping("/oauth-register")
+    public ResponseEntity<String> oauthRegister(@AuthenticationPrincipal Jwt jwt) {
+        String keycloakUserId = jwt.getSubject();
+        authService.handleOAuthUserRegistration(keycloakUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("OAuth registration successful");
     }
 
     @PostMapping("/reset-password")

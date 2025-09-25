@@ -3,7 +3,7 @@ package kh.edu.istad.codecompass.dto.oauth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import kh.edu.istad.codecompass.enums.AuthProvider;
+import kh.edu.istad.codecompass.enums.OAuthProvider;
 import kh.edu.istad.codecompass.enums.Gender;
 import lombok.Builder;
 
@@ -25,7 +25,7 @@ public record CompleteOAuthRequest(
         String email,
 
         @NotNull
-        AuthProvider authProvider, // GOOGLE | GITHUB
+        OAuthProvider authProvider, // GOOGLE | GITHUB
 
         @NotBlank
         String providerId

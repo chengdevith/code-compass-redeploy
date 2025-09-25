@@ -25,6 +25,8 @@ public interface AuthService {
      */
     void verifyEmail(String userId);
 
+    void handleOAuthUserRegistration(String keycloakUserId);
+
     void resetPassword(ResetPasswordRequest resetPasswordRequest);
 
     void requestPasswordReset(ResetPasswordRequest resetPasswordRequest);
