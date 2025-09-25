@@ -56,10 +56,12 @@ jobs:
             docker compose down
             
             # Remove old images for this app
-            docker rmi -f benz3528/code-compass:latest || true
+            #docker rmi -f benz3528/code-compass:latest || true
+            docker rmi -f benz3528/redeploy:latest || true
 
             # Pull fresh latest image
-            docker pull benz3528/code-compass:latest
+            #docker pull benz3528/code-compass:latest
+            docker pull benz3528/redeploy:latest
 
             # Start with new image
             docker compose up -d --force-recreate --remove-orphans
