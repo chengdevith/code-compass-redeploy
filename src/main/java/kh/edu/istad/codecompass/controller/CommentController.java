@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/comments")
@@ -48,6 +50,11 @@ public class CommentController {
 
         reportService.changeStatus(request);
 
+    }
+
+    @GetMapping("/get-report")
+    public List<ReportResponse> getReport() {
+        return reportService.getReport();
     }
 
 }

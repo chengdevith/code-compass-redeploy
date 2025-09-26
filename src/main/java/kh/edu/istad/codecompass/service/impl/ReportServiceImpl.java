@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +66,11 @@ public class ReportServiceImpl implements ReportService {
 
         reportRepository.save(report);
 
+    }
+
+    @Override
+    public List<ReportResponse> getReport() {
+        return reportMapper.toReportResponseList(reportRepository.findAll());
     }
 
 }
