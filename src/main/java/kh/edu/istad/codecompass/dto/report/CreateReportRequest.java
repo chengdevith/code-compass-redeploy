@@ -5,7 +5,7 @@ public record CreateReportRequest(
         String reason,
         Long commentId,
         Long problemId,
-        Long userId
+        String username
 
 ) {
 }
