@@ -5,6 +5,8 @@ import kh.edu.istad.codecompass.dto.report.ReportResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
@@ -12,5 +14,10 @@ public interface ReportMapper {
     @Mapping(target = "problemId", source = "problem.id")
     @Mapping(target = "commentId", source = "comment.id")
     ReportResponse toReportResponse(Report report);
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "problemId", source = "problem.id")
+    @Mapping(target = "commentId", source = "comment.id")
+    List<ReportResponse> toReportResponseList(List<Report> reports);
 
 }
