@@ -140,7 +140,7 @@ public class Judge0ServiceImpl implements Judge0Service {
             // Time efficiency reward
             if (averageUserExecutionTime <= peekTimeExecution * 1.5) // within 50% of best
                 earnedCoins += baseCoins / 4.0;
-             else if (averageUserExecutionTime <= peekTimeExecution * 2)  // within 100% slower
+            else if (averageUserExecutionTime <= peekTimeExecution * 2)  // within 100% slower
                 earnedCoins += baseCoins / 6.0;
 
             // Memory efficiency reward
@@ -159,7 +159,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     .anyMatch(history -> history.getStatus().equals("Accepted"));
 
 //            user has solved this specific problem for the first time
-            if (! hasSolvedBefore ) {
+            if (!hasSolvedBefore) {
                 user.setCoin((int) earnedCoins + user.getCoin());
                 user.setStar(earnedStars + user.getStar());
                 user.updateLevel();
@@ -174,8 +174,6 @@ public class Judge0ServiceImpl implements Judge0Service {
 
                 List<UserProblem> userProblemList = userProblemRepository
                         .findAllByUserIdAndIsSolvedTrue(user.getId());
-
-
 
                 // collect all solved problem IDs
                 Set<Long> solvedProblemIds = userProblemList.stream()
@@ -238,7 +236,6 @@ public class Judge0ServiceImpl implements Judge0Service {
                 if (earnedCoins > maxHistoryCoins)
                     user.setCoin((int) (user.getCoin() + (earnedCoins - maxHistoryCoins)));
 
-
                 // stars: only add if earned > history
                 Star currentStar = switch (earnedStars) {
                     case 1 -> Star.ONE;
@@ -246,6 +243,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                     case 3 -> Star.THREE;
                     default -> Star.ZERO;
                 };
+
                 if (currentStar.compareTo(maxHistoryStars) > 0) {
                     int additionalStars = currentStar.ordinal() - maxHistoryStars.ordinal();
                     user.setStar(user.getStar() + additionalStars);
@@ -333,7 +331,7 @@ public class Judge0ServiceImpl implements Judge0Service {
     }
 
     @Transactional
-        protected Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
+    protected Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
         try {
             log.info("Sending batch request to Judge0 with {} submissions", request.submissions().size());
 
