@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record CommentResponse(
 
+        Long id,
         String comment,
         LocalDateTime commentAt,
         Boolean isDeleted,
