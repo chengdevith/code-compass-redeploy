@@ -36,7 +36,7 @@ public class ReportServiceImpl implements ReportService {
         report.setCreateAt(LocalDateTime.now());
         report.setStatus(ReportStatus.PENDING);
 
-        report.setUser(userRepository.findById(request.userId()).orElseThrow(
+        report.setUser(userRepository.findUserByUsername(request.username()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
         ));
 
