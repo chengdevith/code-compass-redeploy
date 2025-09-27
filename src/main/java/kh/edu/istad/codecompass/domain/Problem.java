@@ -55,6 +55,7 @@ public class Problem {
     private Boolean isDeleted;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToOne
