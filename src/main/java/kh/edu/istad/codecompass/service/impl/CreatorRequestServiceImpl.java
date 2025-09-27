@@ -7,6 +7,7 @@ import kh.edu.istad.codecompass.dto.creatorRequest.response.CreatorResponseDTO;
 import kh.edu.istad.codecompass.dto.creatorRequest.response.ReviewCreatorResponse;
 import kh.edu.istad.codecompass.dto.creatorRequest.request.UpdateRoleRequest;
 import kh.edu.istad.codecompass.enums.ReportStatus;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.repository.CreatorRequestRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.CreatorRequestService;
@@ -47,7 +48,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
 
         CreatorRequest creatorRequest = new CreatorRequest();
         creatorRequest.setDescription(creatorRequest.getDescription());
-        creatorRequest.setStatus(ReportStatus.PENDING);
+        creatorRequest.setStatus(Status.PENDING);
         creatorRequest.setUser(user);
 
         creatorRequest = creatorRequestRepository.save(creatorRequest);
@@ -106,7 +107,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
             CreatorRequest creatorRequest = creatorRequestRepository.findCreatorRequestByUser_Id(user.getId()).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
             );
-            creatorRequest.setStatus(ReportStatus.APPROVED);
+            creatorRequest.setStatus(Status.APPROVED);
             creatorRequest = creatorRequestRepository.save(creatorRequest);
 
             user.setCreatorRequest(creatorRequest);

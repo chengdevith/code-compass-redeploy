@@ -15,8 +15,8 @@ public class SubmissionHistoryServiceImpl implements SubmissionHistoryService {
     private final SubmissionHistoryRepository submissionHistoryRepository;
 
     @Override
-    public List<SubmissionHistoryResponse> getAllHistory(String username) {
-        return submissionHistoryRepository.findSubmissionHistoriesByUser_Username(username)
+    public List<SubmissionHistoryResponse> getAllHistory(String username, Long problemId) {
+        return submissionHistoryRepository.findByProblemIdAndUser_Username(problemId ,username)
                 .stream()
                 .map(submissionHistory -> SubmissionHistoryResponse.builder()
                         .star(submissionHistory.getStar())

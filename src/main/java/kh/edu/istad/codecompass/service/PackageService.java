@@ -22,7 +22,7 @@ public interface PackageService {
      */
     PackageResponse addProblemsToPackage(AddProblemToPackageRequest request);
 
-    void verifyPackage(Long id, Boolean isVerified);
+    PackageResponse verifyPackage(Long id, Boolean isVerified);
 
     List<PackageResponse> getAllPackages();
 
@@ -30,8 +30,13 @@ public interface PackageService {
 
     PackageResponse updatePackage(Long id,  PackageRequest packageRequest);
 
-    PackageResponse createPackage(PackageRequest packageRequest);
+    PackageResponse createPackage(PackageRequest packageRequest, String username);
 
     PackageResponse findPackageById(Long id);
 
+    List<PackageResponse> getPackagesByCreator(String username);
+
+    List<PackageResponse> getAllVerifiedPackages();
+
+    List<PackageResponse> getAllUnverifiedPackages();
 }

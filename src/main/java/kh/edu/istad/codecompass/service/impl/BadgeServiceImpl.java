@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
 import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.BadgeMapper;
 import kh.edu.istad.codecompass.repository.BadgeRepository;
 import kh.edu.istad.codecompass.repository.PackageRepository;
@@ -56,12 +57,13 @@ public class BadgeServiceImpl implements BadgesService {
     }
 
     @Override
-    public void verifyBadges(Long id, Boolean isVerified) {
+    public BadgesResponse verifyBadges(Long id, Boolean isVerified) {
         Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedFalse(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
         badge.setIsVerified(isVerified);
-        badgeRepository.save(badge);
-
+        badge.setStatus(Status.APPROVED);
+        badge = badgeRepository.save(badge);
+        return badgeMapper.toBadgeResponse(badge);
     }
 
     @Override
@@ -107,6 +109,7 @@ public class BadgeServiceImpl implements BadgesService {
         badge.setCreatedAt(LocalDateTime.now());
         badge.setIsVerified(false);
         badge.setIsDeleted(false);
+        badge.setStatus(Status.PENDING);
         badgeRepository.save(badge);
 
         return badgeMapper.toBadgeResponse(badge);
@@ -118,5 +121,13 @@ public class BadgeServiceImpl implements BadgesService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Badge not found")
         );
         return badgeMapper.toBadgeResponse(badge);
+    }
+
+    @Override
+    public List<BadgesResponse> getBadgesByCreator(String username) {
+        return badgeRepository.findBadgesByAuthor(username)
+                .stream()
+                .map(badgeMapper::toBadgeResponse)
+                .toList();
     }
 }

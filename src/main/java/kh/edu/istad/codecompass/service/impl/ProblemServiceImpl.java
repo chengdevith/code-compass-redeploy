@@ -12,6 +12,7 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.ProblemService;
@@ -95,6 +96,7 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setBestTimeExecution(problemRequest.bestTimeExecution());
         problem.setIsVerified(false);
         problem.setIsDeleted(false);
+        problem.setStatus(Status.PENDING);
 
         problem = problemRepository.save(problem);
         ProblemIndex problemIndex = ProblemIndex.builder()
@@ -253,14 +255,16 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Transactional
     @Override
-    public void verifyProblem(long problemId, boolean isVerified) {
+    public ProblemResponse verifyProblem(long problemId, boolean isVerified) {
 
         Problem problem  = problemRepository.findProblemByIdAndIsVerifiedFalse(problemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
         );
         problem.setIsVerified(isVerified);
+        problem.setStatus(Status.APPROVED);
 
-        problemRepository.save(problem);
+        problem = problemRepository.save(problem);
+        return problemMapper.fromEntityToResponse(problem);
     }
 
     @Transactional
@@ -286,6 +290,14 @@ public class ProblemServiceImpl implements ProblemService {
 
         problemElasticsearchRepository.save(problemIndex);
 
+    }
+
+    @Override
+    public List<ProblemResponse> getProblemsByAuthor(String username) {
+        return problemRepository.findProblemsByAuthor_Username(username)
+                .stream()
+                .map(problemMapper::fromEntityToResponse)
+                .toList();
     }
 
 

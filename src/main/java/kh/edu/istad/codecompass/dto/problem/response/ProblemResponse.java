@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.dto.hint.response.HintResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Builder;
 
 import java.util.List;
@@ -37,6 +38,8 @@ public record ProblemResponse(
 
         List<HintResponse> hints,
 
-        String author
+        String author,
+
+        Status status
 ) { }
 

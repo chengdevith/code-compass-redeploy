@@ -11,7 +11,7 @@ public interface BadgesService {
 
     void updateBadge(Long id, BadgeRequest badgeRequest);
 
-    void verifyBadges(Long id, Boolean isVerified);
+    BadgesResponse verifyBadges(Long id, Boolean isVerified);
 
     List<BadgesResponse>unverifiedBadges();
 
@@ -22,4 +22,6 @@ public interface BadgesService {
     BadgesResponse createBadge(BadgeRequest badgeRequest, String author);
 
     BadgesResponse getBadgeById(Long id);
+
+    List<BadgesResponse> getBadgesByCreator(String username);
 }

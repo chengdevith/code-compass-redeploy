@@ -6,6 +6,7 @@ import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.PackageMapper;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.PackageRepository;
@@ -59,14 +60,15 @@ public class PackageServiceImpl implements PackageService {
 
     @Transactional
     @Override
-    public void verifyPackage(Long id, Boolean isVerified) {
+    public PackageResponse verifyPackage(Long id, Boolean isVerified) {
 
         Package pack = packageRepository.findPackageByIdAndIsVerifiedFalse(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
         );
         pack.setIsVerified(isVerified);
-
-        packageRepository.save(pack);
+        pack.setStatus(Status.APPROVED);
+        pack = packageRepository.save(pack);
+        return packageMapper.mapPackageToResponse(pack);
     }
 
     @Transactional
@@ -104,7 +106,7 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
-    public PackageResponse createPackage(PackageRequest packageRequest) {
+    public PackageResponse createPackage(PackageRequest packageRequest, String username) {
 
         if (packageRepository.existsByName(packageRequest.name()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Package already exists");
@@ -114,6 +116,8 @@ public class PackageServiceImpl implements PackageService {
         pack.setDescription(packageRequest.description());
         pack.setIsDeleted(false);
         pack.setIsVerified(false);
+        pack.setStatus(Status.PENDING);
+        pack.setAuthor(username);
 
         pack = packageRepository.save(pack);
 
@@ -128,5 +132,29 @@ public class PackageServiceImpl implements PackageService {
         );
 
         return packageMapper.mapPackageToResponse(pack);
+    }
+
+    @Override
+    public List<PackageResponse> getPackagesByCreator(String username) {
+        return packageRepository.findPackagesByAuthor(username)
+                .stream()
+                .map(packageMapper::mapPackageToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<PackageResponse> getAllVerifiedPackages() {
+        return packageRepository.findPackagesByIsVerifiedTrue()
+                .stream()
+                .map(packageMapper::mapPackageToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<PackageResponse> getAllUnverifiedPackages() {
+        return packageRepository.findPackagesByIsVerifiedFalse()
+                .stream()
+                .map(packageMapper::mapPackageToResponse)
+                .toList();
     }
 }

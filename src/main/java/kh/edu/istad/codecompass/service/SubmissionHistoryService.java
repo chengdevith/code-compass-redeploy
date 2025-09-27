@@ -5,5 +5,5 @@ import kh.edu.istad.codecompass.dto.submissionHistory.response.SubmissionHistory
 import java.util.List;
 
 public interface SubmissionHistoryService {
-    List<SubmissionHistoryResponse> getAllHistory(String username);
+    List<SubmissionHistoryResponse> getAllHistory(String username, Long problemId);
 }

@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.domain;
 import jakarta.persistence.*;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -52,6 +53,9 @@ public class Problem {
 
     @Column(nullable = false)
     private Boolean isDeleted;
+
+    @Column(nullable = false)
+    private Status status;
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
