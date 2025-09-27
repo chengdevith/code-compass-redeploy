@@ -20,4 +20,6 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
 
     Optional<Problem> findProblemByIdAndAuthor_Username(Long problemId, String authorUsername);
 
+    List<Problem> findProblemsByAuthor_Username(String username);
+
 }

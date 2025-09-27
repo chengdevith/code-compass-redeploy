@@ -11,6 +11,8 @@ import kh.edu.istad.codecompass.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,22 +32,19 @@ public class PackageController {
 
     @PutMapping("/{id}/verification")
     @Operation(summary = "Verifies package to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-   ResponseEntity<String>verifyPackage(@PathVariable Long id,
+    PackageResponse verifyPackage(@PathVariable Long id,
                                       @RequestParam(defaultValue = "true") Boolean verified){
-       packageService.verifyPackage(id, verified);
-
-       return ResponseEntity.ok("The package has bean verified successfully");
-
+       return packageService.verifyPackage(id, verified);
    }
 
     @GetMapping
-    @Operation(summary = "Views all packages - both unverified and verified", security = {@SecurityRequirement(name = "bearerAuth")})
-    public List<PackageResponse>getAllPackages() {
-    return packageService.getAllPackages();
+    @Operation(summary = "Getting all packages - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    public List<PackageResponse> getAllProblems(){
+        return packageService.getAllPackages();
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Updates a specific problem", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Updates a specific problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public PackageResponse updatePackage(@PathVariable Long id,
          @RequestBody PackageRequest packageRequest) {
         return packageService.updatePackage(id, packageRequest);
@@ -54,9 +53,12 @@ public class PackageController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @Operation(summary = "Creates a package", security = {@SecurityRequirement(name = "bearerAuth")})
-    public PackageResponse createPackage(@RequestBody PackageRequest packageRequest) {
-        return packageService.createPackage(packageRequest);
+    @Operation(summary = "Creates a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    public PackageResponse createPackage(@RequestBody PackageRequest packageRequest, @AuthenticationPrincipal Jwt jwt) {
+
+        String username = jwt.getClaim("preferred_username");
+
+        return packageService.createPackage(packageRequest, username);
     }
 
     @GetMapping("/{id}")
@@ -64,4 +66,24 @@ public class PackageController {
     PackageResponse findPackageById(@PathVariable Long id) {
         return packageService.findPackageById(id);
     }
+
+    @GetMapping("/me")
+    @Operation(summary = "Getting packages for a creator (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    List<PackageResponse> getPackagesByCreator(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return packageService.getPackagesByCreator(username);
+    }
+
+    @GetMapping("/verified")
+    @Operation(summary = "Getting all verified packages (public)")
+    List<PackageResponse> getAllVerifiedPackages() {
+        return packageService.getAllVerifiedPackages();
+    }
+
+    @GetMapping("/unverified")
+    @Operation(summary = "Getting all verified packages (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    List<PackageResponse> getAllUnVerifiedPackages() {
+        return packageService.getAllUnverifiedPackages();
+    }
+
 }

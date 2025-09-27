@@ -22,4 +22,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
     boolean existsBadgeByName(String name);
 
     Optional<Badge> findBadgesByProblemPackage_Name(String name);
+
+    List<Badge> findBadgesByAuthor(String username);
 }

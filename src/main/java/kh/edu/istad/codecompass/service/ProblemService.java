@@ -87,7 +87,7 @@ public interface ProblemService {
      * @param isVerified A boolean flag; {@code true} to verify the problem, {@code false} to un-verify it.
      * @author Panharoth
      */
-    void verifyProblem(long problemId, boolean isVerified);
+    ProblemResponse verifyProblem(long problemId, boolean isVerified);
 
 
     /**
@@ -102,4 +102,6 @@ public interface ProblemService {
      * @author Panharoth
      */
     void updateProblem(Long problemId, String username, UpdateProblemRequest updateProblemRequest);
+
+    List<ProblemResponse> getProblemsByAuthor(String username);
 }

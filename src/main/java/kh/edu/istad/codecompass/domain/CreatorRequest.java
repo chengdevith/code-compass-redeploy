@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
 import kh.edu.istad.codecompass.enums.ReportStatus;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,9 +16,10 @@ public class CreatorRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    String description;
+    private String description;
 
-    ReportStatus status;
+    @Column(nullable = false)
+    private Status status;
 
     @OneToOne
     User user;

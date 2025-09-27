@@ -63,12 +63,11 @@ public class ProblemController {
     @PutMapping("/{problemId}/verification")
     @Operation(summary = "Verifies a problem to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> verifyProblem(
+    public ProblemResponse verifyProblem(
             @PathVariable Long problemId,
             @RequestParam(defaultValue = "true") boolean verified
     ) {
-        problemService.verifyProblem(problemId, verified);
-        return ResponseEntity.ok("The problem has been verified successfully");
+        return problemService.verifyProblem(problemId, verified);
     }
 
     @PatchMapping("/{problemId}")
@@ -110,5 +109,12 @@ public class ProblemController {
     @PreAuthorize("permitAll()")
     public List<ProblemIndex> searchProblems(@RequestParam String keyword) {
         return problemElasticsearchRepository.findByTitleContaining(keyword);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Getting problems by creator", security = {@SecurityRequirement(name = "bearerAuth")})
+    public List<ProblemResponse> getProblemsByAuthor (@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return problemService.getProblemsByAuthor(username);
     }
 }

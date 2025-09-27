@@ -61,11 +61,9 @@ public class BadgeController {
 
     @PatchMapping("/{id}/verification")
     @Operation(summary = "For verifying badges (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    ResponseEntity <String>VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
+    BadgesResponse VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
                                           boolean verified) {
-        badgesService.verifyBadges(id, verified);
-        return ResponseEntity.ok("The badge has been verified successfully");
-
+        return badgesService.verifyBadges(id, verified);
     }
 
     @GetMapping
@@ -83,6 +81,13 @@ public class BadgeController {
     ) {
         String author = jwt.getClaim("preferred_username");
         return badgesService.createBadge(badgeRequest, author);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Getting badges for a creator (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    public List<BadgesResponse> getBadgesByAuthor(@AuthenticationPrincipal Jwt jwt){
+        String username = jwt.getClaim("preferred_username");
+        return badgesService.getBadgesByCreator(username);
     }
 
 }

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,11 +21,11 @@ public class SubmissionHistory {
 
     private final SubmissionHistoryService submissionHistoryService;
 
-    @GetMapping
+    @GetMapping("/{problemId}/problem")
     @Operation(summary = "Get history submission for a subscriber (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    public List<SubmissionHistoryResponse> getHistory(@AuthenticationPrincipal Jwt jwt) {
+    public List<SubmissionHistoryResponse> getHistory(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
         String username = jwt.getClaim("preferred_username");
-        return submissionHistoryService.getAllHistory(username);
+        return submissionHistoryService.getAllHistory(username, problemId);
     }
 
 }
