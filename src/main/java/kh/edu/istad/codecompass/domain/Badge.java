@@ -41,6 +41,7 @@ public class Badge {
     private String author;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @ManyToMany(mappedBy = "badges")

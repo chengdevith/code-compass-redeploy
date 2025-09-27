@@ -31,6 +31,7 @@ public class Package {
     private Boolean isVerified;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(nullable = false)
