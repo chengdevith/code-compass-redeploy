@@ -47,7 +47,7 @@ public class AuthController {
     private String realm;
 
     @PostMapping("/login")
-    @Operation(summary = "Get access token from Keycloak (public)")
+    @Operation(summary = "Get access token (public)")
     public ResponseEntity<?> getToken(@RequestBody LoginRequest request) {
         try {
             // Prepare headers
@@ -167,6 +167,7 @@ public class AuthController {
     }
 
     @PostMapping("/oauth-register")
+    @Operation(summary = "Reset Password (public)")
     public ResponseEntity<String> oauthRegister(@AuthenticationPrincipal Jwt jwt) {
         String keycloakUserId = jwt.getSubject();
         authService.handleOAuthUserRegistration(keycloakUserId);
@@ -174,14 +175,14 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Reset Password | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset Password successfully");
     }
 
     @PostMapping("/request-reset-password")
-    @Operation(summary = "Request reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Request reset Password  | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
         return ResponseEntity.ok("We have sent link to your email to reset password");

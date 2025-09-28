@@ -84,14 +84,14 @@ public class ProblemController {
     }
 
     @GetMapping("/unverified")
-    @Operation(summary = "Acts as a filter for admin to access all unverified problems (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "View all unverified problems | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProblemSummaryResponse> getUnverifiedProblems() {
         return problemService.getUnverifiedProblems();
     }
 
     @GetMapping
-    @Operation(summary = "For admin to view all problems - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "View all problems - both verified and unverified | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProblemSummaryResponse> getAllProblems() {
         return problemService.getProblems();
@@ -112,9 +112,17 @@ public class ProblemController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Getting problems by creator", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get problems by creator | [ CREATOR, ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<ProblemResponse> getProblemsByAuthor (@AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         return problemService.getProblemsByAuthor(username);
+    }
+
+    @DeleteMapping("/{problemId}/delete")
+    @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
+    @Operation(summary = "Delete a problem by ID", security = {@SecurityRequirement(name = "bearerAuth")})
+    public void deleteProblemById(@PathVariable Long problemId, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        problemService.deleteProblemById(problemId, username);
     }
 }

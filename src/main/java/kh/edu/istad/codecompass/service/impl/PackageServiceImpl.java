@@ -82,21 +82,13 @@ public class PackageServiceImpl implements PackageService {
                 .toList();
     }
 
-//    @Transactional
-//    @Override
-//    public PackageResponse getPackage(Long id) {
-//
-//        Package pack = packageRepository.findByIdAndIsVerifiedTrue(id).orElseThrow(
-//                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
-//        );
-//
-//        return packageMapper.mappackageToPackageResponse(pack);
-//    }
-
     @Override
-    public PackageResponse updatePackage(Long id, PackageRequest packageRequest) {
+    public PackageResponse updatePackage(Long id, PackageRequest packageRequest, String username) {
 
-        Package pack = packageRepository.findByIdAndIsVerifiedTrue(id).orElseThrow(()
+        if (packageRepository.existsByAuthor(username))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package");
+
+        Package pack = packageRepository.findPackageByAuthorAndId(username, id).orElseThrow(()
                 -> new ResponseStatusException(HttpStatus.NOT_FOUND  ,"Package not found.")
         );
         packageMapper.updatePackagePartially(packageRequest, pack);
@@ -121,7 +113,7 @@ public class PackageServiceImpl implements PackageService {
 
         pack = packageRepository.save(pack);
 
-        return packageMapper.mapPackageToResponse(pack) ;
+        return packageMapper.mapPackageToResponse(pack);
     }
 
     @Override
@@ -156,5 +148,15 @@ public class PackageServiceImpl implements PackageService {
                 .stream()
                 .map(packageMapper::mapPackageToResponse)
                 .toList();
+    }
+
+    @Override
+    public void deletePackageById(Long id, String username) {
+        Package pack = packageRepository.findPackageByAuthorAndId(username, id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
+        );
+        pack.setIsDeleted(true);
+        pack.setIsVerified(false);
+        packageRepository.save(pack);
     }
 }

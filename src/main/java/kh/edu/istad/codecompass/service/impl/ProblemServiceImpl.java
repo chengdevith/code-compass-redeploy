@@ -300,5 +300,15 @@ public class ProblemServiceImpl implements ProblemService {
                 .toList();
     }
 
+    @Override
+    public void deleteProblemById(long problemId, String username) {
+        Problem problem = problemRepository.findProblemByIdAndAuthor_Username(problemId, username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+        problem.setIsDeleted(true);
+        problem.setIsVerified(false);
+        problemRepository.save(problem);
+    }
+
 
 }
