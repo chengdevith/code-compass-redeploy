@@ -7,10 +7,12 @@ import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageReques
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 
+import kh.edu.istad.codecompass.service.BadgesService;
 import kh.edu.istad.codecompass.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -25,39 +27,38 @@ public class PackageController {
     private final PackageService packageService;
 
     @PutMapping("/add-problems")
-    @Operation(summary = "Adds problems to a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Adds problems to a package | [ CREATOR, ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public PackageResponse addProblemsToPackage(@RequestBody @Valid AddProblemToPackageRequest request) {
         return  packageService.addProblemsToPackage(request);
     }
 
     @PutMapping("/{id}/verification")
-    @Operation(summary = "Verifies package to be created (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    PackageResponse verifyPackage(@PathVariable Long id,
-                                      @RequestParam(defaultValue = "true") Boolean verified){
+    @Operation(summary = "Verify a package | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    PackageResponse verifyPackage(@PathVariable Long id, @RequestParam(defaultValue = "true") Boolean verified){
        return packageService.verifyPackage(id, verified);
    }
 
     @GetMapping
-    @Operation(summary = "Getting all packages - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get all packages - both verified and unverified | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<PackageResponse> getAllProblems(){
         return packageService.getAllPackages();
     }
 
     @PatchMapping("/{id}")
-    @Operation(summary = "Updates a specific problem (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Update a problem | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public PackageResponse updatePackage(@PathVariable Long id,
-         @RequestBody PackageRequest packageRequest) {
-        return packageService.updatePackage(id, packageRequest);
+         @RequestBody PackageRequest packageRequest, @AuthenticationPrincipal Jwt jwt) {
 
+        String username = jwt.getClaim("preferred_username");
+        return packageService.updatePackage(id, packageRequest, username);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @Operation(summary = "Creates a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Creates a package | [ CREATOR, ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public PackageResponse createPackage(@RequestBody PackageRequest packageRequest, @AuthenticationPrincipal Jwt jwt) {
 
         String username = jwt.getClaim("preferred_username");
-
         return packageService.createPackage(packageRequest, username);
     }
 
@@ -68,7 +69,7 @@ public class PackageController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Getting packages for a creator (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get all packages by author | [ CREATOR | ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     List<PackageResponse> getPackagesByCreator(@AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         return packageService.getPackagesByCreator(username);
@@ -81,9 +82,18 @@ public class PackageController {
     }
 
     @GetMapping("/unverified")
-    @Operation(summary = "Getting all verified packages (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get all verified packages | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     List<PackageResponse> getAllUnVerifiedPackages() {
         return packageService.getAllUnverifiedPackages();
     }
 
+    @DeleteMapping("/{id}/delete")
+    @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
+    @Operation(summary = "Delete a package | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deletePackageById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        packageService.deletePackageById(id, username);
+        return ResponseEntity.noContent().build();
+    }
 }

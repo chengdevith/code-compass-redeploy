@@ -25,4 +25,9 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
     List<Package> findPackagesByIsVerifiedTrue();
 
     List<Package> findPackagesByIsVerifiedFalse();
+
+    Optional<Package> findPackageByAuthorAndId(String author, Long id);
+
+    Boolean existsByAuthor(String author);
+
 }
