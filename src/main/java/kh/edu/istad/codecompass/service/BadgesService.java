@@ -24,4 +24,6 @@ public interface BadgesService {
     BadgesResponse getBadgeById(Long id);
 
     List<BadgesResponse> getBadgesByCreator(String username);
+
+    void deleteBadgeById(Long id, String username);
 }

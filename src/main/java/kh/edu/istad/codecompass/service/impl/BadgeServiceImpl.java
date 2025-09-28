@@ -32,21 +32,33 @@ public class BadgeServiceImpl implements BadgesService {
 
     @Override
     public void addBadgeToPackage(AddBadgeToPackageRequest request) {
+        // Find package
+        Package pack = packageRepository.findByNameAndIsVerifiedTrue(request.packageName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found"));
 
-        if (badgeRepository.existsBadgeByName(request.badgeName()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Badge name already exists");
+        // Find badge
+        Badge badge = badgeRepository.findBadgeByNameAndIsVerifiedTrue(request.badgeName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
 
-        Package pack = packageRepository.findByNameAndIsVerifiedTrue(request.packageName()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
-        );
+        // Check if package already has a badge
+        if (pack.getBadge() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Package '" + request.packageName() + "' already has a badge assigned: " + pack.getBadge().getName());
+        }
 
-        Badge badge = badgeRepository.findBadgeByNameAndIsVerifiedTrue(request.badgeName()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found")
-        );
+        // Check if badge is already assigned to a different package
+        if (badge.getProblemPackage() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Badge '" + request.badgeName() + "' is already assigned to package: " + badge.getProblemPackage().getName());
+        }
 
+        // Assign the badge to package (both sides of the relationship)
         badge.setProblemPackage(pack);
-        badgeRepository.save(badge);
+        pack.setBadge(badge);
 
+        // Save both entities to maintain consistency
+        badgeRepository.save(badge);
+        packageRepository.save(pack);
     }
 
     @Override
@@ -129,5 +141,15 @@ public class BadgeServiceImpl implements BadgesService {
                 .stream()
                 .map(badgeMapper::toBadgeResponse)
                 .toList();
+    }
+
+    @Override
+    public void deleteBadgeById(Long id, String username) {
+        Badge badge = badgeRepository.findBadgeByAuthorAndId(username, id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge with ID" + id + " not exists")
+        );
+        badge.setIsDeleted(true);
+        badge.setIsVerified(false);
+        badgeRepository.save(badge);
     }
 }

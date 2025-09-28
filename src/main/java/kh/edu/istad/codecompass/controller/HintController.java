@@ -17,7 +17,7 @@ public class HintController {
     private final HintService hintService;
 
     @PutMapping("/{id}/unlock")
-    @Operation(summary = "Use subscriber's earned coins to unlock a hint (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Unlock a hint | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> unlockHint(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
 
         String username = jwt.getClaim("preferred_username");

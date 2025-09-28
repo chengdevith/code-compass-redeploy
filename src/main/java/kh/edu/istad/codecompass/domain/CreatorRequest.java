@@ -16,6 +16,7 @@ public class CreatorRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 400)
     private String description;
 
     @Column(nullable = false)

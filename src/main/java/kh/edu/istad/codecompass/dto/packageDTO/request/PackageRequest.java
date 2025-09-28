@@ -8,7 +8,6 @@ public record PackageRequest(
         @NotBlank(message = "Package name is required")
         String name,
         @NotBlank(message = "Package description is required")
-
         String description
 ) {
 }
