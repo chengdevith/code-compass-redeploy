@@ -13,19 +13,19 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
 
     Optional<Badge> findBadgeByNameAndIsVerifiedTrue(String name);
 
-    Optional<Badge> findBadgeByIdAndIsVerifiedFalse(long id);
+    Optional<Badge> findBadgeByIdAndIsVerifiedFalseAndIsDeletedFalse(long id);
 
     Optional<Badge> findBadgeByIdAndIsVerifiedTrue(long id);
 
-    List<Badge> findBadgeByIsVerifiedFalse();
+    List<Badge> findBadgeByIsVerifiedFalseAndIsDeletedFalse();
 
     List<Badge> findBadgeByIsVerifiedTrue();
 
-    boolean existsBadgeByName(String name);
+    boolean existsBadgeByNameAndIsDeletedFalse(String name);
 
     Optional<Badge> findBadgesByProblemPackage_Name(String name);
 
-    List<Badge> findBadgesByAuthor(String username);
+    List<Badge> findBadgesByAuthorAndIsDeletedFalse(String username);
 
-    Optional<Badge> findBadgeByAuthorAndId(String author, Long id);
+    Optional<Badge> findBadgeByAuthorAndIdAndIsDeletedFalse(String author, Long id);
 }

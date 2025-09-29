@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.dto.packageDTO;
 
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.enums.Status;
 import lombok.Builder;
@@ -15,6 +16,10 @@ public record PackageResponse(
         List<ProblemSummaryResponse> problems,
         Status status,
         String author,
-        BadgesResponse badgesResponse
+        BadgesResponse badgesResponse,
+        @JsonProperty("is_deleted")
+        Boolean isDeleted,
+        @JsonProperty("is_verified")
+        Boolean isVerified
 
 ) { }

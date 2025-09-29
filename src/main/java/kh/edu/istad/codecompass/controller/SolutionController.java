@@ -24,14 +24,14 @@ public class SolutionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "For subscribers and creators to post their problem solution (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Post solution | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public SolutionResponse postSolution(@RequestBody @Valid SolutionRequest solutionRequest, @AuthenticationPrincipal Jwt jwt) {
         String author = jwt.getClaim("preferred_username");
         return solutionService.postSolution(solutionRequest, author);
     }
 
     @GetMapping("/problem/{problemId}")
-    @Operation(summary = "Access solutions in a specific problem after they've solved it (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get solutions | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<SolutionResponse> getAllSolutions(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
         String username = jwt.getClaim("preferred_username");
         return solutionService.getAllSolutions(username, problemId);

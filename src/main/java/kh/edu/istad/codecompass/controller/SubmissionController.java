@@ -33,13 +33,13 @@ public class SubmissionController {
     }
 
     @GetMapping("/{token}")
-    @Operation(summary = "View a paste submission by a submission token (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get a submission by token | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public Judge0SubmissionResponse getSubmission(@PathVariable String token) {
         return judge0Service.getSubmissionByToken(token);
     }
 
     @PostMapping("/batch/{problemId}")
-    @Operation(summary = "Submit the solution to judge system and save to submission history for each user (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Submit code | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     public Judge0BatchResponse executeBatch(
             @RequestBody

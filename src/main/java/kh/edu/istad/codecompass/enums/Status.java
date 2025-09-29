@@ -5,5 +5,6 @@ public enum Status {
     APPROVED,
     REJECTED,
     SUSPENDED,
-    BANNED
+    BANNED,
+    ALLOWED
 }

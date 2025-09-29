@@ -93,8 +93,10 @@ public class Judge0ServiceImpl implements Judge0Service {
         Judge0BatchResponse responses = sendBatchRequestToJudge0(request, batchRequest.languageId());
 
         User user = userRepository.findUserByUsername(username).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")

@@ -13,21 +13,21 @@ public interface PackageRepository extends JpaRepository<Package, Long> {
 
     Optional<Package> findPackageByIdAndIsVerifiedFalse(Long id);
     Optional<Package> findByIdAndIsVerifiedTrue(Long id);
-    Boolean existsByName(String name);
+    Boolean existsByNameAndIsDeletedFalse(String name);
 //    Optional<Package> findByName(String name);
     Optional<Package> findByNameAndIsVerifiedTrue(String name);
 //    Optional<Package> findPackageById(Long problemId);
 
     List<Package> findPackagesByProblems_Id(Long problemId);
 
-    List<Package> findPackagesByAuthor(String username);
+    List<Package> findPackagesByAuthorAndIsDeletedFalse(String username);
 
     List<Package> findPackagesByIsVerifiedTrue();
 
-    List<Package> findPackagesByIsVerifiedFalse();
+    List<Package> findPackagesByIsVerifiedFalseAndIsDeletedFalse();
 
-    Optional<Package> findPackageByAuthorAndId(String author, Long id);
+    Optional<Package> findPackageByAuthorAndIdAndIsDeletedFalse(String author, Long id);
 
-    Boolean existsByAuthor(String author);
+    Boolean existsByAuthorAndIsDeletedFalse(String author);
 
 }
