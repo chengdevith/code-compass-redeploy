@@ -8,18 +8,20 @@ import java.util.Optional;
 
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
 
-    boolean existsProblemByTitle(String title);
+    boolean existsProblemByTitleAndIsDeletedFalse(String title);
 
-    Optional<Problem> findProblemByIdAndIsVerifiedFalse(long problemId);
+    Optional<Problem> findProblemByIdAndIsVerifiedFalseAndIsDeletedFalse(long problemId);
 
     Optional<Problem> findProblemByIdAndIsVerifiedTrue(long problemId);
 
-    List<Problem> findProblemsByIsVerifiedFalse();
+    List<Problem> findProblemsByIsVerifiedFalseAndIsDeletedFalse();
 
     List<Problem> findProblemsByIsVerifiedTrue();
 
-    Optional<Problem> findProblemByIdAndAuthor_Username(Long problemId, String authorUsername);
+    Optional<Problem> findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(Long problemId, String authorUsername);
 
-    List<Problem> findProblemsByAuthor_Username(String username);
+    List<Problem> findProblemsByAuthor_UsernameAndIsDeletedFalse(String username);
+
+    List<Problem> findByIsDeletedFalse();
 
 }

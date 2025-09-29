@@ -40,6 +40,12 @@ public record ProblemResponse(
 
         String author,
 
-        Status status
+        Status status,
+
+        @JsonProperty("is_deleted")
+        Boolean isDeleted,
+
+        @JsonProperty("is_verified")
+        Boolean isVerified
 ) { }
 

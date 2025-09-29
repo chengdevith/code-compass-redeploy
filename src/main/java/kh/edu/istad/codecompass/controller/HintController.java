@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class HintController {
 
     private final HintService hintService;
-
     @PutMapping("/{id}/unlock")
     @Operation(summary = "Unlock a hint | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> unlockHint(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {

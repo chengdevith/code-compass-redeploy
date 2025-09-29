@@ -10,6 +10,7 @@ import kh.edu.istad.codecompass.dto.auth.request.ResetPasswordRequest;
 import kh.edu.istad.codecompass.enums.OAuthProvider;
 import kh.edu.istad.codecompass.enums.Gender;
 import kh.edu.istad.codecompass.enums.Role;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.repository.LeaderBoardRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.AuthService;
@@ -294,11 +295,16 @@ public class AuthServiceImpl implements AuthService {
             user.setGender(Gender.OTHER);
         }
 
+        if (user.getGender().equals(Gender.FEMALE)) user.setImageUrl("https://cdn.jsdelivr.net/gh/alohe/avatars/png/memo_8.png");
+        else if (user.getGender().equals(Gender.MALE)) user.setImageUrl("https://cdn.jsdelivr.net/gh/alohe/avatars/png/memo_34.png");
+        else user.setImageUrl("https://cdn.jsdelivr.net/gh/alohe/avatars/png/memo_22.png");
+
         user.setIsDeleted(false);
         user.setCoin(20);
         user.setStar(0);
         user.setTotalProblemsSolved(0);
         user.setRank(userRepository.count() + 1);
         user.updateLevel();
+        user.setStatus(Status.ALLOWED);
     }
 }

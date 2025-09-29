@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Service
@@ -85,10 +86,10 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageResponse updatePackage(Long id, PackageRequest packageRequest, String username) {
 
-        if (packageRepository.existsByAuthor(username))
+        if (packageRepository.existsByAuthorAndIsDeletedFalse(username))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package");
 
-        Package pack = packageRepository.findPackageByAuthorAndId(username, id).orElseThrow(()
+        Package pack = packageRepository.findPackageByAuthorAndIdAndIsDeletedFalse(username, id).orElseThrow(()
                 -> new ResponseStatusException(HttpStatus.NOT_FOUND  ,"Package not found.")
         );
         packageMapper.updatePackagePartially(packageRequest, pack);
@@ -100,7 +101,7 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageResponse createPackage(PackageRequest packageRequest, String username) {
 
-        if (packageRepository.existsByName(packageRequest.name()))
+        if (packageRepository.existsByNameAndIsDeletedFalse(packageRequest.name()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Package already exists");
 
         Package pack = new Package();
@@ -128,7 +129,7 @@ public class PackageServiceImpl implements PackageService {
 
     @Override
     public List<PackageResponse> getPackagesByCreator(String username) {
-        return packageRepository.findPackagesByAuthor(username)
+        return packageRepository.findPackagesByAuthorAndIsDeletedFalse(username)
                 .stream()
                 .map(packageMapper::mapPackageToResponse)
                 .toList();
@@ -144,7 +145,7 @@ public class PackageServiceImpl implements PackageService {
 
     @Override
     public List<PackageResponse> getAllUnverifiedPackages() {
-        return packageRepository.findPackagesByIsVerifiedFalse()
+        return packageRepository.findPackagesByIsVerifiedFalseAndIsDeletedFalse()
                 .stream()
                 .map(packageMapper::mapPackageToResponse)
                 .toList();
@@ -152,11 +153,13 @@ public class PackageServiceImpl implements PackageService {
 
     @Override
     public void deletePackageById(Long id, String username) {
-        Package pack = packageRepository.findPackageByAuthorAndId(username, id).orElseThrow(
+        Package pack = packageRepository.findPackageByAuthorAndIdAndIsDeletedFalse(username, id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
         );
         pack.setIsDeleted(true);
         pack.setIsVerified(false);
+        pack.setName(UUID.randomUUID().toString());
+        pack.setStatus(Status.REJECTED);
         packageRepository.save(pack);
     }
 }

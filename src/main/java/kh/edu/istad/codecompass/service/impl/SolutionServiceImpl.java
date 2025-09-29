@@ -34,8 +34,10 @@ public class SolutionServiceImpl implements SolutionService {
     public SolutionResponse postSolution(SolutionRequest request, String author) {
 
         User user = userRepository.findUserByUsername(author).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         List<SubmissionHistories> submissionHistories = submissionHistoryRepository
                 .findByProblemIdAndUser_Username(request.problemId(), author);

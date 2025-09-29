@@ -35,6 +35,12 @@ public record ProblemResponseBySpecificUser (
 
         List<UserHintResponse> hints,
 
-        String author
+        String author,
+
+        @JsonProperty("is_deleted")
+        Boolean isDeleted,
+
+        @JsonProperty("is_verified")
+        Boolean isVerified
 ){
 }

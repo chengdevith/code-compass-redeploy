@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.dto.leaderboard;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.userLeaderBoard.UserResponseLeaderBoard;
+import kh.edu.istad.codecompass.mapper.BadgeMapper;
 
 import java.util.List;
 
@@ -20,13 +21,14 @@ public record LeaderboardResponse(
             List<User> topUsers,
             Long yourRank,
             List<User> nearbyUsers,
-            User currentUser
+            User currentUser,
+            BadgeMapper badgeMapper
     ) {
         return new LeaderboardResponse(
-                topUsers.stream().map(UserResponseLeaderBoard::fromEntity).toList(),
+                topUsers.stream().map(u -> UserResponseLeaderBoard.fromEntity(u, badgeMapper)).toList(),
                 yourRank,
-                nearbyUsers.stream().map(UserResponseLeaderBoard::fromEntity).toList(),
-                UserResponseLeaderBoard.fromEntity(currentUser)
+                nearbyUsers.stream().map(u -> UserResponseLeaderBoard.fromEntity(u, badgeMapper)).toList(),
+                UserResponseLeaderBoard.fromEntity(currentUser, badgeMapper)
         );
     }
 }
