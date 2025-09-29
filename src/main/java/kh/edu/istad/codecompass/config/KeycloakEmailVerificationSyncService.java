@@ -70,6 +70,12 @@ public class KeycloakEmailVerificationSyncService {
                                 org.springframework.http.HttpStatus.NOT_FOUND,
                                 "User not found in Postgres: " + username
                         ));
+                if (user.getIsDeleted().equals(true))
+                    throw new ResponseStatusException(
+                            org.springframework.http.HttpStatus.NOT_FOUND,
+                            "User not found in Postgres: " + username
+                    );
+
                 if (!userElasticsearchRepository.existsById(user.getId().toString())) {
                     UserIndex index = UserIndex.builder()
                             .id(user.getId().toString())

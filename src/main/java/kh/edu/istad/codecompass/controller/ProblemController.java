@@ -121,6 +121,7 @@ public class ProblemController {
     @DeleteMapping("/{problemId}/delete")
     @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
     @Operation(summary = "Delete a problem by ID", security = {@SecurityRequirement(name = "bearerAuth")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProblemById(@PathVariable Long problemId, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         problemService.deleteProblemById(problemId, username);

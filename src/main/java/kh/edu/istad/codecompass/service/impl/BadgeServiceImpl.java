@@ -2,7 +2,7 @@ package kh.edu.istad.codecompass.service.impl;
 
 import kh.edu.istad.codecompass.domain.Badge;
 import kh.edu.istad.codecompass.domain.Package;
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;
 import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
 import kh.edu.istad.codecompass.enums.Status;
@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -70,7 +71,7 @@ public class BadgeServiceImpl implements BadgesService {
 
     @Override
     public BadgesResponse verifyBadges(Long id, Boolean isVerified) {
-        Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedFalse(id).orElseThrow(
+        Badge badge = badgeRepository.findBadgeByIdAndIsVerifiedFalseAndIsDeletedFalse(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
         badge.setIsVerified(isVerified);
         badge.setStatus(Status.APPROVED);
@@ -82,7 +83,7 @@ public class BadgeServiceImpl implements BadgesService {
     public List<BadgesResponse> unverifiedBadges() {
 
         return badgeRepository
-                .findBadgeByIsVerifiedFalse()
+                .findBadgeByIsVerifiedFalseAndIsDeletedFalse()
                 .stream()
                 .map(badgeMapper::toBadgeResponse)
                 .toList();
@@ -110,7 +111,7 @@ public class BadgeServiceImpl implements BadgesService {
     @Override
     public BadgesResponse createBadge(BadgeRequest badgeRequest, String author) {
 
-        if (badgeRepository.existsBadgeByName(badgeRequest.name()))
+        if (badgeRepository.existsBadgeByNameAndIsDeletedFalse(badgeRequest.name()))
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Badge name already exists");
 
         if (! userRepository.existsByUsername(author))
@@ -137,7 +138,7 @@ public class BadgeServiceImpl implements BadgesService {
 
     @Override
     public List<BadgesResponse> getBadgesByCreator(String username) {
-        return badgeRepository.findBadgesByAuthor(username)
+        return badgeRepository.findBadgesByAuthorAndIsDeletedFalse(username)
                 .stream()
                 .map(badgeMapper::toBadgeResponse)
                 .toList();
@@ -145,11 +146,13 @@ public class BadgeServiceImpl implements BadgesService {
 
     @Override
     public void deleteBadgeById(Long id, String username) {
-        Badge badge = badgeRepository.findBadgeByAuthorAndId(username, id).orElseThrow(
+        Badge badge = badgeRepository.findBadgeByAuthorAndIdAndIsDeletedFalse(username, id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge with ID" + id + " not exists")
         );
         badge.setIsDeleted(true);
         badge.setIsVerified(false);
+        badge.setName(UUID.randomUUID().toString());
+        badge.setStatus(Status.REJECTED);
         badgeRepository.save(badge);
     }
 }

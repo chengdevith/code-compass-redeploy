@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;
 import kh.edu.istad.codecompass.service.BadgesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

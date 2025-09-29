@@ -22,7 +22,7 @@ public class SubmissionHistory {
     private final SubmissionHistoryService submissionHistoryService;
 
     @GetMapping("/{problemId}/problem")
-    @Operation(summary = "Get history submission for a subscriber (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get history submission | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<SubmissionHistoryResponse> getHistory(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
         String username = jwt.getClaim("preferred_username");
         return submissionHistoryService.getAllHistory(username, problemId);
