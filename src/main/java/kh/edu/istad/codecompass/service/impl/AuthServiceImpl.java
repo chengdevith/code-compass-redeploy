@@ -274,7 +274,6 @@ public class AuthServiceImpl implements AuthService {
         localUser.setUsername(keycloakUser.getUsername());
         setFromKeycloakToLocalUser(keycloakUser, localUser);
         localUser.setAuthProvider(provider);
-        localUser = userRepository.save(localUser);
 
         return RegisterResponse.builder()
                 .username(localUser.getUsername())
@@ -306,5 +305,17 @@ public class AuthServiceImpl implements AuthService {
         user.setRank(userRepository.count() + 1);
         user.updateLevel();
         user.setStatus(Status.ALLOWED);
+
+        // Find or create leaderboard
+        LeaderBoard leaderBoard = leaderBoardRepository.findById(1L).orElseGet(LeaderBoard::new);
+
+        // Associate user with leaderboard
+        user.setLeaderBoard(leaderBoard);
+        leaderBoard.getUsers().add(user);
+
+        // Save both entities to ensure relationships are persisted
+        leaderBoardRepository.save(leaderBoard);
+
+
     }
 }
