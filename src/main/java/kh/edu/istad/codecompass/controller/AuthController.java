@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
@@ -186,5 +187,15 @@ public class AuthController {
     public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
         return ResponseEntity.ok("We have sent link to your email to reset password");
+    }
+
+    @PostMapping("/oauth/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("permitAll()")
+    public void registerOAuthUser(@AuthenticationPrincipal Jwt jwt) {
+
+        String keycloakUserId = jwt.getSubject();
+        authService.handleOAuthUserRegistration(keycloakUserId);
+
     }
 }
