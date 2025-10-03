@@ -314,7 +314,7 @@ public class AuthServiceImpl implements AuthService {
         leaderBoard.getUsers().add(user);
 
         // Save both entities to ensure relationships are persisted
-        leaderBoardRepository.save(leaderBoard);
+//        leaderBoardRepository.save(leaderBoard);
 
 
     }
