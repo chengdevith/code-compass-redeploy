@@ -56,12 +56,12 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
 
     @Override
     public LeaderboardPublicResponse getLeaderboardPublic() {
-        return getTop50Users().;
+        return getTop50Users();
     }
 
-    private List<UserProfileResponse> getTop50Users() {
+    private LeaderboardPublicResponse getTop50Users() {
         // Sorting logic can be adjusted based on how you rank the users
-        return userRepository.findAllByOrderByStarDesc().stream()// Sort by stars descending
+        List<UserProfileResponse> users = userRepository.findAllByOrderByStarDesc().stream()// Sort by stars descending
                 .limit(50)  // Limit to top 50 users
                 .map( user -> {
                     Level level = user.getLevel();
@@ -85,6 +85,7 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
                             .isDeleted(user.getIsDeleted())
                             .build();
                 }).toList();
+        return new LeaderboardPublicResponse(users);
     }
 
     private List<UserResponseLeaderBoard> getTop25Users(LeaderBoard leaderBoard) {
