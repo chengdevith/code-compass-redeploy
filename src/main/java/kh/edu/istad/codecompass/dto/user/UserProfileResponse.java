@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.dto.user;
 
+import kh.edu.istad.codecompass.enums.Role;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ public record UserProfileResponse(
         Integer submissionHistories,
         Integer solution,
         Integer view,
-        Integer comment
+        Integer comment,
+        Role role
 ) {
 }

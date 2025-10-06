@@ -3,6 +3,7 @@ package kh.edu.istad.codecompass.dto.badge.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import org.hibernate.validator.constraints.Length;
 
 public record AddBadgeToPackageRequest(
         @NotEmpty(message = "Package name is required")

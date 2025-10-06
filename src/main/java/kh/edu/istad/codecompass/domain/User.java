@@ -1,10 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
-import kh.edu.istad.codecompass.enums.OAuthProvider;
-import kh.edu.istad.codecompass.enums.Gender;
-import kh.edu.istad.codecompass.enums.Level;
-import kh.edu.istad.codecompass.enums.Status;
+import kh.edu.istad.codecompass.enums.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -90,5 +87,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.ALLOWED;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.SUBSCRIBER;
+
 
 }
