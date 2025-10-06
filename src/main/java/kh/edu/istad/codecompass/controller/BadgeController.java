@@ -31,7 +31,7 @@ public class BadgeController {
         return ResponseEntity.ok("The badge has successfully been added to package");
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @Operation(summary = "Update a badge by ID | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);
@@ -59,7 +59,7 @@ public class BadgeController {
     }
 
 
-    @PatchMapping("/{id}/verification")
+    @PutMapping("/{id}/verification")
     @Operation(summary = "Verify a badge | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     BadgesResponse VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
                                           boolean verified) {

@@ -6,6 +6,7 @@ import kh.edu.istad.codecompass.dto.user.UserProfileResponse;
 import kh.edu.istad.codecompass.dto.user.UserResponse;
 import kh.edu.istad.codecompass.elasticsearch.domain.UserIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.UserElasticsearchRepository;
+import kh.edu.istad.codecompass.enums.Level;
 import kh.edu.istad.codecompass.mapper.UserMapper;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.UserProfileService;
@@ -72,6 +73,8 @@ public class UserProfileServiceImpl implements UserProfileService {
             );
             if (user.getIsDeleted().equals(true)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
+            Level level = user.getLevel();
+
             return UserProfileResponse.builder()
                     .username(user.getUsername())
                     .email(user.getEmail())
@@ -82,7 +85,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                     .github(user.getGithub())
                     .linkedin(user.getLinkedin())
                     .imageUrl(user.getImageUrl())
-                    .level(String.valueOf(user.getLevel()))
+                    .level(level.getDisplayName())
                     .coin(user.getCoin())
                     .star(user.getStar())
                     .rank(user.getRank())
@@ -91,6 +94,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                     .badge(user.getBadges().size())
                     .submissionHistories(user.getSubmissionHistories().size())
                     .solution(user.getSolutions().size())
+                    .role(user.getRole())
                     .view(0) // optional
                     .comment(user.getComments().size())
                     .build();

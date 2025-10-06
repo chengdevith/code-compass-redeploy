@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kh.edu.istad.codecompass.enums.Gender;
+import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.enums.Status;
 import lombok.Builder;
 
@@ -19,6 +20,7 @@ public record UserResponse(
         String linkedin,
         @JsonProperty("image_url")
         String imageUrl,
-        Status status
+        Status status,
+        Role role
 ) {
 }

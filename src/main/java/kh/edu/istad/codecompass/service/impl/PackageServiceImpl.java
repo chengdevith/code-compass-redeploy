@@ -86,12 +86,16 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageResponse updatePackage(Long id, PackageRequest packageRequest, String username) {
 
-        if (packageRepository.existsByAuthorAndIsDeletedFalse(username))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package");
+//        if (packageRepository.existsByAuthorAndIsDeletedFalse(username))
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package " + username);
 
         Package pack = packageRepository.findPackageByAuthorAndIdAndIsDeletedFalse(username, id).orElseThrow(()
                 -> new ResponseStatusException(HttpStatus.NOT_FOUND  ,"Package not found.")
         );
+
+        if (! pack.getAuthor().equals(username))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package " + username);
+
         packageMapper.updatePackagePartially(packageRequest, pack);
         pack = packageRepository.save(pack);
 
