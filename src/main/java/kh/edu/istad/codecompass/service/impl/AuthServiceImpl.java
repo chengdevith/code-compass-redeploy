@@ -305,6 +305,7 @@ public class AuthServiceImpl implements AuthService {
         user.setRank(userRepository.count() + 1);
         user.updateLevel();
         user.setStatus(Status.ALLOWED);
+        user.setRole(Role.SUBSCRIBER);
 
         // Find or create leaderboard
         LeaderBoard leaderBoard = leaderBoardRepository.findById(1L).orElseGet(LeaderBoard::new);

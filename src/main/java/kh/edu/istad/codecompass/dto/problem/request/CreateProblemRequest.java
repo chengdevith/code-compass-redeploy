@@ -27,8 +27,7 @@ public record CreateProblemRequest (
         Star star,
 
         @NotNull
-        @Max(40)
-        @Min(20)
+        @Size(min = 20, max = 40, message = "The coins should be between 20 to 40")
         Integer coin,
 
         @JsonProperty("best_memory_usage")

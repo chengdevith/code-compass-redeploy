@@ -18,4 +18,5 @@ public record SolutionRequest(
         @JsonProperty("problem_id")
         Long problemId
 ) {
+
 }

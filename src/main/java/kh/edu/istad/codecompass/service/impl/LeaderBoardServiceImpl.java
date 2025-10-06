@@ -3,8 +3,11 @@ package kh.edu.istad.codecompass.service.impl;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.LeaderBoard;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardPublicResponse;
 import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardResponse;
+import kh.edu.istad.codecompass.dto.user.UserProfileResponse;
 import kh.edu.istad.codecompass.dto.userLeaderBoard.UserResponseLeaderBoard;
+import kh.edu.istad.codecompass.enums.Level;
 import kh.edu.istad.codecompass.mapper.BadgeMapper;
 import kh.edu.istad.codecompass.repository.LeaderBoardRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
@@ -49,6 +52,39 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
         UserResponseLeaderBoard currentUser = UserResponseLeaderBoard.fromEntity(user, badgeMapper);
 
         return new LeaderboardResponse(topUsers, userRank, nearbyUsers, currentUser);
+    }
+
+    @Override
+    public LeaderboardPublicResponse getLeaderboardPublic() {
+        return getTop50Users().;
+    }
+
+    private List<UserProfileResponse> getTop50Users() {
+        // Sorting logic can be adjusted based on how you rank the users
+        return userRepository.findAllByOrderByStarDesc().stream()// Sort by stars descending
+                .limit(50)  // Limit to top 50 users
+                .map( user -> {
+                    Level level = user.getLevel();
+                    return UserProfileResponse
+                            .builder()
+                            .role(user.getRole())
+                            .dob(user.getDob())
+                            .badge(user.getBadges().size())
+                            .coin(user.getCoin())
+                            .star(user.getStar())
+                            .level(level.getDisplayName())
+                            .comment(user.getComments().size())
+                            .gender(user.getGender().name())
+                            .rank(user.getRank())
+                            .github(user.getGithub())
+                            .imageUrl(user.getImageUrl())
+                            .linkedin(user.getLinkedin())
+                            .solution(user.getSolutions().size())
+                            .username(user.getUsername())
+                            .totalProblemsSolved(user.getTotalProblemsSolved())
+                            .isDeleted(user.getIsDeleted())
+                            .build();
+                }).toList();
     }
 
     private List<UserResponseLeaderBoard> getTop25Users(LeaderBoard leaderBoard) {

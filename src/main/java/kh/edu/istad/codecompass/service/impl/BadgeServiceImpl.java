@@ -67,6 +67,7 @@ public class BadgeServiceImpl implements BadgesService {
     Badge badge = badgeRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
     badgeMapper.fromUpdateRequestToEntity(badgeRequest, badge);
+    badgeRepository.save(badge);
     }
 
     @Override
