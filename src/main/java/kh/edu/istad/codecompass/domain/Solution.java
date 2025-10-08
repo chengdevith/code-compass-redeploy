@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +26,12 @@ public class Solution {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(name = "posted_at")
+    private LocalDateTime postedAt = LocalDateTime.now();
+
+    @Column(name = "lanuage_id")
+    private String languageId;
+
     @ManyToOne
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
@@ -31,6 +39,5 @@ public class Solution {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 
 }

@@ -116,4 +116,6 @@ public interface ProblemService {
     List<ProblemResponse> getProblemsByAuthor(String username);
 
     void deleteProblemById(long problemId, String username);
+
+    void rejectProblemById(long problemId);
 }
