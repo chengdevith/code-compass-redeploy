@@ -28,4 +28,6 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
     List<Badge> findBadgesByAuthorAndIsDeletedFalse(String username);
 
     Optional<Badge> findBadgeByAuthorAndIdAndIsDeletedFalse(String author, Long id);
+
+    Optional<Badge> findBadgeById(Long id);
 }

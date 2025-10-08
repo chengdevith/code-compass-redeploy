@@ -13,4 +13,6 @@ public interface UserProblemRepository extends JpaRepository<UserProblem, Long> 
 
     List<UserProblem> findAllByUserIdAndIsSolvedTrue(Long userId);
 
+    Optional<UserProblem> findByUserIdAndProblemId(Long userId, Long problemId);
+
 }

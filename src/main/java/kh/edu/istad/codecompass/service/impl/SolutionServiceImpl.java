@@ -4,11 +4,13 @@ import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.Solution;
 import kh.edu.istad.codecompass.domain.SubmissionHistories;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.domain.UserProblem;
 import kh.edu.istad.codecompass.dto.solution.SolutionRequest;
 import kh.edu.istad.codecompass.dto.solution.SolutionResponse;
 import kh.edu.istad.codecompass.mapper.SolutionMapper;
 import kh.edu.istad.codecompass.repository.SolutionRepository;
 import kh.edu.istad.codecompass.repository.SubmissionHistoryRepository;
+import kh.edu.istad.codecompass.repository.UserProblemRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.SolutionService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SolutionServiceImpl implements SolutionService {
     private final SubmissionHistoryRepository submissionHistoryRepository;
     private final UserRepository userRepository;
     private final SolutionMapper solutionMapper;
+    private final UserProblemRepository userProblemRepository;
 
     @Transactional
     @Override
@@ -39,30 +42,17 @@ public class SolutionServiceImpl implements SolutionService {
         if (user.getIsDeleted().equals(true))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
-        List<SubmissionHistories> submissionHistories = submissionHistoryRepository
-                .findByProblemIdAndUser_Username(request.problemId(), author);
-
-        boolean isAccepted = false;
-
-        SubmissionHistories submissionHistory = null;
-
-        for (SubmissionHistories history : submissionHistories) {
-            isAccepted = history.getStatus().equals("Accepted");
-            if (isAccepted) {
-                submissionHistory = history;
-                break;
-            }
-        }
-
-        if (!isAccepted)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "To post the solution, you must solve the problem first");
+        UserProblem userProblem = userProblemRepository.findByUserIdAndProblemId(user.getId(), request.problemId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "To post the solution, you must solve the problem first")
+        );
 
         Solution solution = new Solution();
         solution.setExplanation(request.explanation());
         solution.setUser(user);
         solution.setSourceCode(request.sourceCode());
         solution.setIsDeleted(false);
-        solution.setProblem(submissionHistory.getProblem());
+        solution.setProblem(userProblem.getProblem());
+        solution.setLanguageId(request.languageId());
 
         solution = solutionRepository.save(solution);
 
@@ -89,6 +79,15 @@ public class SolutionServiceImpl implements SolutionService {
         return solutionRepository.findSolutionByProblemIdAndIsDeletedFalse(problemId).stream().map(
             solutionMapper::toResponse
         ).toList();
+    }
+
+    @Override
+    public void deleteSolution(Long solutionId, String author) {
+        Solution solution = solutionRepository.findSolutionByIdAndUser_Username(solutionId,  author).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Solution not found")
+        );
+        solution.setIsDeleted(true);
+        solutionRepository.save(solution);
     }
 
 }

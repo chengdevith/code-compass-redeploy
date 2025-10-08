@@ -20,7 +20,7 @@ public record ProblemResponse(
         @JsonProperty("best_time_execution")
         Double bestTimeExecution,
 
-        Byte coin,
+        Integer coin,
 
         String description,
 

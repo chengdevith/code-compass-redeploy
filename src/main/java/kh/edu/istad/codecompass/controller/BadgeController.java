@@ -93,11 +93,20 @@ public class BadgeController {
     @DeleteMapping("/{id}/delete")
     @Operation(summary = "Delete a badge | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
+    @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<?> deleteBadge(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt){
         String username = jwt.getClaim("preferred_username");
         badgesService.deleteBadgeById(id,  username);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/{badgeId}/rejection")
+    @Operation(summary = "Reject a badge | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectBadgeById(@PathVariable Long badgeId){
+        badgesService.rejectBadgeById(badgeId);
     }
 
 }

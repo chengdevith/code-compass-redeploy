@@ -88,12 +88,22 @@ public class PackageController {
     }
 
     @DeleteMapping("/{id}/delete")
-    @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CREATOR')")
     @Operation(summary = "Delete a package | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deletePackageById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    public void deletePackageById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         packageService.deletePackageById(id, username);
-        return ResponseEntity.noContent().build();
     }
+
+
+    @PutMapping("/{id}/rejection")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @Operation(summary = "Reject a package | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectPackageById(@PathVariable Long id) {
+        packageService.rejectPackage(id);
+    }
+
+
 }

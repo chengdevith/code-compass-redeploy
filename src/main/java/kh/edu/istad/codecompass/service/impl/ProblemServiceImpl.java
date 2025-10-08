@@ -189,7 +189,7 @@ public class ProblemServiceImpl implements ProblemService {
                 problem.getId(),
                 problem.getBestMemoryUsage(),
                 problem.getBestTimeExecution(),
-                problem.getCoin().byteValue(),
+                problem.getCoin(),
                 problem.getDescription(),
                 problem.getDifficulty(),
                 problem.getStar(),
@@ -320,5 +320,22 @@ public class ProblemServiceImpl implements ProblemService {
         problemRepository.save(problem);
     }
 
+    @Override
+    public void rejectProblemById(long problemId) {
+        Problem problem =  problemRepository.findById(problemId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+
+        if (problem.getStatus().equals(Status.PENDING)) {
+            problem.setIsVerified(false);
+            problem.setStatus(Status.REJECTED);
+            problemRepository.save(problem);
+        }
+        else if (problem.getStatus().equals(Status.REJECTED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Problem already rejected");
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found");
+
+    }
 
 }
