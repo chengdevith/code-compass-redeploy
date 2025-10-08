@@ -125,4 +125,6 @@ public interface PackageService {
     List<PackageResponse> getAllUnverifiedPackages();
 
     void deletePackageById(Long id, String username);
+
+    void rejectPackage(Long id);
 }

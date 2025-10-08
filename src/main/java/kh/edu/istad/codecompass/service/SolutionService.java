@@ -31,4 +31,6 @@ public interface SolutionService {
      */
     List<SolutionResponse> getAllSolutions(String username, Long problemId);
 
+    void deleteSolution(Long solutionId, String author);
+
 }

@@ -86,9 +86,6 @@ public class PackageServiceImpl implements PackageService {
     @Override
     public PackageResponse updatePackage(Long id, PackageRequest packageRequest, String username) {
 
-//        if (packageRepository.existsByAuthorAndIsDeletedFalse(username))
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You're not the creator of this package " + username);
-
         Package pack = packageRepository.findPackageByAuthorAndIdAndIsDeletedFalse(username, id).orElseThrow(()
                 -> new ResponseStatusException(HttpStatus.NOT_FOUND  ,"Package not found.")
         );
@@ -165,5 +162,23 @@ public class PackageServiceImpl implements PackageService {
         pack.setName(UUID.randomUUID().toString());
         pack.setStatus(Status.REJECTED);
         packageRepository.save(pack);
+    }
+
+    @Override
+    public void rejectPackage(Long id) {
+        Package pack = packageRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
+        );
+
+        if (pack.getStatus().equals(Status.PENDING)) {
+            pack.setStatus(Status.REJECTED);
+            pack.setIsVerified(false);
+            packageRepository.save(pack);
+        }
+        else if (pack.getStatus().equals(Status.REJECTED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Package already rejected");
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found");
+
     }
 }

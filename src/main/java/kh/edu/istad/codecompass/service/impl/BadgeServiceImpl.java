@@ -156,4 +156,23 @@ public class BadgeServiceImpl implements BadgesService {
         badge.setStatus(Status.REJECTED);
         badgeRepository.save(badge);
     }
+
+    @Override
+    public void rejectBadgeById(Long id) {
+
+        Badge badge = badgeRepository.findBadgeById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge with ID" + id + " not exists")
+        );
+
+        if (badge.getStatus().equals(Status.PENDING)) {
+            badge.setIsVerified(false);
+            badge.setStatus(Status.REJECTED);
+            badgeRepository.save(badge);
+        }
+        else if (badge.getStatus().equals(Status.REJECTED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Badge already rejected");
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found");
+
+    }
 }

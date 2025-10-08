@@ -24,7 +24,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/problems")
-//@PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
 public class ProblemController {
 
     private final ProblemElasticsearchRepository  problemElasticsearchRepository;
@@ -120,10 +119,18 @@ public class ProblemController {
 
     @DeleteMapping("/{problemId}/delete")
     @PreAuthorize("hasAnyRole('CREATOR', 'ADMIN')")
-    @Operation(summary = "Delete a problem by ID", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Delete a problem by ID | [ ADMIN ]", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProblemById(@PathVariable Long problemId, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         problemService.deleteProblemById(problemId, username);
+    }
+
+    @PutMapping("/{problemId}/rejection")
+    @Operation(summary = "Reject a problem by ID | [ ADMIN ]", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectProblemById(@PathVariable Long problemId) {
+        problemService.rejectProblemById(problemId);
     }
 }
