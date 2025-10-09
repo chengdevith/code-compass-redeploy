@@ -13,6 +13,7 @@ public record UserProfileResponse(
         String email,
         String gender,
         String dob,
+        String bio,
         String location,
         String website,
         String github,

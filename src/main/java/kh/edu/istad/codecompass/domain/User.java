@@ -30,7 +30,10 @@ public class User {
     @Column(nullable = false)
     private Gender gender;
 
+    @Column(length = 120)
     private String dob;
+
+    private String bio;
 
     private String location;
     private String website;

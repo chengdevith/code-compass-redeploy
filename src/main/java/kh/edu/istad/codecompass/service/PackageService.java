@@ -127,4 +127,6 @@ public interface PackageService {
     void deletePackageById(Long id, String username);
 
     void rejectPackage(Long id);
+
+    Integer countProblemsInPackage(Long packageId);
 }
