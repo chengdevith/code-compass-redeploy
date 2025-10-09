@@ -118,4 +118,6 @@ public interface ProblemService {
     void deleteProblemById(long problemId, String username);
 
     void rejectProblemById(long problemId);
+
+    List<String> getAllProblemTags();
 }

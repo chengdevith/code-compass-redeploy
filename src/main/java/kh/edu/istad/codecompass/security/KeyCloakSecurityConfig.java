@@ -67,7 +67,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        submissions
-                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/run/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/run/batch").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/submissions").hasAnyRole("CREATOR", "SUBSCRIBER")
 
@@ -89,6 +89,7 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/verified").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/*").permitAll() // For {problemId} - public access
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/unverified").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/problems/*/verification").hasRole("ADMIN") // For verification
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/problems/*").hasAnyRole("ADMIN", "CREATOR") // For updates
