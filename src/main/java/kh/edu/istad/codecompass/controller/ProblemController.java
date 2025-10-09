@@ -133,4 +133,10 @@ public class ProblemController {
     public void rejectProblemById(@PathVariable Long problemId) {
         problemService.rejectProblemById(problemId);
     }
+
+    @GetMapping("/tags")
+    @Operation(summary = "Get all problems' tags (public)", security = {@SecurityRequirement(name = "bearerAuth")})
+    List<String> getAllProblemTags() {
+        return problemService.getAllProblemTags();
+    }
 }

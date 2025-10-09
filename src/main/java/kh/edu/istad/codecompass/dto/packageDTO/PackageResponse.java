@@ -20,6 +20,8 @@ public record PackageResponse(
         @JsonProperty("is_deleted")
         Boolean isDeleted,
         @JsonProperty("is_verified")
-        Boolean isVerified
+        Boolean isVerified,
+        @JsonProperty("total_problems")
+        Integer totalProblems
 
 ) { }

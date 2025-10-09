@@ -338,4 +338,9 @@ public class ProblemServiceImpl implements ProblemService {
 
     }
 
+    @Override
+    public List<String> getAllProblemTags() {
+        return tagRepository.findAll().stream().map(Tag::getTagName).toList();
+    }
+
 }

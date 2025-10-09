@@ -181,4 +181,14 @@ public class PackageServiceImpl implements PackageService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found");
 
     }
+
+    @Override
+    public Integer countProblemsInPackage(Long packageId) {
+
+        Package pack = packageRepository.findById(packageId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
+        );
+
+        return pack.getProblems().size();
+    }
 }
