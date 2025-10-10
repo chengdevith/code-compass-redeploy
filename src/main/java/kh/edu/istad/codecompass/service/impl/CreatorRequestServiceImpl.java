@@ -7,6 +7,7 @@ import kh.edu.istad.codecompass.dto.creatorRequest.response.CreatorResponseDTO;
 import kh.edu.istad.codecompass.dto.creatorRequest.response.ReviewCreatorResponse;
 import kh.edu.istad.codecompass.dto.creatorRequest.request.UpdateRoleRequest;
 import kh.edu.istad.codecompass.enums.ReportStatus;
+import kh.edu.istad.codecompass.enums.Role;
 import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.repository.CreatorRequestRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
@@ -118,6 +119,8 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
             creatorRequest = creatorRequestRepository.save(creatorRequest);
 
             user.setCreatorRequest(creatorRequest);
+            user.setRole(Role.CREATOR);
+            user = userRepository.save(user);
 
         }
         return ReviewCreatorResponse

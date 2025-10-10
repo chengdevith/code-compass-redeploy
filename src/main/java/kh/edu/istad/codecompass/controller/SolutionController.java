@@ -8,6 +8,7 @@ import kh.edu.istad.codecompass.dto.solution.SolutionResponse;
 import kh.edu.istad.codecompass.service.SolutionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,21 @@ public class SolutionController {
         String username = jwt.getClaim("preferred_username");
         return solutionService.getAllSolutions(username, problemId);
     }
+
+    @DeleteMapping("/{solutionId}/delete")
+    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'CREATOR')")
+    @Operation(summary = "Delete a solution | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteSolution(@PathVariable Long solutionId, @AuthenticationPrincipal Jwt jwt) {
+        String author = jwt.getClaim("preferred_username");
+        solutionService.deleteSolution(solutionId, author);
+    }
+
+//    @PutMapping("/{solutionId}/like")
+//    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'CREATOR')")
+//    @Operation(summary = "Like a solution | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+//    public void likeSolution(@PathVariable Long solutionId) {
+//        solutionService.lkeSolution(solutionId);
+//    }
 
 }

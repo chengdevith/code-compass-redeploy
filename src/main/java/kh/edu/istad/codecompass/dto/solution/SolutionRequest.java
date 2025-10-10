@@ -2,13 +2,19 @@ package kh.edu.istad.codecompass.dto.solution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 
+import java.util.Set;
+
 @Builder
 public record SolutionRequest(
+        @NotEmpty(message = "Title is required")
+        String title,
+
         String explanation,
         @JsonProperty("source_code")
         @NotBlank(message = "Source code is required")
@@ -22,7 +28,9 @@ public record SolutionRequest(
         @JsonProperty("language_id")
         @NotBlank(message = "Programming language ID is required")
         @Length(max = 99, message = "Programming language ID should be between 1 to 99")
-        String languageId
+        String languageId,
+
+        Set<String> tags
 ) {
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Builder
 public record SolutionResponse(
@@ -20,6 +21,11 @@ public record SolutionResponse(
         @JsonProperty("user_profile")
         String userProfile,
         @JsonProperty("posted_at")
-        LocalDateTime postedAt
+        LocalDateTime postedAt,
+        Set<String> tags,
+        @JsonProperty("like_count")
+        Long likeCount,
+        @JsonProperty("is_liked_by_user")
+        Boolean isLikedByUser
 ) {
 }

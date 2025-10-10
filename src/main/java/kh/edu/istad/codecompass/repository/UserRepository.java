@@ -18,6 +18,8 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     List<User> findAllByOrderByStarDesc();
 
+    List<User> findAllByOrderByRankAsc();
+
     List<User> findByLeaderBoardOrderByRankAsc(LeaderBoard leaderBoard, Pageable pageable);
 
     List<User> findByLeaderBoardAndRankBetweenOrderByRankAsc(
