@@ -26,7 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LeaderBoardServiceImpl implements LeaderBoardService {
 
-    private final LeaderBoardRepository leaderBoardRepository;
     private final UserRepository userRepository;
     private final BadgeMapper  badgeMapper;
 
@@ -61,7 +60,7 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
 
     private LeaderboardPublicResponse getTop50Users() {
         // Sorting logic can be adjusted based on how you rank the users
-        List<UserProfileResponse> users = userRepository.findAllByOrderByStarDesc().stream()// Sort by stars descending
+        List<UserProfileResponse> users = userRepository.findAllByOrderByRankAsc().stream()// Sort by stars descending
                 .limit(50)  // Limit to top 50 users
                 .map( user -> {
                     Level level = user.getLevel();

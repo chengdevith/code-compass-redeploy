@@ -33,4 +33,6 @@ public interface SolutionService {
 
     void deleteSolution(Long solutionId, String author);
 
+//    void lkeSolution(Long solutionId, String username);
+
 }
