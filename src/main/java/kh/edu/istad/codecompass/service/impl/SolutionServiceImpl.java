@@ -53,6 +53,8 @@ public class SolutionServiceImpl implements SolutionService {
         solution.setIsDeleted(false);
         solution.setProblem(userProblem.getProblem());
         solution.setLanguageId(request.languageId());
+        solution.setTags(request.tags());
+        solution.setTitle(request.title());
 
         solution = solutionRepository.save(solution);
 
@@ -89,5 +91,15 @@ public class SolutionServiceImpl implements SolutionService {
         solution.setIsDeleted(true);
         solutionRepository.save(solution);
     }
+
+//    @Override
+//    public void lkeSolution(Long solutionId, String username) {
+//        Solution solution = solutionRepository.findById(solutionId).orElseThrow(
+//                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Solution not found")
+//        );
+//
+//        solution.setLikeCount(solution.getLikeCount() == null ? 1 : solution.getLikeCount() + 1);
+//        solutionRepository.save(solution);
+//    }
 
 }
