@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +48,7 @@ public class AuthController {
     private String realm;
 
     @PostMapping("/login")
-    @Operation(summary = "Get access token from Keycloak (public)")
+    @Operation(summary = "Get access token (public)")
     public ResponseEntity<?> getToken(@RequestBody LoginRequest request) {
         try {
             // Prepare headers
@@ -109,7 +112,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/token")
+    @PostMapping("/refresh")
     @Operation(summary = "Refresh access token (public)")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {
@@ -164,17 +167,35 @@ public class AuthController {
         return authService.register(registerRequest);
     }
 
+    @PostMapping("/oauth-register")
+    @Operation(summary = "Reset Password (public)")
+    public ResponseEntity<String> oauthRegister(@AuthenticationPrincipal Jwt jwt) {
+        String keycloakUserId = jwt.getSubject();
+        authService.handleOAuthUserRegistration(keycloakUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("OAuth registration successful");
+    }
+
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Reset Password | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset Password successfully");
     }
 
     @PostMapping("/request-reset-password")
-    @Operation(summary = "Request reset Password (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Request reset Password  | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<String> requestResetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
         authService.requestPasswordReset(resetPasswordRequest);
         return ResponseEntity.ok("We have sent link to your email to reset password");
+    }
+
+    @PostMapping("/oauth/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("permitAll()")
+    public void registerOAuthUser(@AuthenticationPrincipal Jwt jwt) {
+
+        String keycloakUserId = jwt.getSubject();
+        authService.handleOAuthUserRegistration(keycloakUserId);
+
     }
 }

@@ -51,11 +51,12 @@ public class KeyCloakSecurityConfig {
 //                        badges
                         .requestMatchers("/api/v1/badges/verified").permitAll()
                         .requestMatchers( "/api/v1/badges/add-to-package").hasAnyRole("ADMIN", "CREATOR")
-                        .requestMatchers("/api/v1/badges").hasAnyRole("ADMIN", "CREATOR") // REMOVED trailing slash
+                        .requestMatchers("/api/v1/badges").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers("/api/v1/badges/unverified").hasRole("ADMIN")
                         .requestMatchers("/api/v1/badges/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/v1/badges").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/badges").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/badges/me").hasAnyRole("ADMIN", "CREATOR")
 
 //                        creator requests
                         .requestMatchers(HttpMethod.POST,"/api/v1/creator-requests").hasRole("SUBSCRIBER")
@@ -63,35 +64,40 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/creator-requests").hasRole("ADMIN")
 
 //                        hints
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/hints/*").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        submissions
-                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/run/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/run/batch").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/submissions/batch").hasAnyRole("CREATOR", "SUBSCRIBER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/submissions").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        leader board
-                        .requestMatchers("/api/v1/leaderboard/me").hasAnyRole("ADMIN" ,"CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/leaderboard").permitAll()
+                        .requestMatchers("/api/v1/leaderboard/me").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        packages
                         .requestMatchers("/api/v1/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasAnyRole("ADMIN", "CREATOR")
-                        // NOTE: You have duplicate POST mapping above - remove one
-                        .requestMatchers( HttpMethod.PUT,"/api/v1/packages/*").hasRole("ADMIN") // REMOVED trailing slash
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/*").hasRole("ADMIN") // REMOVED trailing slash
-                        .requestMatchers(HttpMethod.GET, "/api/v1/packages").hasAnyRole("ADMIN", "CREATOR","SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/me").hasAnyRole("ADMIN", "CREATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/unverified").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/verified").permitAll()
+                        .requestMatchers( HttpMethod.PUT,"/api/v1/packages/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/*").hasRole("ADMIN")
 
-//                        problems - SIMPLIFIED FOR METHOD-LEVEL SECURITY
+//                        problems
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/verified").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/*").permitAll() // For {problemId} - public access
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/tags").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/unverified").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/problems/*/verification").hasRole("ADMIN") // For verification
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/problems/*/verification").hasRole("ADMIN") // For verification
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/problems/*").hasAnyRole("ADMIN", "CREATOR") // For updates
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/problems").hasAnyRole("ADMIN", "CREATOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/problems/*/me").authenticated() // For specific user access
-                        // Removed path variable endpoints - handled by method-level security
+                        .requestMatchers(HttpMethod.GET, "/api/v1/problems/me").hasAnyRole("ADMIN", "CREATOR")
+
 
 //                        roles
                         .requestMatchers(HttpMethod.PUT, "/api/v1/roles/assign-role").hasRole("ADMIN")
@@ -101,8 +107,13 @@ public class KeyCloakSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/solutions/problem/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
 
 //                        users
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/by-email/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/search").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER") // REMOVED trailing slash
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/update/*").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+
+//                        submission histories
+                        .requestMatchers(HttpMethod.GET, "/api/v1/submission-histories/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
 
                         .anyRequest().authenticated()
         );

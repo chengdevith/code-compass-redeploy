@@ -12,6 +12,7 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.ProblemService;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,12 +44,14 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemResponse createProblem(CreateProblemRequest problemRequest, String username) {
 
-        if (problemRepository.existsProblemByTitle(problemRequest.title()))
+        if (problemRepository.existsProblemByTitleAndIsDeletedFalse(problemRequest.title()))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem already exists");
 
         User author = userRepository.findUserByUsername(username).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (author.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         Problem problem = problemMapper.fromRequestToEntity(problemRequest);
         problem.setAuthor(author);
@@ -95,6 +99,7 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setBestTimeExecution(problemRequest.bestTimeExecution());
         problem.setIsVerified(false);
         problem.setIsDeleted(false);
+        problem.setStatus(Status.PENDING);
 
         problem = problemRepository.save(problem);
         ProblemIndex problemIndex = ProblemIndex.builder()
@@ -118,8 +123,11 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public ProblemResponseBySpecificUser getProblemBySpecificUser(String username, long problemId) {
 
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+        );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
@@ -151,12 +159,11 @@ public class ProblemServiceImpl implements ProblemService {
             // save or update
             userHintRepository.save(userHint);
 
-            // add/update in userHints list so it can be used for response mapping
+            // add or update in userHints list so it can be used for response mapping
             if (!userHints.contains(userHint)) {
                 userHints.add(userHint);
             }
         }
-
 
         List<UserHintResponse> hintResponses = hints.stream()
                 .map(hint -> {
@@ -182,7 +189,7 @@ public class ProblemServiceImpl implements ProblemService {
                 problem.getId(),
                 problem.getBestMemoryUsage(),
                 problem.getBestTimeExecution(),
-                problem.getCoin().byteValue(),
+                problem.getCoin(),
                 problem.getDescription(),
                 problem.getDifficulty(),
                 problem.getStar(),
@@ -190,7 +197,10 @@ public class ProblemServiceImpl implements ProblemService {
                 testCaseResponses,
                 tagNames,
                 hintResponses,
-                problem.getAuthor().getUsername()
+                problem.getAuthor().getUsername(),
+                problem.getIsDeleted(),
+                problem.getIsVerified()
+
         );
     }
 
@@ -210,7 +220,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public List<ProblemSummaryResponse> getProblems() {
         return problemRepository
-                .findAll()
+                .findByIsDeletedFalse()
                 .stream().map(problem ->
                         ProblemSummaryResponse
                                 .builder()
@@ -224,7 +234,7 @@ public class ProblemServiceImpl implements ProblemService {
     @Transactional
     @Override
     public List<ProblemSummaryResponse> getUnverifiedProblems() {
-        return problemRepository.findProblemsByIsVerifiedFalse()
+        return problemRepository.findProblemsByIsVerifiedFalseAndIsDeletedFalse()
                 .stream()
                 .map(problem ->
                         ProblemSummaryResponse
@@ -253,21 +263,23 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Transactional
     @Override
-    public void verifyProblem(long problemId, boolean isVerified) {
+    public ProblemResponse verifyProblem(long problemId, boolean isVerified) {
 
-        Problem problem  = problemRepository.findProblemByIdAndIsVerifiedFalse(problemId).orElseThrow(
+        Problem problem  = problemRepository.findProblemByIdAndIsVerifiedFalseAndIsDeletedFalse(problemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
         );
         problem.setIsVerified(isVerified);
+        problem.setStatus(Status.APPROVED);
 
-        problemRepository.save(problem);
+        problem = problemRepository.save(problem);
+        return problemMapper.fromEntityToResponse(problem);
     }
 
     @Transactional
     @Override
     public void updateProblem(Long problemId, String authorUsername, UpdateProblemRequest updateProblemRequest) {
 
-        Problem problem = problemRepository.findProblemByIdAndAuthor_Username(problemId ,authorUsername)
+        Problem problem = problemRepository.findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(problemId ,authorUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
 
         problemMapper.fromUpdateRequestToEntity(updateProblemRequest, problem);
@@ -288,5 +300,47 @@ public class ProblemServiceImpl implements ProblemService {
 
     }
 
+    @Override
+    public List<ProblemResponse> getProblemsByAuthor(String username) {
+        return problemRepository.findProblemsByAuthor_UsernameAndIsDeletedFalse(username)
+                .stream()
+                .map(problemMapper::fromEntityToResponse)
+                .toList();
+    }
+
+    @Override
+    public void deleteProblemById(long problemId, String username) {
+        Problem problem = problemRepository.findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(problemId, username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+        problem.setIsDeleted(true);
+        problem.setIsVerified(false);
+        problem.setTitle(UUID.randomUUID().toString());
+        problem.setStatus(Status.REJECTED);
+        problemRepository.save(problem);
+    }
+
+    @Override
+    public void rejectProblemById(long problemId) {
+        Problem problem =  problemRepository.findById(problemId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+
+        if (problem.getStatus().equals(Status.PENDING)) {
+            problem.setIsVerified(false);
+            problem.setStatus(Status.REJECTED);
+            problemRepository.save(problem);
+        }
+        else if (problem.getStatus().equals(Status.REJECTED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Problem already rejected");
+        else
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found");
+
+    }
+
+    @Override
+    public List<String> getAllProblemTags() {
+        return tagRepository.findAll().stream().map(Tag::getTagName).toList();
+    }
 
 }

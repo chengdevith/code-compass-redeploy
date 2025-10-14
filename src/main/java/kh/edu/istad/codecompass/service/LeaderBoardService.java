@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.service;
 
+import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardPublicResponse;
 import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardResponse;
 
 public interface LeaderBoardService {
@@ -16,5 +17,7 @@ public interface LeaderBoardService {
      * @author Panharoth
      */
     LeaderboardResponse getLeaderboardWithUser(String username);
+
+    LeaderboardPublicResponse getLeaderboardPublic();
 
 }

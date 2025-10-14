@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import kh.edu.istad.codecompass.enums.Role;
 
 public record UpdateRoleRequest(
-        @NotNull(message = "Role is required")
-        Role role,
         @NotBlank(message = "Username is required")
         String username
 ) { }

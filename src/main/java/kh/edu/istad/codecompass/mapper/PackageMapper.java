@@ -12,10 +12,12 @@ import org.mapstruct.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = { ProblemMapper.class })
+@Mapper(componentModel = "spring", uses = { ProblemMapper.class, BadgeMapper.class })
 public interface PackageMapper {
 
     @Mapping(target = "problems", source = "problems")
+    @Mapping(target = "badgesResponse", source = "badge")
+    @Mapping(target = "totalProblems", expression = "java(pack.getProblems().size())")
     PackageResponse mapPackageToResponse(Package pack);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

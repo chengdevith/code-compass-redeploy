@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +26,7 @@ public class Badge {
     @Column(nullable = false)
     private String description;
 
-    private String icon_url;
+    private String iconUrl;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -38,6 +39,10 @@ public class Badge {
 
     @Column(nullable = false)
     private String author;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @ManyToMany(mappedBy = "badges")
     private List<User> user = new ArrayList<>();

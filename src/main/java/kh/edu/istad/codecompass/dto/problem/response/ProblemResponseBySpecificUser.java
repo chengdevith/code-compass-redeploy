@@ -17,7 +17,7 @@ public record ProblemResponseBySpecificUser (
         @JsonProperty("best_time_execution")
         Double bestTimeExecution,
 
-        Byte coin,
+        Integer coin,
 
         String description,
 
@@ -35,6 +35,12 @@ public record ProblemResponseBySpecificUser (
 
         List<UserHintResponse> hints,
 
-        String author
+        String author,
+
+        @JsonProperty("is_deleted")
+        Boolean isDeleted,
+
+        @JsonProperty("is_verified")
+        Boolean isVerified
 ){
 }

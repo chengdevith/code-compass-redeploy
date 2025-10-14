@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.repository;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.SubmissionHistories;
+import kh.edu.istad.codecompass.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,16 @@ public interface SubmissionHistoryRepository extends JpaRepository<SubmissionHis
     Boolean existsByProblemIdAndUser_Username(Long problemId, String userUsername);
 
     List<SubmissionHistories> findSubmissionHistoriesByUser_Username(String userUsername);
+
+    List<SubmissionHistories> findByUser(User user);
+
+    @Query("""
+        SELECT sh.languageId, COUNT(sh)
+        FROM SubmissionHistories sh
+        WHERE sh.user = :user
+          AND sh.status = 'Accepted'
+        GROUP BY sh.languageId
+    """)
+    List<Object[]> countAcceptedSubmissionsByLanguage(@Param("user") User user);
 
 }

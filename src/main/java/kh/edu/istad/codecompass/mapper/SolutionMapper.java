@@ -10,6 +10,8 @@ public interface SolutionMapper {
 
     @Mapping(target = "problemId", source = "problem.id")
     @Mapping(target = "author", source = "user.username")
+    @Mapping(target = "userProfile", source = "user.imageUrl")
+    @Mapping(target = "solutionId", source = "id")
     SolutionResponse toResponse(Solution solution);
 
 }

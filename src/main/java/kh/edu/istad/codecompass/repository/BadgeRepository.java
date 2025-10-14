@@ -2,6 +2,8 @@ package kh.edu.istad.codecompass.repository;
 
 
 import kh.edu.istad.codecompass.domain.Badge;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,15 +13,21 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
 
     Optional<Badge> findBadgeByNameAndIsVerifiedTrue(String name);
 
-    Optional<Badge> findBadgeByIdAndIsVerifiedFalse(long id);
+    Optional<Badge> findBadgeByIdAndIsVerifiedFalseAndIsDeletedFalse(long id);
 
     Optional<Badge> findBadgeByIdAndIsVerifiedTrue(long id);
 
-    List<Badge> findBadgeByIsVerifiedFalse();
+    List<Badge> findBadgeByIsVerifiedFalseAndIsDeletedFalse();
 
     List<Badge> findBadgeByIsVerifiedTrue();
 
-    boolean existsBadgeByName(String name);
+    boolean existsBadgeByNameAndIsDeletedFalse(String name);
 
     Optional<Badge> findBadgesByProblemPackage_Name(String name);
+
+    List<Badge> findBadgesByAuthorAndIsDeletedFalse(String username);
+
+    Optional<Badge> findBadgeByAuthorAndIdAndIsDeletedFalse(String author, Long id);
+
+    Optional<Badge> findBadgeById(Long id);
 }

@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.dto.hint.response.HintResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseResponse;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Builder;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public record ProblemResponse(
         @JsonProperty("best_time_execution")
         Double bestTimeExecution,
 
-        Byte coin,
+        Integer coin,
 
         String description,
 
@@ -37,6 +38,14 @@ public record ProblemResponse(
 
         List<HintResponse> hints,
 
-        String author
+        String author,
+
+        Status status,
+
+        @JsonProperty("is_deleted")
+        Boolean isDeleted,
+
+        @JsonProperty("is_verified")
+        Boolean isVerified
 ) { }
 

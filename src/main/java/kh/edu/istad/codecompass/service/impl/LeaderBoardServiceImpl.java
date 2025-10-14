@@ -3,8 +3,12 @@ package kh.edu.istad.codecompass.service.impl;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.LeaderBoard;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardPublicResponse;
 import kh.edu.istad.codecompass.dto.leaderboard.LeaderboardResponse;
+import kh.edu.istad.codecompass.dto.user.UserProfileResponse;
 import kh.edu.istad.codecompass.dto.userLeaderBoard.UserResponseLeaderBoard;
+import kh.edu.istad.codecompass.enums.Level;
+import kh.edu.istad.codecompass.mapper.BadgeMapper;
 import kh.edu.istad.codecompass.repository.LeaderBoardRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.LeaderBoardService;
@@ -22,14 +26,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LeaderBoardServiceImpl implements LeaderBoardService {
 
-    private final LeaderBoardRepository leaderBoardRepository;
     private final UserRepository userRepository;
+    private final BadgeMapper  badgeMapper;
 
     @Override
     @Transactional
     public LeaderboardResponse getLeaderboardWithUser(String username) {
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+        );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         LeaderBoard leaderBoard = user.getLeaderBoard();
         Long userRank = user.getRank();
@@ -41,9 +48,43 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
         List<UserResponseLeaderBoard> nearbyUsers = getNearbyUsersWithEdgeCases(leaderBoard, userRank);
 
         // Current user response
-        UserResponseLeaderBoard currentUser = UserResponseLeaderBoard.fromEntity(user);
+        UserResponseLeaderBoard currentUser = UserResponseLeaderBoard.fromEntity(user, badgeMapper);
 
         return new LeaderboardResponse(topUsers, userRank, nearbyUsers, currentUser);
+    }
+
+    @Override
+    public LeaderboardPublicResponse getLeaderboardPublic() {
+        return getTop50Users();
+    }
+
+    private LeaderboardPublicResponse getTop50Users() {
+        // Sorting logic can be adjusted based on how you rank the users
+        List<UserProfileResponse> users = userRepository.findAllByOrderByRankAsc().stream()// Sort by stars descending
+                .limit(50)  // Limit to top 50 users
+                .map( user -> {
+                    Level level = user.getLevel();
+                    return UserProfileResponse
+                            .builder()
+                            .role(user.getRole())
+                            .dob(user.getDob())
+                            .badge(user.getBadges().size())
+                            .coin(user.getCoin())
+                            .star(user.getStar())
+                            .level(level.getDisplayName())
+                            .comment(user.getComments().size())
+                            .gender(user.getGender().name())
+                            .rank(user.getRank())
+                            .github(user.getGithub())
+                            .imageUrl(user.getImageUrl())
+                            .linkedin(user.getLinkedin())
+                            .solution(user.getSolutions().size())
+                            .username(user.getUsername())
+                            .totalProblemsSolved(user.getTotalProblemsSolved())
+                            .isDeleted(user.getIsDeleted())
+                            .build();
+                }).toList();
+        return new LeaderboardPublicResponse(users);
     }
 
     private List<UserResponseLeaderBoard> getTop25Users(LeaderBoard leaderBoard) {
@@ -51,7 +92,7 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
         List<User> users = userRepository.findByLeaderBoardOrderByRankAsc(leaderBoard, pageable);
 
         return users.stream()
-                .map(UserResponseLeaderBoard::fromEntity)
+                .map(u -> UserResponseLeaderBoard.fromEntity(u, badgeMapper))
                 .toList();
     }
 
@@ -68,7 +109,9 @@ public class LeaderBoardServiceImpl implements LeaderBoardService {
                 leaderBoard, startRank, endRank);
 
         return users.stream()
-                .map(UserResponseLeaderBoard::fromEntity)
+                .map(u -> {
+                    return UserResponseLeaderBoard.fromEntity(u, badgeMapper);
+                })
                 .toList();
     }
 }

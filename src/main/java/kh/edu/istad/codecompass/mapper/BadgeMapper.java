@@ -2,7 +2,8 @@ package kh.edu.istad.codecompass.mapper;
 
 import kh.edu.istad.codecompass.domain.Badge;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.response.BadgeSummaryResponse;
+import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
@@ -14,4 +15,6 @@ public interface BadgeMapper {
     Badge fromRequestToEntity(BadgeRequest badgeRequest);
 
     BadgesResponse toBadgeResponse(Badge badge);
+
+    BadgeSummaryResponse toBadgeSummaryResponse(Badge badge);
 }

@@ -1,16 +1,12 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
-import kh.edu.istad.codecompass.enums.AuthProvider;
-import kh.edu.istad.codecompass.enums.Gender;
-import kh.edu.istad.codecompass.enums.Level;
+import kh.edu.istad.codecompass.enums.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +30,10 @@ public class User {
     @Column(nullable = false)
     private Gender gender;
 
+    @Column(length = 120)
     private String dob;
+
+    private String bio;
 
     private String location;
     private String website;
@@ -87,6 +86,13 @@ public class User {
     }
 
     @Enumerated(EnumType.STRING)
-    private AuthProvider authProvider; // GOOGLE, GITHUB, LOCAL
+    private OAuthProvider authProvider; // GOOGLE, GITHUB, NONE
+
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ALLOWED;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.SUBSCRIBER;
+
 
 }

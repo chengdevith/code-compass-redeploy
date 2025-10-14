@@ -36,8 +36,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setIsDeleted(false);
 
         User user = userRepository.findUserByUsername(createCommentRequest.username()).orElseThrow(
-               () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         comment.setUser(user);
 

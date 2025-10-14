@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.badge.request.AddBadgeToPackageRequest;
 import kh.edu.istad.codecompass.dto.badge.request.BadgeRequest;
-import kh.edu.istad.codecompass.dto.badge.BadgesResponse;
+import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;
 import kh.edu.istad.codecompass.service.BadgesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,14 +25,14 @@ public class BadgeController {
  private final BadgesService badgesService;
 
     @PutMapping("/add-to-package")
-    @Operation(summary = "For adding a badge to a package (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Assign badge to a package | [ CREATOR, ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> addBadgeToPackage(@RequestBody @Valid AddBadgeToPackageRequest request) {
         badgesService.addBadgeToPackage(request);
         return ResponseEntity.ok("The badge has successfully been added to package");
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Input a badge ID to update (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update a badge by ID | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);
         return ResponseEntity.ok("The badge been updated successfully");
@@ -40,7 +40,7 @@ public class BadgeController {
     }
 
     @GetMapping("/unverified")
-    @Operation(summary = "This endpoint acts like a display filtering for admin to unverified badges (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get unverified badges | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<BadgesResponse>getUnverifiedBadges(){
         return badgesService.unverifiedBadges();
     }
@@ -59,23 +59,21 @@ public class BadgeController {
     }
 
 
-    @PatchMapping("/{id}/verification")
-    @Operation(summary = "For verifying badges (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    ResponseEntity <String>VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
+    @PutMapping("/{id}/verification")
+    @Operation(summary = "Verify a badge | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    BadgesResponse VerifiedBadges(@PathVariable Long id, @RequestParam(defaultValue = "true")
                                           boolean verified) {
-        badgesService.verifyBadges(id, verified);
-        return ResponseEntity.ok("The badge has been verified successfully");
-
+        return badgesService.verifyBadges(id, verified);
     }
 
     @GetMapping
-    @Operation(summary = "For displaying all badges - both verified and unverified (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get all badges - both verified and unverified | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     public List<BadgesResponse> getAllBadges(){
         return badgesService.getAllBadges();
     }
 
     @PostMapping
-    @Operation(summary = "For creating a new badge (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Create a new badge | [ CREATOR, ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @ResponseStatus(HttpStatus.CREATED)
     public BadgesResponse createBadge(
             @RequestBody @Valid BadgeRequest badgeRequest,
@@ -83,6 +81,32 @@ public class BadgeController {
     ) {
         String author = jwt.getClaim("preferred_username");
         return badgesService.createBadge(badgeRequest, author);
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get badges for a creator | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    public List<BadgesResponse> getBadgesByAuthor(@AuthenticationPrincipal Jwt jwt){
+        String username = jwt.getClaim("preferred_username");
+        return badgesService.getBadgesByCreator(username);
+    }
+
+    @DeleteMapping("/{id}/delete")
+    @Operation(summary = "Delete a badge | [ CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<?> deleteBadge(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt){
+        String username = jwt.getClaim("preferred_username");
+        badgesService.deleteBadgeById(id,  username);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/{badgeId}/rejection")
+    @Operation(summary = "Reject a badge | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectBadgeById(@PathVariable Long badgeId){
+        badgesService.rejectBadgeById(badgeId);
     }
 
 }

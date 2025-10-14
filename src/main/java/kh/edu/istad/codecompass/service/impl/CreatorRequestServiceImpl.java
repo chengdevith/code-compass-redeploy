@@ -7,6 +7,8 @@ import kh.edu.istad.codecompass.dto.creatorRequest.response.CreatorResponseDTO;
 import kh.edu.istad.codecompass.dto.creatorRequest.response.ReviewCreatorResponse;
 import kh.edu.istad.codecompass.dto.creatorRequest.request.UpdateRoleRequest;
 import kh.edu.istad.codecompass.enums.ReportStatus;
+import kh.edu.istad.codecompass.enums.Role;
+import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.repository.CreatorRequestRepository;
 import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.CreatorRequestService;
@@ -42,12 +44,14 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
     public CreatorResponseDTO requestTobeCreator(CreatorRequestDto creatorRequestDto, String username) {
 
         User user = userRepository.findUserByUsername(username).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         CreatorRequest creatorRequest = new CreatorRequest();
         creatorRequest.setDescription(creatorRequest.getDescription());
-        creatorRequest.setStatus(ReportStatus.PENDING);
+        creatorRequest.setStatus(Status.PENDING);
         creatorRequest.setUser(user);
 
         creatorRequest = creatorRequestRepository.save(creatorRequest);
@@ -67,12 +71,15 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
         creatorRequests.forEach(creatorRequest -> {
             User user = new User();
             user = userRepository.findUserByUsername(creatorRequest.getUser().getUsername()).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
             );
+            if (user.getIsDeleted().equals(true))
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+
             ReviewCreatorResponse response = ReviewCreatorResponse
                     .builder()
-                    .username(creatorRequest.getUser().getUsername())
-                    .status(creatorRequest.getStatus())
+                    .username(user.getUsername())
+                    .status(user.getStatus())
                     .description(creatorRequest.getDescription())
                     .level(user.getLevel())
                     .rank(user.getRank())
@@ -88,8 +95,10 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
     public ReviewCreatorResponse assignRoleToCreator(UpdateRoleRequest updateRoleRequest) {
 
         User user = userRepository.findUserByUsername(updateRoleRequest.username()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         List<UserRepresentation> users = keycloak.realm(realmName).users().search(updateRoleRequest.username(), true);
         if (!users.isEmpty()) {
@@ -98,7 +107,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
 
             RoleRepresentation role = keycloak.realm(realmName)
                     .roles()
-                    .get(updateRoleRequest.role().name())
+                    .get("CREATOR")
                     .toRepresentation();
 
             userResource.roles().realmLevel().add(List.of(role));
@@ -106,11 +115,12 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
             CreatorRequest creatorRequest = creatorRequestRepository.findCreatorRequestByUser_Id(user.getId()).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
             );
-            creatorRequest.setStatus(ReportStatus.APPROVED);
+            creatorRequest.setStatus(Status.APPROVED);
             creatorRequest = creatorRequestRepository.save(creatorRequest);
 
             user.setCreatorRequest(creatorRequest);
-
+            user.setRole(Role.CREATOR);
+            user = userRepository.save(user);
 
         }
         return ReviewCreatorResponse

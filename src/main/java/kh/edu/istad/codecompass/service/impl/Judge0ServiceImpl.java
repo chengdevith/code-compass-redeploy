@@ -82,33 +82,32 @@ public class Judge0ServiceImpl implements Judge0Service {
                 .block();
     }
 
+
     @Transactional
     @Override
     public Judge0BatchResponse createSubmissionBatch(BatchSubmissionRequest batchRequest, String username, Long problemId) {
 
         List<CreateSubmissionRequest> submissions = prepareSubmissionRequests(batchRequest);
-
         Judge0BatchRequest request = new Judge0BatchRequest(submissions);
-
         Judge0BatchResponse responses = sendBatchRequestToJudge0(request, batchRequest.languageId());
 
         User user = userRepository.findUserByUsername(username).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
         );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         Problem problem = problemRepository.findProblemByIdAndIsVerifiedTrue(problemId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found")
         );
 
-//        submissionHistoryRepository.deleteOldSubmissions(username);
-
-        SubmissionHistories submissionHistories = new SubmissionHistories();
-
         AtomicInteger counter = new AtomicInteger(0);
         AtomicInteger userMemoryUsage = new AtomicInteger(0);
         AtomicReference<Double> userExecutionTime = new AtomicReference<>(0.0);
-        int earnedStars = 0;
 
+        String overallStatus = determineOverallStatus(responses.submissions());
+
+        // Calculate metrics only for accepted submissions
         responses.submissions().forEach(submission -> {
             if (submission.status().description().equals("Accepted")) {
                 counter.incrementAndGet();
@@ -117,12 +116,21 @@ public class Judge0ServiceImpl implements Judge0Service {
             }
         });
 
+        // Create submission history
+        SubmissionHistories submissionHistories = new SubmissionHistories();
+        submissionHistories.setProblem(problem);
+        submissionHistories.setUser(user);
+        submissionHistories.setCode(batchRequest.sourceCode());
+        submissionHistories.setStatus(overallStatus);
+        submissionHistories.setLanguageId(batchRequest.languageId());
+        submissionHistories.setSubmittedAt(LocalDateTime.now());
+
         Double peekTimeExecution = problem.getBestTimeExecution();
         Integer peekMemoryUsage = problem.getBestMemoryUsage();
 
-//                  status = accepted
-        if (counter.get() == submissions.size()) {
-            earnedStars++; // Base star for solving
+        // Only process rewards if ALL submissions are accepted
+        if (overallStatus.equals("Accepted")) {
+            int earnedStars = 1; // Base star for solving
             double averageUserMemoryUsage = (double) userMemoryUsage.get() / counter.get();
             double averageUserExecutionTime = userExecutionTime.get() / counter.get();
 
@@ -138,9 +146,9 @@ public class Judge0ServiceImpl implements Judge0Service {
             double earnedCoins = baseCoins / 4.0;   // Base reward for solving
 
             // Time efficiency reward
-            if (averageUserExecutionTime <= peekTimeExecution * 1.5) // within 50% of best
+            if (averageUserExecutionTime <= peekTimeExecution * 1.5)
                 earnedCoins += baseCoins / 4.0;
-             else if (averageUserExecutionTime <= peekTimeExecution * 2)  // within 100% slower
+            else if (averageUserExecutionTime <= peekTimeExecution * 2)
                 earnedCoins += baseCoins / 6.0;
 
             // Memory efficiency reward
@@ -149,21 +157,29 @@ public class Judge0ServiceImpl implements Judge0Service {
             else if (averageUserMemoryUsage <= peekMemoryUsage * 2)
                 earnedCoins += baseCoins / 6.0;
 
-
             long roundedCoins = Math.round(earnedCoins);
-            earnedCoins = (int) Math.min(roundedCoins, problem.getCoin());
+            earnedCoins = Math.min(roundedCoins, problem.getCoin());
 
             boolean hasSolvedBefore = submissionHistoryRepository
                     .findByProblemIdAndUser_Username(problemId, username)
                     .stream()
                     .anyMatch(history -> history.getStatus().equals("Accepted"));
 
-//            user has solved this specific problem for the first time
-            if (! hasSolvedBefore ) {
-                user.setCoin((int) earnedCoins + user.getCoin());
-                user.setStar(earnedStars + user.getStar());
-                user.updateLevel();
+            // Set stars and coins for the submission history
+            Star star = switch (earnedStars) {
+                case 1 -> Star.ONE;
+                case 2 -> Star.TWO;
+                case 3 -> Star.THREE;
+                default -> Star.ZERO;
+            };
+            submissionHistories.setStar(star);
+            submissionHistories.setCoin((int) earnedCoins);
 
+            // User has solved this specific problem for the first time
+            if (!hasSolvedBefore) {
+                user.setCoin(user.getCoin() + (int) earnedCoins);
+                user.setStar(user.getStar() + earnedStars);
+                user.updateLevel();
                 user.setTotalProblemsSolved(user.getTotalProblemsSolved() + 1);
 
                 UserProblem userProblem = new UserProblem();
@@ -175,9 +191,7 @@ public class Judge0ServiceImpl implements Judge0Service {
                 List<UserProblem> userProblemList = userProblemRepository
                         .findAllByUserIdAndIsSolvedTrue(user.getId());
 
-
-
-                // collect all solved problem IDs
+                // Collect all solved problem IDs
                 Set<Long> solvedProblemIds = userProblemList.stream()
                         .map(u -> u.getProblem().getId())
                         .collect(Collectors.toSet());
@@ -189,63 +203,46 @@ public class Judge0ServiceImpl implements Judge0Service {
                             .map(Problem::getId)
                             .collect(Collectors.toSet());
 
-                    // check if user solved all problems in the package
+                    // Check if user solved all problems in the package
                     boolean solvedAll = solvedProblemIds.containsAll(packageProblemIds);
                     if (solvedAll) {
                         Badge badge = badgeRepository.findBadgesByProblemPackage_Name(pack.getName())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Badge not found"));
 
-                        if (!user.getBadges().contains(badge))  // prevent duplicates
+                        if (!user.getBadges().contains(badge))
                             user.getBadges().add(badge);
-
                     }
                 }
 
-                // Fetch the shared leaderboard (create if it doesn't exist)
+                // Leaderboard logic
                 LeaderBoard leaderBoard = leaderBoardRepository.findById(1L)
                         .orElseGet(LeaderBoard::new);
-
-                // Set the user-leaderboard relationship
                 user.setLeaderBoard(leaderBoard);
-
-                // Add user to leaderboard's list
                 leaderBoard.getUsers().add(user);
-
-                // Save leaderboard (cascade will save user too)
                 leaderBoardRepository.save(leaderBoard);
 
             } else {
-
+                // User has solved before - only update if better performance
                 List<SubmissionHistories> submissionHistoriesList =
                         submissionHistoryRepository.findByProblemIdAndUser_Username(problemId, username);
 
-                int maxHistoryCoins = submissionHistoriesList.getFirst().getCoin();
-                Star maxHistoryStars = submissionHistoriesList.getFirst().getStar();
-                if (maxHistoryStars == null) maxHistoryStars = Star.ZERO;
+                int maxHistoryCoins = submissionHistoriesList.stream()
+                        .mapToInt(history -> history.getCoin() == null ? 0 : history.getCoin())
+                        .max()
+                        .orElse(0);
 
-                // find max coin + max star from history
-                for (int i = 1; i < submissionHistoriesList.size(); i++) {
-                    maxHistoryCoins = Math.max(maxHistoryCoins, submissionHistoriesList.get(i).getCoin() == null ? 0 : submissionHistoriesList.get(i).getCoin());
-                    if (submissionHistoriesList.get(i).getStar() == null) {
-                        submissionHistoriesList.get(i).setStar(Star.ZERO);
-                    }
-                    if (submissionHistoriesList.get(i).getStar().compareTo(maxHistoryStars) > 0) {
-                        maxHistoryStars = submissionHistoriesList.get(i).getStar();
-                    }
+                Star maxHistoryStars = submissionHistoriesList.stream()
+                        .map(history -> history.getStar() == null ? Star.ZERO : history.getStar())
+                        .max(Enum::compareTo)
+                        .orElse(Star.ZERO);
+
+                // Coins: only add if earned > history
+                if (earnedCoins > maxHistoryCoins) {
+                    user.setCoin(user.getCoin() + (int) (earnedCoins - maxHistoryCoins));
                 }
 
-                // coins: only add if earned > history
-                if (earnedCoins > maxHistoryCoins)
-                    user.setCoin((int) (user.getCoin() + (earnedCoins - maxHistoryCoins)));
-
-
-                // stars: only add if earned > history
-                Star currentStar = switch (earnedStars) {
-                    case 1 -> Star.ONE;
-                    case 2 -> Star.TWO;
-                    case 3 -> Star.THREE;
-                    default -> Star.ZERO;
-                };
+                // Stars: only add if earned > history
+                Star currentStar = star; // Use the star that's already calculated
                 if (currentStar.compareTo(maxHistoryStars) > 0) {
                     int additionalStars = currentStar.ordinal() - maxHistoryStars.ordinal();
                     user.setStar(user.getStar() + additionalStars);
@@ -254,51 +251,13 @@ public class Judge0ServiceImpl implements Judge0Service {
             }
 
             userRepository.save(user);
-
-            List<User> users = userRepository.findAllByOrderByStarDesc();
-            long rank = 1;
-            Integer prevStar = -1;
-            long sameRank = 1;
-
-            for (User u : users) {
-                if (!u.getStar().equals(prevStar)) {
-                    rank = sameRank;
-                    prevStar = u.getStar();
-                }
-                u.setRank(rank);
-                sameRank++;
-            }
-            userRepository.saveAll(users);
-
-            submissionHistories.setCoin((int) earnedCoins);
-            submissionHistories.setProblem(problem);
-            submissionHistories.setUser(user);
-            submissionHistories.setCode(batchRequest.sourceCode());
-            submissionHistories.setStatus(responses.submissions().getFirst().status().description());
-            submissionHistories.setLanguageId(responses.submissions().getFirst().languageId());
-            submissionHistories.setSubmittedAt(LocalDateTime.now());
-
-            Star star = switch (earnedStars) {
-                case 1 -> Star.ONE;
-                case 2 -> Star.TWO;
-                case 3 -> Star.THREE;
-                default -> null;
-            };
-            submissionHistories.setStar(star);
-
-            submissionHistoryRepository.save(submissionHistories);
-
-        } else {
-            submissionHistories.setProblem(problem);
-            submissionHistories.setUser(user);
-            submissionHistories.setCode(batchRequest.sourceCode());
-            submissionHistories.setStatus(responses.submissions().getFirst().status().description());
-            submissionHistories.setLanguageId(responses.submissions().getFirst().languageId());
-            submissionHistories.setSubmittedAt(LocalDateTime.now());
-
-            submissionHistoryRepository.save(submissionHistories);
-
         }
+
+        // Save submission history (for both accepted and failed cases)
+        submissionHistoryRepository.save(submissionHistories);
+
+        // Update ranks after all user changes
+        updateUserRanks();
 
         return responses;
     }
@@ -333,7 +292,7 @@ public class Judge0ServiceImpl implements Judge0Service {
     }
 
     @Transactional
-        protected Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
+    protected Judge0BatchResponse sendBatchRequestToJudge0(Judge0BatchRequest request, String languageId) {
         try {
             log.info("Sending batch request to Judge0 with {} submissions", request.submissions().size());
 
@@ -539,5 +498,33 @@ public class Judge0ServiceImpl implements Judge0Service {
         }
 
         return new Judge0BatchResponse(mappedResponses);
+    }
+
+
+    // Helper method to determine overall status
+    private String determineOverallStatus(List<Judge0SubmissionResponse> submissions) {
+        // If any submission is not accepted, return the first non-accepted status
+        return submissions.stream()
+                .filter(sub -> !sub.status().description().equals("Accepted"))
+                .findFirst()
+                .map(sub -> sub.status().description())
+                .orElse("Accepted");
+    }
+
+    private void updateUserRanks() {
+        List<User> users = userRepository.findAllByOrderByStarDesc();
+        long rank = 1;
+        Integer prevStar = -1;
+        long sameRank = 1;
+
+        for (User u : users) {
+            if (!u.getStar().equals(prevStar)) {
+                rank = sameRank;
+                prevStar = u.getStar();
+            }
+            u.setRank(rank);
+            sameRank++;
+        }
+        userRepository.saveAll(users);
     }
 }

@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.service.impl;
 
 import kh.edu.istad.codecompass.domain.Report;
+import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.dto.report.ChangeStatusRequest;
 import kh.edu.istad.codecompass.dto.report.CreateReportRequest;
 import kh.edu.istad.codecompass.dto.report.ReportResponse;
@@ -38,9 +39,13 @@ public class ReportServiceImpl implements ReportService {
         report.setCreateAt(LocalDateTime.now());
         report.setStatus(ReportStatus.PENDING);
 
-        report.setUser(userRepository.findUserByUsername(request.username()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
-        ));
+        User user = userRepository.findUserByUsername(request.username()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+        );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+
+        report.setUser(user);
 
         report.setComment(commentRepository.findById(request.commentId()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found")

@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,13 @@ public class Package {
 
     @Column(nullable = false)
     private Boolean isVerified;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    @Column(nullable = false)
+    String author;
 
     @ManyToMany
     private Set<Problem> problems = new HashSet<>();

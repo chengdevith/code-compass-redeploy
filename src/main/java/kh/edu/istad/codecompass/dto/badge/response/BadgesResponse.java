@@ -1,6 +1,7 @@
-package kh.edu.istad.codecompass.dto.badge;
+package kh.edu.istad.codecompass.dto.badge.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public record BadgesResponse(
         Boolean isDeleted,
         @JsonProperty("is_verified")
         Boolean isVerified,
-        String author
+        String author,
+        Status status
 ) {
 }

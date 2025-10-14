@@ -87,8 +87,7 @@ public interface ProblemService {
      * @param isVerified A boolean flag; {@code true} to verify the problem, {@code false} to un-verify it.
      * @author Panharoth
      */
-    void verifyProblem(long problemId, boolean isVerified);
-
+    ProblemResponse verifyProblem(long problemId, boolean isVerified);
 
     /**
      * Updates an existing problem created by a specific user.
@@ -102,4 +101,23 @@ public interface ProblemService {
      * @author Panharoth
      */
     void updateProblem(Long problemId, String username, UpdateProblemRequest updateProblemRequest);
+
+    /**
+     * Retrieves a list of all problems created by a specific author.
+     * <p>
+     * This method is used to fetch the complete collection of problems
+     * that are associated with the given username, regardless of their verification status.
+     *
+     * @param username The unique username of the author whose problems are to be retrieved.
+     * @return A {@link List} of {@link ProblemResponse} objects, detailing all problems created by the specified user.
+     * The list will be empty if the user hasn't created any problems.
+     * @author Panharoth
+     */
+    List<ProblemResponse> getProblemsByAuthor(String username);
+
+    void deleteProblemById(long problemId, String username);
+
+    void rejectProblemById(long problemId);
+
+    List<String> getAllProblemTags();
 }
