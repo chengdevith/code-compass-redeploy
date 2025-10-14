@@ -34,7 +34,7 @@ spring:
 # Config Server Path and BaseUri for media
 media:
   server-path: /app/media/
-  base-uri: http://localhost:8081/media/
+  base-uri: https://code-compass.devith.it.com/media/
 
 server:
   forward-headers-strategy: framework
