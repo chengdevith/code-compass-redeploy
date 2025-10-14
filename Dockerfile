@@ -29,6 +29,9 @@ RUN mkdir -p /app/media && chmod 775 /app/media
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
+# Add appuser to docker group (GID 999 matches host docker group)
+RUN groupadd -g 999 docker && usermod -aG docker appuser
+
 # Install curl for health checks (optional)
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
