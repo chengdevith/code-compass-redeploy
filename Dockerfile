@@ -24,7 +24,7 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Create directory for media files
-RUN mkdir -p /app/media
+RUN mkdir -p /app/media && chmod 775 /app/media
 
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser

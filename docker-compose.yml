@@ -1,4 +1,4 @@
-#services:
+  #services:
 #  code-compass-db:
 #    image: postgres:16.9-bullseye
 #    container_name: code-compass-db
