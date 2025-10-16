@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.service.impl;
 
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.*;
+import kh.edu.istad.codecompass.dto.hint.HintRequest;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.dto.testCase.TestCaseRequest;
@@ -18,13 +19,14 @@ import kh.edu.istad.codecompass.repository.*;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +41,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final UserHintRepository userHintRepository;
     private final ProblemMapper problemMapper;
     private final HintRepository hintRepository;
+    private final TestCaseRepository testCaseRepository;
 
     @Transactional
     @Override
@@ -233,32 +236,33 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Transactional
     @Override
-    public List<ProblemSummaryResponse> getUnverifiedProblems() {
-        return problemRepository.findProblemsByIsVerifiedFalseAndIsDeletedFalse()
-                .stream()
-                .map(problem ->
-                        ProblemSummaryResponse
-                                .builder()
-                                .id(problem.getId())
-                                .difficulty(problem.getDifficulty())
-                                .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
-                                .title(problem.getTitle())
-                                .build()).toList();
+    public Page<ProblemSummaryResponse> getUnverifiedProblems(Pageable pageable) {
+
+        Page<Problem> problems = problemRepository.findProblemsByIsVerifiedFalseAndIsDeletedFalse(pageable);
+
+        return problems.map(problem -> ProblemSummaryResponse.builder()
+                .id(problem.getId())
+                .difficulty(problem.getDifficulty())
+                .tags(problem.getTags().stream()
+                        .map(Tag::getTagName)
+                        .collect(Collectors.toList()))
+                .title(problem.getTitle())
+                .build());
     }
 
     @Transactional
     @Override
-    public List<ProblemSummaryResponse> getVerifiedProblems() {
-        return problemRepository.findProblemsByIsVerifiedTrue()
-                .stream()
-                .map(problem ->
-                        ProblemSummaryResponse
-                                .builder()
-                                .id(problem.getId())
-                                .difficulty(problem.getDifficulty())
-                                .tags(problem.getTags().stream().map(Tag::getTagName).collect(Collectors.toList()))
-                                .title(problem.getTitle())
-                                .build()).toList();
+    public Page<ProblemSummaryResponse> getVerifiedProblems(Pageable pageable) {
+        Page<Problem> problems = problemRepository.findProblemsByIsVerifiedTrue(pageable);
+
+        return problems.map(problem -> ProblemSummaryResponse.builder()
+                .id(problem.getId())
+                .difficulty(problem.getDifficulty())
+                .tags(problem.getTags().stream()
+                        .map(Tag::getTagName)
+                        .collect(Collectors.toList()))
+                .title(problem.getTitle())
+                .build());
     }
 
     @Transactional
@@ -279,10 +283,33 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public void updateProblem(Long problemId, String authorUsername, UpdateProblemRequest updateProblemRequest) {
 
-        Problem problem = problemRepository.findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(problemId ,authorUsername)
+        Problem problem = problemRepository.findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(problemId, authorUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Problem not found"));
 
+        log.info(updateProblemRequest.toString());
+
+        // Map simple fields first
         problemMapper.fromUpdateRequestToEntity(updateProblemRequest, problem);
+
+        if (updateProblemRequest.hints() != null && !updateProblemRequest.hints().isEmpty()) {
+            updateHints(problem, updateProblemRequest.hints());
+        }
+        problemRepository.save(problem);
+
+        // Handle hints update manually
+
+
+//        // Handle test cases update if needed
+        if (updateProblemRequest.testCases() != null) {
+            updateTestCases(problem, updateProblemRequest.testCases());
+        }
+
+        // Handle tags update if needed
+        if (updateProblemRequest.tagNames() != null) {
+            updateTags(problem, updateProblemRequest.tagNames());
+        }
+
+        problem.setUpdateAt(LocalDateTime.now());
 
         ProblemIndex problemIndex = ProblemIndex.builder()
                 .description(problem.getDescription())
@@ -297,7 +324,75 @@ public class ProblemServiceImpl implements ProblemService {
                 .build();
 
         problemElasticsearchRepository.save(problemIndex);
+    }
 
+    private void updateHints(Problem problem, List<HintRequest> hintRequests) {
+        log.info("Starting updateHints with {} requests", hintRequests.size());
+
+        Map<Long, Hint> existingHints = problem.getHints().stream()
+                .collect(Collectors.toMap(Hint::getId, h -> h));
+
+        List<Hint> updatedHints = new ArrayList<>();
+
+        for (HintRequest hr : hintRequests) {
+            Hint hint;
+            boolean isLocked = hr.isLocked() != null ? hr.isLocked() : false;
+
+            if (hr.id() != null) {
+                // Load the hint from DB if it exists
+                hint = existingHints.get(hr.id());
+                if (hint == null) {
+                    // Optionally: fetch from repository if it belongs to this problem
+                    hint = hintRepository.findById(hr.id())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hint ID not found: " + hr.id()));
+                }
+                // Update existing hint
+                hint.setDescription(hr.description());
+                hint.setIsLocked(isLocked);
+            } else {
+                // New hint
+                hint = new Hint();
+                hint.setDescription(hr.description());
+                hint.setIsLocked(isLocked);
+                hint.setProblem(problem);
+            }
+
+            updatedHints.add(hint);
+        }
+
+        // Replace hints in problem
+        problem.getHints().clear();
+        problem.getHints().addAll(updatedHints);
+    }
+
+
+
+
+    // Optional: Add methods for test cases and tags if needed
+    private void updateTestCases(Problem problem, List<TestCaseRequest> testCaseRequests) {
+        // Similar logic to update test cases
+        List<TestCase> existingTestCases = problem.getTestCases();
+        testCaseRepository.deleteAll(existingTestCases);
+        existingTestCases.clear();
+
+        for (TestCaseRequest testCaseRequest : testCaseRequests) {
+            TestCase testCase = TestCase.builder()
+                    // ... set properties from testCaseRequest
+                    .problem(problem)
+                    .build();
+            problem.getTestCases().add(testCase);
+        }
+    }
+
+    private void updateTags(Problem problem, List<String> tagNames) {
+        // Handle tag updates - find existing tags or create new ones
+        Set<Tag> tags = new HashSet<>();
+        for (String tagName : tagNames) {
+            Tag tag = tagRepository.findByTagName(tagName)
+                    .orElseGet(() -> tagRepository.save(Tag.builder().tagName(tagName).build()));
+            tags.add(tag);
+        }
+        problem.setTags(tags);
     }
 
     @Override

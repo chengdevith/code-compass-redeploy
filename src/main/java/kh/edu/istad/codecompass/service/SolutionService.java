@@ -2,6 +2,8 @@ package kh.edu.istad.codecompass.service;
 
 import kh.edu.istad.codecompass.dto.solution.SolutionRequest;
 import kh.edu.istad.codecompass.dto.solution.SolutionResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -29,7 +31,7 @@ public interface SolutionService {
      * The list will be empty if no solutions are available or if the user is not eligible to view them.
      * @author Panharoth
      */
-    List<SolutionResponse> getAllSolutions(String username, Long problemId);
+    Page<SolutionResponse> getAllSolutions(String username, Long problemId, Pageable pageable);
 
     void deleteSolution(Long solutionId, String author);
 

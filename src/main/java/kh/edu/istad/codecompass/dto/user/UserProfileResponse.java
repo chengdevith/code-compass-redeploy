@@ -24,10 +24,12 @@ public record UserProfileResponse(
         Integer coin,
         Integer star,
         Long rank,
+        @JsonProperty("total_problem_solved")
         Integer totalProblemsSolved,
         @JsonProperty("is_deleted")
         Boolean isDeleted,
         Integer badge,
+        @JsonProperty("submission_histories")
         Integer submissionHistories,
         Integer solution,
         Integer view,

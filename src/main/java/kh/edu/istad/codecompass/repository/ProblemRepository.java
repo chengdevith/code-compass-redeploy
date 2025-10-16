@@ -1,6 +1,8 @@
 package kh.edu.istad.codecompass.repository;
 
 import kh.edu.istad.codecompass.domain.Problem;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,9 +16,9 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
 
     Optional<Problem> findProblemByIdAndIsVerifiedTrue(long problemId);
 
-    List<Problem> findProblemsByIsVerifiedFalseAndIsDeletedFalse();
+    Page<Problem> findProblemsByIsVerifiedFalseAndIsDeletedFalse(Pageable pageable);
 
-    List<Problem> findProblemsByIsVerifiedTrue();
+    Page<Problem> findProblemsByIsVerifiedTrue(Pageable pageable);
 
     Optional<Problem> findProblemByIdAndAuthor_UsernameAndIsDeletedFalse(Long problemId, String authorUsername);
 

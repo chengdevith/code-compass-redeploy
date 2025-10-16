@@ -43,7 +43,8 @@ public interface ProblemMapper {
     @Named("toSummary")
     @Mapping(target = "tags", expression = "java(mapTags(entity.getTags()))")
     ProblemSummaryResponse fromEntityToSummaryResponse(Problem entity);
-    
+
+    @Mapping(target = "hints", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void fromUpdateRequestToEntity(UpdateProblemRequest request, @MappingTarget Problem entity);
 
