@@ -9,9 +9,13 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUs
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
-import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
+import kh.edu.istad.codecompass.elasticsearch.service.ProblemIndexService;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +30,7 @@ import java.util.List;
 @RequestMapping("/api/v1/problems")
 public class ProblemController {
 
-    private final ProblemElasticsearchRepository  problemElasticsearchRepository;
+    private final ProblemIndexService problemIndexService;
     private final ProblemService problemService;
 
     @PostMapping
@@ -43,7 +47,7 @@ public class ProblemController {
 
     @GetMapping("/{problemId}/me")
     @Operation(summary = "Access to different problem details for different user (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'CREATOR')")
     public ProblemResponseBySpecificUser getProblemBySpecificUser(
             @PathVariable Long problemId,
             @AuthenticationPrincipal Jwt jwt
@@ -85,8 +89,9 @@ public class ProblemController {
     @GetMapping("/unverified")
     @Operation(summary = "View all unverified problems | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ProblemSummaryResponse> getUnverifiedProblems() {
-        return problemService.getUnverifiedProblems();
+    public Page<ProblemSummaryResponse> getUnverifiedProblems(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "100") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        return problemService.getUnverifiedProblems(pageable);
     }
 
     @GetMapping
@@ -99,15 +104,17 @@ public class ProblemController {
     @GetMapping("/verified")
     @Operation(summary = "Displays verified problems (public)")
     @PreAuthorize("permitAll()")
-    public List<ProblemSummaryResponse> getVerifiedProblems() {
-        return problemService.getVerifiedProblems();
+    public Page<ProblemSummaryResponse> getVerifiedProblems(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "100") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        return problemService.getVerifiedProblems(pageable);
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search problems (public)")
     @PreAuthorize("permitAll()")
-    public List<ProblemIndex> searchProblems(@RequestParam String keyword) {
-        return problemElasticsearchRepository.findByTitleContaining(keyword);
+    public Page<ProblemIndex> searchProblems(@RequestParam String keyword, @RequestParam(defaultValue = "50") int size, @RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, size);
+        return problemIndexService.searchProblem(keyword, pageable);
     }
 
     @GetMapping("/me")

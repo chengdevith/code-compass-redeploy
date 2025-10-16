@@ -22,7 +22,8 @@ public record UpdateProblemRequest(
 
         Star star,
 
-        @Size(min = 20, max = 40, message = "The coins should be between 20 to 40")
+        @Min(value = 20, message = "The coins should be between 20 to 40")
+        @Max(value = 40, message = "The coins should be between 20 to 40")
         Integer coin,
 
         @JsonProperty("best_memory_usage")

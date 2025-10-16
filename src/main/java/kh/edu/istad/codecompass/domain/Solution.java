@@ -21,10 +21,6 @@ public class Solution {
     @Column(length = 120, columnDefinition = "TEXT")
     private String title;
 
-    private Long likeCount;
-
-    private Boolean isLikedByUser;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String sourceCode;
 

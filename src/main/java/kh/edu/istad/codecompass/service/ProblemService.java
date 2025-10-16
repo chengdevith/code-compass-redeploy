@@ -5,6 +5,8 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -63,7 +65,7 @@ public interface ProblemService {
      * that are currently unverified. The list will be empty if all problems are verified
      * @author Panharoth
      */
-    List<ProblemSummaryResponse> getUnverifiedProblems();
+    Page<ProblemSummaryResponse> getUnverifiedProblems(Pageable pageable);
 
     /**
      * Retrieves a list of all verified problems.
@@ -75,7 +77,7 @@ public interface ProblemService {
      * verified problem. The list will be empty if there are no verified problems.
      * @author Panharoth
      */
-    List<ProblemSummaryResponse> getVerifiedProblems();
+    Page<ProblemSummaryResponse> getVerifiedProblems(Pageable pageable);
 
     /**
      * Verifies or un-verifies a problem, changing its public visibility.

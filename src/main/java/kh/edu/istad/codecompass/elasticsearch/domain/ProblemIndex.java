@@ -1,9 +1,9 @@
 package kh.edu.istad.codecompass.elasticsearch.domain;
 
 import jakarta.persistence.Id;
-import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.enums.Difficulty;
 import kh.edu.istad.codecompass.enums.Star;
+import kh.edu.istad.codecompass.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +30,10 @@ public class ProblemIndex {
     private Star star;
 
     private Double bestTimeExecution;
+
+    private Status status = Status.PENDING;
+
+    private Boolean isDeleted;
 
     private Integer bestMemoryUsage;
 

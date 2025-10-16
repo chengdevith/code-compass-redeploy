@@ -8,7 +8,6 @@ import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
 import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.PackageMapper;
-import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.PackageRepository;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
 import kh.edu.istad.codecompass.service.PackageService;
@@ -22,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -31,7 +31,6 @@ public class PackageServiceImpl implements PackageService {
     private final PackageRepository packageRepository;
     private final PackageMapper packageMapper;
     private final ProblemRepository problemRepository;
-    private final ProblemMapper problemMapper;
 
     @Override
     @Transactional
@@ -132,7 +131,28 @@ public class PackageServiceImpl implements PackageService {
     public List<PackageResponse> getPackagesByCreator(String username) {
         return packageRepository.findPackagesByAuthorAndIsDeletedFalse(username)
                 .stream()
-                .map(packageMapper::mapPackageToResponse)
+                .map(pack -> {
+                    // Create a copy of the package with filtered problems
+                    Package filteredPackage = new Package();
+                    filteredPackage.setId(pack.getId());
+                    filteredPackage.setName(pack.getName());
+                    filteredPackage.setAuthor(pack.getAuthor());
+                    filteredPackage.setDescription(pack.getDescription());
+                    filteredPackage.setIsDeleted(pack.getIsDeleted());
+                    filteredPackage.setIsVerified(pack.getIsVerified());
+                    filteredPackage.setStatus(pack.getStatus());
+                    filteredPackage.setBadge(pack.getBadge() != null ? pack.getBadge().getIsDeleted().equals(false) ? pack.getBadge() : null : null);
+
+                    // Filter only non-deleted problems
+                    Set<Problem> nonDeletedProblems = pack.getProblems()
+                            .stream()
+                            .filter(problem -> !problem.getIsDeleted())
+                            .collect(Collectors.toSet());
+
+                    filteredPackage.setProblems(nonDeletedProblems);
+
+                    return packageMapper.mapPackageToResponse(filteredPackage);
+                })
                 .toList();
     }
 
