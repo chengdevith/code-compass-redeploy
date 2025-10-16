@@ -14,8 +14,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 
         registry.addEndpoint("/api/v1/ws-comments")
-                .setAllowedOrigins("http://localhost:3000/",
-                        "https://code-compass.devith.it.com")
+                .setAllowedOrigins("http://localhost:3000",
+                        "https://code-compass.devith.it.com",
+                        "https://next-code-compass.devith.it.com")
                 .withSockJS();
 
     }

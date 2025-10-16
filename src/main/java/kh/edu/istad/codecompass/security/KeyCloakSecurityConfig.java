@@ -23,23 +23,23 @@ import java.util.stream.Collectors;
 @EnableMethodSecurity(prePostEnabled = true)
 public class KeyCloakSecurityConfig {
 
-    @Bean
-    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
 
-        // Set all request must be authenticated
-        http.authorizeHttpRequests( request ->
-                request
-                        .requestMatchers(
-                                "/api-docs",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/index.html",
-                                "/swagger-ui/index.html/**",
-                                "/webjars/**",
-                                "/media/**",
-                                "/api/v1/ws-comments/**"
-                        ).permitAll()
+            // Set all request must be authenticated
+            http.authorizeHttpRequests( request ->
+                    request
+                            .requestMatchers(
+                                    "/api-docs",
+                                    "/swagger-ui.html",
+                                    "/swagger-ui/**",
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui/index.html",
+                                    "/swagger-ui/index.html/**",
+                                    "/webjars/**",
+                                    "/media/**",
+                                    "/api/v1/ws-comments/**"
+                            ).permitAll()
 
 //                        auth
                         .requestMatchers("/api/v1/auth/register").permitAll()
