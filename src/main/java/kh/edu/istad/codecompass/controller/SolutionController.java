@@ -7,6 +7,10 @@ import kh.edu.istad.codecompass.dto.solution.SolutionRequest;
 import kh.edu.istad.codecompass.dto.solution.SolutionResponse;
 import kh.edu.istad.codecompass.service.SolutionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,9 +36,13 @@ public class SolutionController {
 
     @GetMapping("/problem/{problemId}")
     @Operation(summary = "Get solutions | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    public List<SolutionResponse> getAllSolutions(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
+    public Page<SolutionResponse> getAllSolutions(@AuthenticationPrincipal Jwt jwt,
+                                                  @PathVariable Long problemId,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "30") int size) {
         String username = jwt.getClaim("preferred_username");
-        return solutionService.getAllSolutions(username, problemId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
+        return solutionService.getAllSolutions(username, problemId, pageable);
     }
 
     @DeleteMapping("/{solutionId}/delete")

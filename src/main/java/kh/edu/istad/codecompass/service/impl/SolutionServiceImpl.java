@@ -15,6 +15,8 @@ import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.SolutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,7 +65,7 @@ public class SolutionServiceImpl implements SolutionService {
 
     @Transactional
     @Override
-    public List<SolutionResponse> getAllSolutions(String username, Long problemId) {
+    public Page<SolutionResponse> getAllSolutions(String username, Long problemId, Pageable pageable) {
 
         boolean isUserSolved = false;
         List<SubmissionHistories>  submissionHistories = submissionHistoryRepository.findByProblemIdAndUser_Username(problemId, username);
@@ -78,9 +80,9 @@ public class SolutionServiceImpl implements SolutionService {
         if (!isUserSolved)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "To view the solutions, you must solve the problem first");
 
-        return solutionRepository.findSolutionByProblemIdAndIsDeletedFalse(problemId).stream().map(
-            solutionMapper::toResponse
-        ).toList();
+        return solutionRepository
+                .findSolutionByProblemIdAndIsDeletedFalse(problemId, pageable)
+                .map(solutionMapper::toResponse);
     }
 
     @Override
