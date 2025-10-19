@@ -1,10 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
@@ -12,6 +9,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @Entity
 @Table(name = "test_cases")
+@Builder
+@AllArgsConstructor
 public class TestCase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

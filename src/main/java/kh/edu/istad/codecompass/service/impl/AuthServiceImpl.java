@@ -1,5 +1,6 @@
 package kh.edu.istad.codecompass.service.impl;
 
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
 import kh.edu.istad.codecompass.domain.LeaderBoard;
 import kh.edu.istad.codecompass.domain.User;
@@ -123,6 +124,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void handleOAuthUserRegistration(String keycloakUserId) {
         UserRepresentation keycloakUser = getUserRepresentation(keycloakUserId);
         OAuthProvider provider = getOAuthProvider(keycloakUserId);
@@ -136,7 +138,8 @@ public class AuthServiceImpl implements AuthService {
             user.setUsername(keycloakUser.getUsername());
             setFromKeycloakToLocalUser(keycloakUser, user);
             user.setAuthProvider(provider);
-
+            Long lastRank = userRepository.findMaxRank().describeConstable().orElse(0L);
+            user.setRank(lastRank + 1);
             userRepository.save(user);
         }
     }
@@ -302,7 +305,6 @@ public class AuthServiceImpl implements AuthService {
         user.setCoin(20);
         user.setStar(0);
         user.setTotalProblemsSolved(0);
-        user.setRank(userRepository.count() + 1);
         user.updateLevel();
         user.setStatus(Status.ALLOWED);
         user.setRole(Role.SUBSCRIBER);
@@ -313,10 +315,6 @@ public class AuthServiceImpl implements AuthService {
         // Associate user with leaderboard
         user.setLeaderBoard(leaderBoard);
         leaderBoard.getUsers().add(user);
-
-        // Save both entities to ensure relationships are persisted
-//        leaderBoardRepository.save(leaderBoard);
-
 
     }
 }

@@ -1,9 +1,7 @@
 package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "hints")
+@Builder()
+@AllArgsConstructor
 public class Hint {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,8 +23,9 @@ public class Hint {
     @Column(nullable = false)
     private Boolean isLocked;
 
-    @ManyToOne
-    Problem problem;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "problem_id", nullable = false)
+    private Problem problem;
 
     @OneToMany(mappedBy = "hint", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserHint> userHints = new ArrayList<>();

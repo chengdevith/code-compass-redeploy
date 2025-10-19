@@ -11,6 +11,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "tags")
+@Builder
+@AllArgsConstructor
 public class Tag {
 
     @Id
