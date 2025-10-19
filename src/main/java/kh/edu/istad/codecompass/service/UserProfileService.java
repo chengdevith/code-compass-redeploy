@@ -6,7 +6,7 @@ import kh.edu.istad.codecompass.dto.user.UserResponse;
 
 public interface UserProfileService {
 
-    UserResponse updateUserProfile(UpdateUserProfileRequest request, Long id);
+    UserResponse updateUserProfile(UpdateUserProfileRequest request, String username);
 
     UserProfileResponse getUserProfile(String token);
 
