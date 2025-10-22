@@ -30,6 +30,10 @@ public class SubmissionHistories {
     private Star star;
     private Integer coin;
 
+    String time;
+
+    Integer memory;
+
     @Column(nullable = false)
     private LocalDateTime submittedAt;
 

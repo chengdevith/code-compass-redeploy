@@ -5,7 +5,8 @@ import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.Tag;
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageSummaryResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
 import org.mapstruct.*;
 
@@ -24,6 +25,8 @@ public interface PackageMapper {
     void updatePackagePartially(PackageRequest packageRequest, @MappingTarget Package pack);
 
     List<ProblemSummaryResponse> toProblemSummaryResponses(List<Problem> problems);
+
+    PackageSummaryResponse toPackageSummaryResponses(Package packages);
 
     default ProblemSummaryResponse toProblemSummaryResponse(Problem problem) {
         return new ProblemSummaryResponse(

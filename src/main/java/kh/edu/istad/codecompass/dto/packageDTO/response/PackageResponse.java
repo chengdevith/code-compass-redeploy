@@ -1,4 +1,4 @@
-package kh.edu.istad.codecompass.dto.packageDTO;
+package kh.edu.istad.codecompass.dto.packageDTO.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import kh.edu.istad.codecompass.dto.badge.response.BadgesResponse;

@@ -25,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.MessageFormat;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -124,6 +125,8 @@ public class Judge0ServiceImpl implements Judge0Service {
         submissionHistories.setStatus(overallStatus);
         submissionHistories.setLanguageId(batchRequest.languageId());
         submissionHistories.setSubmittedAt(LocalDateTime.now());
+        submissionHistories.setTime(userExecutionTime.toString());
+        submissionHistories.setMemory(userMemoryUsage.get());
 
         Double peekTimeExecution = problem.getBestTimeExecution();
         Integer peekMemoryUsage = problem.getBestMemoryUsage();

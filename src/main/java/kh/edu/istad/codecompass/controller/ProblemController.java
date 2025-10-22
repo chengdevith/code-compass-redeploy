@@ -8,7 +8,8 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
-import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
+import kh.edu.istad.codecompass.dto.problem.response.UserProblemResponse;
+import kh.edu.istad.codecompass.elasticsearch.dto.SearchProblemResponse;
 import kh.edu.istad.codecompass.elasticsearch.service.ProblemIndexService;
 import kh.edu.istad.codecompass.service.ProblemService;
 import lombok.RequiredArgsConstructor;
@@ -112,9 +113,8 @@ public class ProblemController {
     @GetMapping("/search")
     @Operation(summary = "Search problems (public)")
     @PreAuthorize("permitAll()")
-    public Page<ProblemIndex> searchProblems(@RequestParam String keyword, @RequestParam(defaultValue = "50") int size, @RequestParam(defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, size);
-        return problemIndexService.searchProblem(keyword, pageable);
+    public List<SearchProblemResponse> searchProblems(@RequestParam String keyword) {
+        return problemIndexService.searchProblem(keyword);
     }
 
     @GetMapping("/me")
@@ -142,8 +142,16 @@ public class ProblemController {
     }
 
     @GetMapping("/tags")
-    @Operation(summary = "Get all problems' tags (public)", security = {@SecurityRequirement(name = "bearerAuth")})
+    @Operation(summary = "Get all problems' tags (public)")
     List<String> getAllProblemTags() {
         return problemService.getAllProblemTags();
     }
+
+    @GetMapping("/user-progress")
+    @Operation(summary = "Get a user progress | [ SUBSCRIBER, CREATOR ]", security = {@SecurityRequirement(name = "bearerAuth")})
+    UserProblemResponse userProblemResponse(@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return problemService.userProblems(username);
+    }
+
 }

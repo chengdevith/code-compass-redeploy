@@ -10,6 +10,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.Document;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +21,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 public class ProblemIndex {
     @Id
     private String id;
+
+    private Long problemId;
 
     private String description;
 
@@ -34,6 +39,8 @@ public class ProblemIndex {
     private Status status = Status.PENDING;
 
     private Boolean isDeleted;
+
+    private Set<String> tags = new HashSet<>();
 
     private Integer bestMemoryUsage;
 

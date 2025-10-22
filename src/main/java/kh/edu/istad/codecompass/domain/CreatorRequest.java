@@ -20,7 +20,10 @@ public class CreatorRequest {
     private String description;
 
     @Column(nullable = false)
-    private Status status;
+    private Status status = Status.NOT_REQUESTED;
+
+    @Column(length = 400)
+    private String adminResponseDescription;
 
     @OneToOne
     User user;

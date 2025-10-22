@@ -3,13 +3,20 @@ package kh.edu.istad.codecompass.service.impl;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.Package;
 import kh.edu.istad.codecompass.domain.Problem;
+import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.domain.UserProblem;
 import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageSummaryResponse;
+import kh.edu.istad.codecompass.dto.problem.response.ProblemAndSolvedResponse;
+import kh.edu.istad.codecompass.dto.problem.response.UserProblemResponse;
 import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.PackageMapper;
 import kh.edu.istad.codecompass.repository.PackageRepository;
 import kh.edu.istad.codecompass.repository.ProblemRepository;
+import kh.edu.istad.codecompass.repository.UserProblemRepository;
+import kh.edu.istad.codecompass.repository.UserRepository;
 import kh.edu.istad.codecompass.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +38,8 @@ public class PackageServiceImpl implements PackageService {
     private final PackageRepository packageRepository;
     private final PackageMapper packageMapper;
     private final ProblemRepository problemRepository;
+    private final UserProblemRepository userProblemRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -157,10 +166,10 @@ public class PackageServiceImpl implements PackageService {
     }
 
     @Override
-    public List<PackageResponse> getAllVerifiedPackages() {
+    public List<PackageSummaryResponse> getAllVerifiedPackages() {
         return packageRepository.findPackagesByIsVerifiedTrue()
                 .stream()
-                .map(packageMapper::mapPackageToResponse)
+                .map(packageMapper::toPackageSummaryResponses)
                 .toList();
     }
 
@@ -202,13 +211,51 @@ public class PackageServiceImpl implements PackageService {
 
     }
 
+
+
     @Override
-    public Integer countProblemsInPackage(Long packageId) {
+    public UserProblemResponse userProblems(Long packageId, String username) {
 
-        Package pack = packageRepository.findById(packageId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
-        );
+        // 1. Find package
+        Package pack = packageRepository.findById(packageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found"));
 
-        return pack.getProblems().size();
+        // 2. Find user
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // 3. Get all problems in this package
+        Set<Problem> packageProblems = pack.getProblems();
+        long totalProblems = packageProblems.size();
+
+        if (totalProblems == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Package has no problems or is rejected");
+        }
+
+        // 4. Get user's solved problems (only those inside this package)
+        List<UserProblem> solvedInThisPackage = userProblemRepository
+                .findAllByUserIdAndIsSolvedTrue(user.getId())
+                .stream()
+                .filter(up -> packageProblems.contains(up.getProblem()))
+                .toList();
+
+        // 5. Count solved problems
+        long userProblemCount = solvedInThisPackage.size();
+
+        // 6. Calculate percentage (rounded to 2 decimals)
+        double percentage = (double) userProblemCount / totalProblems * 100.0;
+        percentage = Math.round(percentage * 100.0) / 100.0;
+
+        // 7. Build response list
+        List<ProblemAndSolvedResponse> problemAndSolvedResponses = solvedInThisPackage.stream()
+                .map(up -> ProblemAndSolvedResponse.builder()
+                        .problemId(up.getProblem().getId())
+                        .isSolved(true)
+                        .build())
+                .toList();
+
+        // 8. Return final response
+        return new UserProblemResponse(problemAndSolvedResponses, userProblemCount, totalProblems, percentage);
     }
+
 }

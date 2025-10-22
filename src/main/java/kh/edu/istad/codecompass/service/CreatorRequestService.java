@@ -14,4 +14,8 @@ public interface CreatorRequestService {
     List<ReviewCreatorResponse> getAllCreatorsRequest();
 
     ReviewCreatorResponse assignRoleToCreator(UpdateRoleRequest updateRoleRequest);
+
+    CreatorResponseDTO getCreatorRequestStatus(String username);
+
+    CreatorResponseDTO rejectCreatorRequest(UpdateRoleRequest updateRoleRequest);
 }

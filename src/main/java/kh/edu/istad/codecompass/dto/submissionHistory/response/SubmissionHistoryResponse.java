@@ -16,5 +16,7 @@ public record SubmissionHistoryResponse(
     @JsonProperty("source_code")
     String sourceCode,
     @JsonProperty("submitted_at")
-    LocalDateTime submittedAt
+    LocalDateTime submittedAt,
+    String time,
+    Integer memory
 ) { }

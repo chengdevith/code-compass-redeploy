@@ -20,7 +20,8 @@ public class UserHint {
 
     @ManyToOne
     private User user;
-    @ManyToOne
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private Hint hint;
 
     Boolean isUnlocked = false;

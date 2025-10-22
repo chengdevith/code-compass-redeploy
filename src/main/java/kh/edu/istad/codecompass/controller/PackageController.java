@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageResponse;
 
-import kh.edu.istad.codecompass.service.BadgesService;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageSummaryResponse;
+import kh.edu.istad.codecompass.dto.problem.response.UserProblemResponse;
 import kh.edu.istad.codecompass.service.PackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -77,7 +77,7 @@ public class PackageController {
 
     @GetMapping("/verified")
     @Operation(summary = "Getting all verified packages (public)")
-    List<PackageResponse> getAllVerifiedPackages() {
+    List<PackageSummaryResponse> getAllVerifiedPackages() {
         return packageService.getAllVerifiedPackages();
     }
 
@@ -103,6 +103,15 @@ public class PackageController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rejectPackageById(@PathVariable Long id) {
         packageService.rejectPackage(id);
+    }
+
+    @GetMapping("/{packageId}/user-progress")
+    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'CREATOR')")
+    @Operation(summary = "Get a user's progress in a package | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
+    UserProblemResponse userProblemResponse(@PathVariable long packageId, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getClaim("preferred_username");
+        return packageService.userProblems(packageId, username);
+
     }
 
 

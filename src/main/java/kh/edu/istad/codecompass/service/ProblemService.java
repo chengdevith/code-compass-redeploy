@@ -5,6 +5,7 @@ import kh.edu.istad.codecompass.dto.problem.response.ProblemResponse;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemResponseBySpecificUser;
 import kh.edu.istad.codecompass.dto.problem.request.UpdateProblemRequest;
 import kh.edu.istad.codecompass.dto.problem.response.ProblemSummaryResponse;
+import kh.edu.istad.codecompass.dto.problem.response.UserProblemResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -122,4 +123,6 @@ public interface ProblemService {
     void rejectProblemById(long problemId);
 
     List<String> getAllProblemTags();
+
+    UserProblemResponse userProblems(String username);
 }

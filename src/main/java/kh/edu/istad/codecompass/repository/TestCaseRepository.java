@@ -4,4 +4,5 @@ import kh.edu.istad.codecompass.domain.TestCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TestCaseRepository extends JpaRepository<TestCase, Long> {
+    void deleteByProblemId(Long problemId);
 }

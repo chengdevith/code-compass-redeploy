@@ -3,7 +3,9 @@ package kh.edu.istad.codecompass.service;
 
 import kh.edu.istad.codecompass.dto.packageDTO.request.AddProblemToPackageRequest;
 import kh.edu.istad.codecompass.dto.packageDTO.request.PackageRequest;
-import kh.edu.istad.codecompass.dto.packageDTO.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageResponse;
+import kh.edu.istad.codecompass.dto.packageDTO.response.PackageSummaryResponse;
+import kh.edu.istad.codecompass.dto.problem.response.UserProblemResponse;
 
 import java.util.List;
 
@@ -110,7 +112,7 @@ public interface PackageService {
      * that are currently marked as verified. The list will be empty if no packages have been verified yet.
      * @author Panharoth
      */
-    List<PackageResponse> getAllVerifiedPackages();
+    List<PackageSummaryResponse> getAllVerifiedPackages();
 
     /**
      * Retrieves a list of all unverified problem packages.
@@ -128,5 +130,5 @@ public interface PackageService {
 
     void rejectPackage(Long id);
 
-    Integer countProblemsInPackage(Long packageId);
+    UserProblemResponse userProblems(Long id, String username);
 }

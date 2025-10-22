@@ -2,6 +2,7 @@ package kh.edu.istad.codecompass.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class Hint {
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
-    @OneToMany(mappedBy = "hint", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "hint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserHint> userHints = new ArrayList<>();
+
 }

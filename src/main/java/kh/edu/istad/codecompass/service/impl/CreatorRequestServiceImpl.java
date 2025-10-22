@@ -50,7 +50,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
 
         CreatorRequest creatorRequest = new CreatorRequest();
-        creatorRequest.setDescription(creatorRequest.getDescription());
+        creatorRequest.setDescription(creatorRequestDto.description());
         creatorRequest.setStatus(Status.PENDING);
         creatorRequest.setUser(user);
 
@@ -59,6 +59,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
         return CreatorResponseDTO
                 .builder()
                 .status(creatorRequest.getStatus())
+                .description(creatorRequest.getAdminResponseDescription())
                 .build();
     }
 
@@ -69,8 +70,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
         List<ReviewCreatorResponse> reviewCreatorResponses = new ArrayList<>();
 
         creatorRequests.forEach(creatorRequest -> {
-            User user = new User();
-            user = userRepository.findUserByUsername(creatorRequest.getUser().getUsername()).orElseThrow(
+            User user = userRepository.findUserByUsername(creatorRequest.getUser().getUsername()).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
             );
             if (user.getIsDeleted().equals(true))
@@ -116,6 +116,7 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
             );
             creatorRequest.setStatus(Status.APPROVED);
+            creatorRequest.setAdminResponseDescription(updateRoleRequest.description());
             creatorRequest = creatorRequestRepository.save(creatorRequest);
 
             user.setCreatorRequest(creatorRequest);
@@ -127,10 +128,63 @@ public class CreatorRequestServiceImpl implements CreatorRequestService {
                 .builder()
                 .username(user.getUsername())
                 .status(user.getCreatorRequest().getStatus())
-                .description(user.getCreatorRequest().getDescription())
+                .description(user.getCreatorRequest().getAdminResponseDescription())
                 .stars(user.getStar())
                 .rank(user.getRank())
                 .level(user.getLevel())
+                .build();
+    }
+
+    @Override
+    public CreatorResponseDTO getCreatorRequestStatus(String username) {
+        User user = userRepository.findUserByUsername(username).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+        );
+
+        if (Boolean.TRUE.equals(user.getIsDeleted()))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+
+        CreatorRequest creatorRequest = user.getCreatorRequest();
+        if (creatorRequest == null) {
+            return CreatorResponseDTO.builder()
+                    .status(Status.NOT_REQUESTED)
+                    .description("User has not submitted a creator request.")
+                    .build();
+        }
+
+
+        return CreatorResponseDTO.builder()
+                .status(creatorRequest.getStatus())
+                .description(creatorRequest.getAdminResponseDescription())
+                .build();
+    }
+
+
+    @Override
+    public CreatorResponseDTO rejectCreatorRequest(UpdateRoleRequest updateRoleRequest) {
+
+        User user = userRepository.findUserByUsername(updateRoleRequest.username()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found")
+        );
+        if (user.getIsDeleted().equals(true))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+
+        CreatorRequest creatorRequest = user.getCreatorRequest();
+
+        creatorRequest.setStatus(Status.REJECTED);
+        creatorRequest.setAdminResponseDescription(updateRoleRequest.description());
+
+        creatorRequest = creatorRequestRepository.save(creatorRequest);
+
+        user.setCreatorRequest(creatorRequest);
+
+        userRepository.save(user);
+
+        return CreatorResponseDTO
+                .builder()
+                .status(creatorRequest.getStatus())
+                .description(creatorRequest.getAdminResponseDescription())
                 .build();
     }
 }
