@@ -39,5 +39,4 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     @Query("SELECT COALESCE(MAX(u.rank), 0) FROM User u")
     Long findMaxRank();
-
 }

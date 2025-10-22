@@ -30,10 +30,10 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final SubmissionHistoryRepository submissionHistoryRepository;
 
     @Override
-    public UserResponse updateUserProfile(UpdateUserProfileRequest request, Long id) {
+    public UserResponse updateUserProfile(UpdateUserProfileRequest request, String username) {
 
         // Step 1: Find user in Postgres
-        User user = userRepository.findById(id).orElseThrow(
+        User user = userRepository.findUserByUsername(username).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found in Postgres")
         );
 

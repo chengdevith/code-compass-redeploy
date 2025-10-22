@@ -40,10 +40,10 @@ public class UserController {
         return userIndexService.searchUsers(keyword);
     }
 
-    @PatchMapping("update/{id}")
+    @PatchMapping("update/{username}")
     @Operation(summary = "Updates user information | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable long id) {
-        return userProfileService.updateUserProfile(request, id);
+    public UserResponse updateUser(@RequestBody UpdateUserProfileRequest request, @PathVariable String username) {
+        return userProfileService.updateUserProfile(request, username);
     }
 
     @DeleteMapping("delete/elastic/{id}")
