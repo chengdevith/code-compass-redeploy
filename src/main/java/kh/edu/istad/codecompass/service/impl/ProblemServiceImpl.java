@@ -413,6 +413,12 @@ public class ProblemServiceImpl implements ProblemService {
         problem.setTitle(UUID.randomUUID().toString());
         problem.setStatus(Status.REJECTED);
         problemRepository.save(problem);
+
+        ProblemIndex problemIndex = problemElasticsearchRepository.findProblemIndexByProblemId(problemId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND ,"Problem not found")
+        );
+
+        problemElasticsearchRepository.delete(problemIndex);
     }
 
     @Override

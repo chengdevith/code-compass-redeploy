@@ -20,4 +20,6 @@ public interface ProblemElasticsearchRepository extends ElasticsearchRepository<
 
     List<ProblemIndex> findByTitleContainingAndIsDeletedFalseAndStatus(String keyword, Status status);
 
+    Optional<ProblemIndex> findProblemIndexByProblemId(Long problemId);
+
 }

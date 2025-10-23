@@ -21,7 +21,7 @@ public class LeaderBoard {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "leaderBoard", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "leaderBoard", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 
     @Column(nullable = false)

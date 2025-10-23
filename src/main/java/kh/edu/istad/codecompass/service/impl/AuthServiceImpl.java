@@ -181,7 +181,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private RegisterResponse createNewNonOAuthUser(RegisterRequest registerRequest) {
-        // Validate password match
         if (!registerRequest.password().equals(registerRequest.confirmPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match");
         }
@@ -210,7 +209,6 @@ public class AuthServiceImpl implements AuthService {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user in Keycloak: " + errorBody);
             }
 
-            // Extract the user ID directly from the Location header
             String location = response.getLocation().toString();
             String userId = location.substring(location.lastIndexOf('/') + 1);
 
@@ -219,15 +217,18 @@ public class AuthServiceImpl implements AuthService {
             roleService.assignRole(AssignRoleRequest.builder().userId(userId).roleName(Role.SUBSCRIBER).build());
             this.verifyEmail(userId);
 
+            // Create local user
             User localUser = new User();
             localUser.setUsername(createdKeycloakUser.getUsername());
             setFromKeycloakToLocalUser(createdKeycloakUser, localUser);
             localUser.setAuthProvider(OAuthProvider.NONE);
 
-            LeaderBoard leaderBoard = leaderBoardRepository.findById(1L).orElseGet(LeaderBoard::new);
-            localUser.setLeaderBoard(leaderBoard);
-            leaderBoard.getUsers().add(localUser);
-            leaderBoardRepository.save(leaderBoard);
+            // Assign rank before saving
+            Long lastRank = userRepository.findMaxRank().describeConstable().orElse(0L);
+            localUser.setRank(lastRank + 1);
+
+            // Save the user first (will cascade to leaderboard if mapped properly)
+            userRepository.save(localUser);
 
             return RegisterResponse.builder()
                     .email(localUser.getEmail())
@@ -240,6 +241,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user: " + e.getMessage());
         }
     }
+
 
     private OAuthProvider getOAuthProvider(String keycloakUserId) {
         try {
