@@ -63,6 +63,7 @@ public class PackageController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     @Operation(summary = "Find a specific package (public)")
     PackageResponse findPackageById(@PathVariable Long id) {
         return packageService.findPackageById(id);

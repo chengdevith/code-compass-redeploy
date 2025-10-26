@@ -17,8 +17,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/solutions")
 @RequiredArgsConstructor
@@ -53,12 +51,5 @@ public class SolutionController {
         String author = jwt.getClaim("preferred_username");
         solutionService.deleteSolution(solutionId, author);
     }
-
-//    @PutMapping("/{solutionId}/like")
-//    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'CREATOR')")
-//    @Operation(summary = "Like a solution | [ SUBSCRIBER, CREATOR ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-//    public void likeSolution(@PathVariable Long solutionId) {
-//        solutionService.lkeSolution(solutionId);
-//    }
 
 }

@@ -78,6 +78,7 @@ public class KeyCloakSecurityConfig {
                                 .requestMatchers("/api/v1/leaderboard/me").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        packages
+                                .requestMatchers(HttpMethod.GET, "/api/v1/packages/*").permitAll()
                                 .requestMatchers("/api/v1/packages/add-problems").hasAnyRole("ADMIN", "CREATOR")
                                 .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasAnyRole("ADMIN", "CREATOR")
                                 .requestMatchers(HttpMethod.GET, "/api/v1/packages/me").hasAnyRole("ADMIN", "CREATOR")

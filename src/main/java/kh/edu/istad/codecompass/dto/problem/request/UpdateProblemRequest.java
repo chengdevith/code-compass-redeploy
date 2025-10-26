@@ -20,12 +20,6 @@ public record UpdateProblemRequest(
 
         Difficulty difficulty,
 
-        Star star,
-
-        @Min(value = 20, message = "The coins should be between 20 to 40")
-        @Max(value = 40, message = "The coins should be between 20 to 40")
-        Integer coin,
-
         @JsonProperty("best_memory_usage")
         @Min(value = 0, message = "Best memory usage should be positive")
         Integer bestMemoryUsage,

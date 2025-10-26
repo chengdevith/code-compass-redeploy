@@ -26,7 +26,10 @@ public interface PackageMapper {
 
     List<ProblemSummaryResponse> toProblemSummaryResponses(List<Problem> problems);
 
+    @Mapping(target = "totalProblems", expression = "java(packages.getProblems().stream().filter(p -> !p.getIsDeleted()).count())")
+    @Mapping(target = "badgesResponse", source = "badge")
     PackageSummaryResponse toPackageSummaryResponses(Package packages);
+
 
     default ProblemSummaryResponse toProblemSummaryResponse(Problem problem) {
         return new ProblemSummaryResponse(

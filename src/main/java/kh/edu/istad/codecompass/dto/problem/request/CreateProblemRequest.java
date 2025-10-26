@@ -23,14 +23,6 @@ public record CreateProblemRequest (
         @NotNull(message = "Difficulty is required")
         Difficulty difficulty,
 
-        @NotNull(message = "Star is required")
-        Star star,
-
-        @NotNull
-        @Min(value = 20, message = "The coins should be at least 20")
-        @Max(value = 40, message = "The max of coins is 40")
-        Integer coin,
-
         @JsonProperty("best_memory_usage")
         @Min(value = 0, message = "Best memory usage should be positive")
         Integer bestMemoryUsage,

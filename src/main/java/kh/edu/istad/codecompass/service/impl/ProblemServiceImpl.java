@@ -11,6 +11,8 @@ import kh.edu.istad.codecompass.dto.hint.response.UserHintResponse;
 import kh.edu.istad.codecompass.dto.problem.request.CreateProblemRequest;
 import kh.edu.istad.codecompass.elasticsearch.domain.ProblemIndex;
 import kh.edu.istad.codecompass.elasticsearch.repository.ProblemElasticsearchRepository;
+import kh.edu.istad.codecompass.enums.Difficulty;
+import kh.edu.istad.codecompass.enums.Star;
 import kh.edu.istad.codecompass.enums.Status;
 import kh.edu.istad.codecompass.mapper.ProblemMapper;
 import kh.edu.istad.codecompass.repository.*;
@@ -57,19 +59,24 @@ public class ProblemServiceImpl implements ProblemService {
         Problem problem = problemMapper.fromRequestToEntity(problemRequest);
         problem.setAuthor(author);
 
+        if (problem.getDifficulty().equals(Difficulty.EASY)) problem.setCoin(20);
+        else if (problem.getDifficulty().equals(Difficulty.MEDIUM)) problem.setCoin(30);
+        else problem.setCoin(40);
+
+        problem.setStar(Star.THREE);
         Problem finalProblem1 = problem;
         List<Hint> hints = problemRequest.hints() == null ?
                 List.of()
                 :
                 problemRequest.hints()
-                .stream()
-                .map(hintRequest -> {
-                    Hint hint = new Hint();
-                    hint.setDescription(hintRequest.description());
-                    hint.setIsLocked(hintRequest.isLocked());
-                    hint.setProblem(finalProblem1);
-                    return hint;
-                }).toList();
+                        .stream()
+                        .map(hintRequest -> {
+                            Hint hint = new Hint();
+                            hint.setDescription(hintRequest.description());
+                            hint.setIsLocked(hintRequest.isLocked());
+                            hint.setProblem(finalProblem1);
+                            return hint;
+                        }).toList();
 
         problem.setHints(hints);
 
@@ -140,17 +147,14 @@ public class ProblemServiceImpl implements ProblemService {
                     });
 
             // unlock if the hint is unlocked by default
-            if (!hint.getIsLocked() && !userHint.getIsUnlocked()) {
-                userHint.setIsUnlocked(true);
-            }
+            if (!hint.getIsLocked() && !userHint.getIsUnlocked()) userHint.setIsUnlocked(true);
 
             // save or update
             userHintRepository.save(userHint);
 
             // add or update in userHints list so it can be used for response mapping
-            if (!userHints.contains(userHint)) {
-                userHints.add(userHint);
-            }
+            if (!userHints.contains(userHint)) userHints.add(userHint);
+
         }
 
         List<UserHintResponse> hintResponses = hints.stream()
@@ -162,8 +166,7 @@ public class ProblemServiceImpl implements ProblemService {
                             .orElse(false);
                     return new UserHintResponse(hint.getId(), hint.getDescription(), !unlocked); // isLocked = !unlocked
                 })
-                .collect(Collectors.toList());
-
+                .toList();
 
         List<String> tagNames = problem.getTags().stream()
                 .map(Tag::getTagName)
@@ -188,7 +191,6 @@ public class ProblemServiceImpl implements ProblemService {
                 problem.getAuthor().getUsername(),
                 problem.getIsDeleted(),
                 problem.getIsVerified()
-
         );
     }
 
@@ -262,23 +264,7 @@ public class ProblemServiceImpl implements ProblemService {
 
         problem = problemRepository.save(problem);
 
-        ProblemIndex problemIndex = ProblemIndex.builder()
-                .problemId(problem.getId())
-                .description(problem.getDescription())
-                .title(problem.getTitle())
-                .difficulty(problem.getDifficulty())
-                .coin(problem.getCoin())
-                .star(problem.getStar())
-                .bestTimeExecution(problem.getBestTimeExecution())
-                .bestMemoryUsage(problem.getBestMemoryUsage())
-                .authorId(problem.getAuthor().getId())
-                .authorUsername(problem.getAuthor().getUsername())
-                .tags(problem.getTags().stream()
-                        .map(Tag::getTagName)
-                        .collect(Collectors.toSet()))
-                .build();
-        problemElasticsearchRepository.save(problemIndex);
-
+        updateProblemIndex(problem);
 
         return problemMapper.fromEntityToResponse(problem);
     }
@@ -295,19 +281,16 @@ public class ProblemServiceImpl implements ProblemService {
         problemMapper.fromUpdateRequestToEntity(updateProblemRequest, problem);
 
         // 2. Update hints - do this BEFORE other operations
-        if (updateProblemRequest.hints() != null) {
+        if (updateProblemRequest.hints() != null)
             updateHints(problem, updateProblemRequest.hints());
-        }
 
         // 3. Update test cases
-        if (updateProblemRequest.testCases() != null) {
+        if (updateProblemRequest.testCases() != null)
             updateTestCases(problem, updateProblemRequest.testCases());
-        }
 
         // 4. Update tags
-        if (updateProblemRequest.tagNames() != null) {
+        if (updateProblemRequest.tagNames() != null)
             updateTags(problem, updateProblemRequest.tagNames());
-        }
 
         // 5. Set timestamp
         problem.setUpdateAt(LocalDateTime.now());
@@ -332,7 +315,7 @@ public class ProblemServiceImpl implements ProblemService {
             hint.setIsLocked(hr.isLocked() != null ? hr.isLocked() : false);
             hint.setProblem(problem);
 
-            hintRepository.save(hint);  // ⚠ save first
+            hintRepository.save(hint);
             problem.getHints().add(hint);
         }
 
@@ -379,6 +362,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     private void updateProblemIndex(Problem problem) {
         ProblemIndex problemIndex = ProblemIndex.builder()
+                .problemId(problem.getId())
                 .description(problem.getDescription())
                 .title(problem.getTitle())
                 .difficulty(problem.getDifficulty())
@@ -479,6 +463,5 @@ public class ProblemServiceImpl implements ProblemService {
         // 7. Return response
         return new UserProblemResponse(problemAndSolvedResponses, userProblemCount, totalProblems, percentage);
     }
-
 
 }

@@ -19,6 +19,6 @@ public record PackageSummaryResponse(
             @JsonProperty("is_verified")
             Boolean isVerified,
             @JsonProperty("total_problems")
-            Integer totalProblems
+            Long totalProblems
 
     ) { }

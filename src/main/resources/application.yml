@@ -50,7 +50,7 @@ judge0:
   total-polling-timeout: 3m
   initial-polling-delay: 1s
   max-polling-interval: 5s
-  max-polling-attempts: 36
+  max-polling-attempts: 5
   cpu-time-limit: 2.0
   wall-time-limit: 10.0
   memory-limit: 256000

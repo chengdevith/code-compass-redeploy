@@ -1,6 +1,7 @@
 package kh.edu.istad.codecompass.repository;
 
 import kh.edu.istad.codecompass.domain.LeaderBoard;
+import kh.edu.istad.codecompass.domain.Problem;
 import kh.edu.istad.codecompass.domain.User;
 import kh.edu.istad.codecompass.domain.UserProblem;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,5 @@ public interface UserProblemRepository extends JpaRepository<UserProblem, Long> 
 
     Optional<UserProblem> findByUserIdAndProblemId(Long userId, Long problemId);
 
+    void deleteByProblem(Problem problem);
 }
