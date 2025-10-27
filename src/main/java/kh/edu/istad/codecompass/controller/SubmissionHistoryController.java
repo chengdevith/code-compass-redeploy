@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/submission-histories")
 @RestController
-public class SubmissionHistory {
+public class SubmissionHistoryController {
 
     private final SubmissionHistoryService submissionHistoryService;
 
@@ -28,4 +28,9 @@ public class SubmissionHistory {
         return submissionHistoryService.getAllHistory(username, problemId);
     }
 
+    @GetMapping("/{problemId}/latest")
+    public SubmissionHistoryResponse getLatestWithAccepted(@AuthenticationPrincipal Jwt jwt, @PathVariable Long problemId) {
+        String username = jwt.getClaim("preferred_username");
+        return submissionHistoryService.getLatestWithAccepted(username, problemId);
+    }
 }

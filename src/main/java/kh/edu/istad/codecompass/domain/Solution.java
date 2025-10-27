@@ -35,7 +35,7 @@ public class Solution {
     @Column(name = "posted_at")
     private LocalDateTime postedAt = LocalDateTime.now();
 
-    @Column(name = "lanuage_id")
+    @Column(name = "language_id")
     private String languageId;
 
     @ManyToOne

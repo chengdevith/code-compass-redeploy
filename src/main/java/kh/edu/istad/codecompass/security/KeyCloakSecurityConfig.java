@@ -119,6 +119,7 @@ public class KeyCloakSecurityConfig {
 
 //                        submission histories
                                 .requestMatchers(HttpMethod.GET, "/api/v1/submission-histories/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/submission-histories/*/latest").hasAnyRole("CREATOR", "SUBSCRIBER")
 
 //                        comments
                                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/*").permitAll()

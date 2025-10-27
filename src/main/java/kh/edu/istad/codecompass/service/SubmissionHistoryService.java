@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface SubmissionHistoryService {
     List<SubmissionHistoryResponse> getAllHistory(String username, Long problemId);
+
+    SubmissionHistoryResponse getLatestWithAccepted(String username, Long problemId);
 }

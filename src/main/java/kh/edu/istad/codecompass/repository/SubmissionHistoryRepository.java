@@ -3,12 +3,14 @@ package kh.edu.istad.codecompass.repository;
 import jakarta.transaction.Transactional;
 import kh.edu.istad.codecompass.domain.SubmissionHistories;
 import kh.edu.istad.codecompass.domain.User;
+import kh.edu.istad.codecompass.dto.jugde0.response.SubmissionResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubmissionHistoryRepository extends JpaRepository<SubmissionHistories, Long> {
 
@@ -35,5 +37,11 @@ public interface SubmissionHistoryRepository extends JpaRepository<SubmissionHis
         GROUP BY sh.languageId
     """)
     List<Object[]> countAcceptedSubmissionsByLanguage(@Param("user") User user);
+
+    Optional<SubmissionHistories> findFirstByUser_UsernameAndProblem_IdAndStatusOrderBySubmittedAtDesc(
+            String username,
+            Long problemId,
+            String status
+    );
 
 }

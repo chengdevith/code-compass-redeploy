@@ -8,6 +8,7 @@ import java.util.Set;
 
 @Builder
 public record SolutionResponse(
+        String title,
         @JsonProperty("solution_id")
         Long solutionId,
         @JsonProperty("source_code")
@@ -22,10 +23,6 @@ public record SolutionResponse(
         String userProfile,
         @JsonProperty("posted_at")
         LocalDateTime postedAt,
-        Set<String> tags,
-        @JsonProperty("like_count")
-        Long likeCount,
-        @JsonProperty("is_liked_by_user")
-        Boolean isLikedByUser
+        Set<String> tags
 ) {
 }
