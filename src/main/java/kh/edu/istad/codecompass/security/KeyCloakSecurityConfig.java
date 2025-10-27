@@ -89,6 +89,7 @@ public class KeyCloakSecurityConfig {
                                 .requestMatchers(HttpMethod.PATCH, "/api/v1/packages/*").hasRole("ADMIN")
 
 //                        problems
+                                .requestMatchers(HttpMethod.GET, "/api/v1/problems/problem-tags").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/problems/verified").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/problems/search").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/problems/*").permitAll() // For {problemId} - public access
@@ -118,6 +119,11 @@ public class KeyCloakSecurityConfig {
 
 //                        submission histories
                                 .requestMatchers(HttpMethod.GET, "/api/v1/submission-histories/").hasAnyRole("ADMIN", "CREATOR", "SUBSCRIBER")
+
+//                        comments
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/comments/*/banned").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/comments/*/allowed").hasRole("ADMIN")
 
                                 .anyRequest().authenticated()
         );

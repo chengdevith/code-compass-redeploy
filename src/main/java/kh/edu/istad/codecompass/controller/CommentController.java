@@ -47,9 +47,7 @@ public class CommentController {
 
     @PutMapping("/change-status")
     public void changeStatus(@RequestBody ChangeStatusRequest request) {
-
         reportService.changeStatus(request);
-
     }
 
     @GetMapping("/get-report")
@@ -57,4 +55,18 @@ public class CommentController {
         return reportService.getReport();
     }
 
+    @PutMapping("/{username}/banned")
+    public void bannedUser(@PathVariable String username) {
+        commentService.bannedUser(username);
+    }
+
+    @PutMapping("/{username}/allowed")
+    public void allowedUser(@PathVariable String username) {
+        commentService.allowedUser(username);
+    }
+
+    @GetMapping("/{cmtId}")
+    public CommentResponse getComment(@PathVariable Long cmtId) {
+        return commentService.getCommentById(cmtId);
+    }
 }

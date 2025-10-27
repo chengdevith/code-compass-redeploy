@@ -10,4 +10,10 @@ public interface CommentService {
     CommentResponse createComment(CreateCommentRequest createCommentRequest);
 
     List<CommentResponse> getCommentsByProblemId(Long problemId);
+
+    void bannedUser(String username);
+
+    void allowedUser(String username);
+
+    CommentResponse getCommentById(Long id);
 }

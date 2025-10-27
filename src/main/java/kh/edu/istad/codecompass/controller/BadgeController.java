@@ -33,10 +33,8 @@ public class BadgeController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Update a badge by ID | [ ADMIN ] (secured)", security = {@SecurityRequirement(name = "bearerAuth")})
-    ResponseEntity<String> updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
+    void updateBadge (@PathVariable Long id, @RequestBody @Valid BadgeRequest badgeRequest) {
         badgesService.updateBadge(id,badgeRequest);
-        return ResponseEntity.ok("The badge been updated successfully");
-
     }
 
     @GetMapping("/unverified")

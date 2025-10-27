@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -152,6 +153,12 @@ public class ProblemController {
     UserProblemResponse userProblemResponse(@AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getClaim("preferred_username");
         return problemService.userProblems(username);
+    }
+
+    @GetMapping("/problem-tags")
+    @Operation(summary = "Get a user progress (public)")
+    Set<String> getProblemsTags() {
+        return problemService.getProblemTags();
     }
 
 }

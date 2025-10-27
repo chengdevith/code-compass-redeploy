@@ -133,6 +133,8 @@ public class PackageServiceImpl implements PackageService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Package not found")
         );
 
+        Set<Problem>  filteredProblem = pack.getProblems().stream().filter(p -> !p.getIsDeleted()).collect(Collectors.toSet());
+        pack.setProblems(filteredProblem);
         return packageMapper.mapPackageToResponse(pack);
     }
 

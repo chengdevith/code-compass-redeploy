@@ -21,7 +21,8 @@ public class UserHint {
     @ManyToOne
     private User user;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "hint_id")
     private Hint hint;
 
     Boolean isUnlocked = false;

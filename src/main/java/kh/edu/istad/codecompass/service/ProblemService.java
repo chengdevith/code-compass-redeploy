@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ProblemService {
 
@@ -125,4 +126,6 @@ public interface ProblemService {
     List<String> getAllProblemTags();
 
     UserProblemResponse userProblems(String username);
+
+    Set<String> getProblemTags();
 }

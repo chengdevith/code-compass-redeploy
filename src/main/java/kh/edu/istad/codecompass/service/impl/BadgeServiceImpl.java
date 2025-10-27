@@ -154,6 +154,7 @@ public class BadgeServiceImpl implements BadgesService {
         badge.setIsVerified(false);
         badge.setName(UUID.randomUUID().toString());
         badge.setStatus(Status.REJECTED);
+        badge.setProblemPackage(null);
         badgeRepository.save(badge);
     }
 

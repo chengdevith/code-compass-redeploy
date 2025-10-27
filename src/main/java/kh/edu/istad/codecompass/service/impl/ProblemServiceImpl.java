@@ -43,6 +43,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final HintRepository hintRepository;
     private final TestCaseRepository testCaseRepository;
     private final UserProblemRepository userProblemRepository;
+
     @Transactional
     @Override
     public ProblemResponse createProblem(CreateProblemRequest problemRequest, String username) {
@@ -306,7 +307,7 @@ public class ProblemServiceImpl implements ProblemService {
         log.info("Updating {} hints", hintRequests.size());
 
         // Remove hints from DB first
-        problem.getHints().removeIf(h -> true); // keeps the parent reference intact
+        problem.getHints().removeIf(hint -> true); // keeps the parent reference intact
 
         // Add new hints
         for (HintRequest hr : hintRequests) {
@@ -463,5 +464,16 @@ public class ProblemServiceImpl implements ProblemService {
         // 7. Return response
         return new UserProblemResponse(problemAndSolvedResponses, userProblemCount, totalProblems, percentage);
     }
+
+    @Override
+    public Set<String> getProblemTags() {
+        return tagRepository.findAll().stream()
+                .filter(tag -> tag.getProblems() != null &&
+                        tag.getProblems().stream().anyMatch(p -> !p.getIsDeleted()))
+                .map(Tag::getTagName)
+                .collect(Collectors.toSet());
+    }
+
+
 
 }

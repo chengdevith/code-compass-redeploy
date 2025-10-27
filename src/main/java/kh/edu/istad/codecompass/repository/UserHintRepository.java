@@ -17,4 +17,7 @@ public interface UserHintRepository extends JpaRepository<UserHint, Long> {
 
     @Query("SELECT uh FROM UserHint uh WHERE uh.user = :user AND uh.hint.problem = :problem")
     List<UserHint> findByUserAndHintProblem(@Param("user") User user, @Param("problem") Problem problem);
+
+    void removeUserHintByHint_Id(Long hintId);
+//    List<UserHint> findUserHintByHint_Id(Long hintId);
 }
